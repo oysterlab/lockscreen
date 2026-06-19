@@ -15,10 +15,10 @@ const resetButton = document.querySelector("#resetButton");
 
 const CAMERA_HOME = {
   x: 0,
-  y: 1.02,
+  y: 1.16,
   z: 6.4,
   lookX: 0,
-  lookY: 0.9,
+  lookY: 0.99,
 };
 
 const MODEL_HOME = {
@@ -30,7 +30,7 @@ const MODEL_HOME = {
 window.addEventListener("load", () => window.lucide?.createIcons());
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0xf2b97c, 0.026);
+scene.fog = new THREE.FogExp2(0xf0a762, 0.026);
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
@@ -109,9 +109,9 @@ resetButton.addEventListener("click", resetView);
 document.addEventListener("fullscreenchange", updateFullscreenButton);
 
 function setupLights() {
-  scene.add(new THREE.HemisphereLight(0xffe7bf, 0x5e3a23, 1.75));
+  scene.add(new THREE.HemisphereLight(0xffe2b1, 0x6c3f22, 1.78));
 
-  const sun = new THREE.DirectionalLight(0xffc06f, 4.2);
+  const sun = new THREE.DirectionalLight(0xffad5f, 4.35);
   sun.position.set(-3.6, 6.8, 5.4);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
@@ -126,11 +126,11 @@ function setupLights() {
   softSky.position.set(3.4, 3.8, 2.8);
   scene.add(softSky);
 
-  const stallBulb = new THREE.PointLight(0xffb05f, 4.2, 5.2, 1.9);
+  const stallBulb = new THREE.PointLight(0xff9f4f, 4.45, 5.2, 1.9);
   stallBulb.position.set(1.4, 1.35, 1.15);
   scene.add(stallBulb);
 
-  const windowGlow = new THREE.PointLight(0xffdf9a, 3.2, 4.8, 2);
+  const windowGlow = new THREE.PointLight(0xffc878, 3.35, 4.8, 2);
   windowGlow.position.set(-1.55, 1.05, 0.9);
   scene.add(windowGlow);
 }
