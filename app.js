@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
-const MODEL_URL = new URL("./sample (1).glb", import.meta.url).href;
+const MODEL_URL = new URL("./cat-lock.glb", import.meta.url).href;
 
 const canvas = document.querySelector("#scene");
 const timeEl = document.querySelector("#time");
