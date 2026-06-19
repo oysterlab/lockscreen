@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "https://cdn.jsdelivr.net/npm/meshoptimizer@0.20.0/meshopt_decoder.module.js";
 
-const MODEL_URL = new URL("./cat-lock.glb", import.meta.url).href;
+const MODEL_URL = new URL("./cat-lock-meshopt.glb", import.meta.url).href;
 
 const canvas = document.querySelector("#scene");
 const timeEl = document.querySelector("#time");
@@ -146,6 +147,7 @@ function setupDiorama() {
 
 async function loadModel() {
   const loader = new GLTFLoader();
+  loader.setMeshoptDecoder(MeshoptDecoder);
 
   loader.load(
     MODEL_URL,
