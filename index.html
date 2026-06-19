@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"
+    />
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Cat Lock" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./style.css" />
+    <title>Cat Diorama Lock</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main class="lockscreen" aria-label="Cat diorama lock screen prototype">
+      <canvas id="scene" aria-hidden="true"></canvas>
+      <div class="shade" aria-hidden="true"></div>
+
+      <section class="clock" aria-live="polite">
+        <time id="time">--:--</time>
+        <span id="date">---</span>
+      </section>
+
+      <div class="controls" aria-label="Scene controls">
+        <button id="motionButton" type="button" aria-label="Enable motion" title="Enable motion">
+          <i data-lucide="compass"></i>
+        </button>
+        <button id="fullscreenButton" type="button" aria-label="Fullscreen" title="Fullscreen">
+          <i data-lucide="maximize"></i>
+        </button>
+        <button id="resetButton" type="button" aria-label="Reset view" title="Reset view">
+          <i data-lucide="rotate-ccw"></i>
+        </button>
+      </div>
+
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+      <noscript>JavaScript is required to view this lock screen.</noscript>
+    </main>
+
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

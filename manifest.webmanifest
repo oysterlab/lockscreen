@@ -1,0 +1,10 @@
+{
+  "name": "Cat Diorama Lock",
+  "short_name": "Cat Lock",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000"
+}
