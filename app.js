@@ -36,6 +36,12 @@ const PARALLAX = {
   pointerYMax: 0.24,
 };
 
+const TOUCH_CAMERA = {
+  minTilt: -1,
+  maxTilt: 0.55,
+  sensitivity: 2.35,
+};
+
 window.addEventListener("load", () => window.lucide?.createIcons());
 
 const scene = new THREE.Scene();
@@ -93,6 +99,15 @@ const motion = {
   probeTimer: 0,
 };
 
+const touch = {
+  active: false,
+  pointerId: null,
+  startX: 0,
+  startY: 0,
+  startTilt: 0,
+  tilt: 0,
+};
+
 const state = {
   motionEnabled: false,
   hasMotionReading: false,
@@ -110,8 +125,10 @@ requestAnimationFrame(render);
 
 window.addEventListener("resize", resize);
 window.visualViewport?.addEventListener("resize", resize);
-canvas.addEventListener("pointerdown", handlePointer, { passive: true });
-canvas.addEventListener("pointermove", handlePointer, { passive: true });
+canvas.addEventListener("pointerdown", handlePointerDown, { passive: true });
+canvas.addEventListener("pointermove", handlePointerMove, { passive: true });
+canvas.addEventListener("pointerup", handlePointerEnd, { passive: true });
+canvas.addEventListener("pointercancel", handlePointerEnd, { passive: true });
 motionButton.addEventListener("click", enableMotion);
 fullscreenButton.addEventListener("click", toggleFullscreen);
 resetButton.addEventListener("click", resetView);
@@ -491,7 +508,11 @@ function applyParallax(x, y, fromSensor) {
   const yMin = fromSensor ? PARALLAX.sensorYMin : PARALLAX.pointerYMin;
   const yMax = fromSensor ? PARALLAX.sensorYMax : PARALLAX.pointerYMax;
   const normalizedY = THREE.MathUtils.clamp(applyDeadZone(y, deadZoneY), yMin, yMax);
-  const verticalY = fromSensor ? 0 : normalizedY;
+  const verticalY = THREE.MathUtils.clamp(
+    touch.tilt + (fromSensor ? 0 : normalizedY),
+    TOUCH_CAMERA.minTilt,
+    TOUCH_CAMERA.maxTilt,
+  );
 
   if (fromSensor) {
     state.hasMotionReading = true;
@@ -499,13 +520,13 @@ function applyParallax(x, y, fromSensor) {
   }
 
   target.modelYaw = normalizedX * 0.26;
-  target.modelPitch = verticalY < 0 ? -verticalY * 0.032 : -verticalY * 0.012;
+  target.modelPitch = verticalY < 0 ? -verticalY * 0.105 : -verticalY * 0.07;
   target.modelRoll = -normalizedX * 0.035;
   target.backdropYaw = -normalizedX * 0.08;
   target.cameraX = CAMERA_HOME.x + normalizedX * 0.28;
-  target.cameraY = CAMERA_HOME.y - verticalY * 0.045;
+  target.cameraY = CAMERA_HOME.y - verticalY * 0.32;
   target.lookX = CAMERA_HOME.lookX + normalizedX * 0.1;
-  target.lookY = CAMERA_HOME.lookY - verticalY * 0.018;
+  target.lookY = CAMERA_HOME.lookY + verticalY * 0.08;
 }
 
 function applyDeadZone(value, deadZone) {
@@ -517,11 +538,37 @@ function applyDeadZone(value, deadZone) {
   return Math.sign(clamped) * Math.pow(normalized, 1.35);
 }
 
-function handlePointer(event) {
-  if (state.motionEnabled && state.hasMotionReading) return;
+function handlePointerDown(event) {
+  touch.active = true;
+  touch.pointerId = event.pointerId;
+  touch.startX = event.clientX;
+  touch.startY = event.clientY;
+  touch.startTilt = touch.tilt;
+  canvas.setPointerCapture?.(event.pointerId);
+  handlePointerMove(event);
+}
+
+function handlePointerMove(event) {
+  if (touch.pointerId != null && event.pointerId !== touch.pointerId) return;
+
   const x = (event.clientX / window.innerWidth - 0.5) * 2;
-  const y = (event.clientY / window.innerHeight - 0.5) * 2;
-  applyParallax(x * 0.85, y * 0.65, false);
+  if (touch.active) {
+    const deltaY = (event.clientY - touch.startY) / window.innerHeight;
+    touch.tilt = THREE.MathUtils.clamp(
+      touch.startTilt + deltaY * TOUCH_CAMERA.sensitivity,
+      TOUCH_CAMERA.minTilt,
+      TOUCH_CAMERA.maxTilt,
+    );
+  }
+
+  applyParallax(x * 0.85, 0, false);
+}
+
+function handlePointerEnd(event) {
+  if (touch.pointerId != null && event.pointerId !== touch.pointerId) return;
+  touch.active = false;
+  touch.pointerId = null;
+  canvas.releasePointerCapture?.(event.pointerId);
 }
 
 async function toggleFullscreen() {
@@ -551,6 +598,8 @@ function resetView() {
   target.modelYaw = MODEL_HOME.yaw;
   target.modelRoll = MODEL_HOME.roll;
   target.backdropYaw = 0;
+  touch.tilt = 0;
+  touch.startTilt = 0;
   showStatus("정면으로 재설정됨", true);
 }
 
