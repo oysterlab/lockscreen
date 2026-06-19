@@ -41,7 +41,10 @@ button {
   background:
     linear-gradient(180deg, rgba(255, 235, 182, 0.7) 0%, transparent 31%),
     linear-gradient(145deg, rgba(255, 230, 172, 0.58), transparent 44%),
-    linear-gradient(180deg, #efa764 0%, #df8951 34%, #a7613c 69%, #50301e 100%);
+    linear-gradient(180deg, rgba(239, 167, 100, 0.2) 0%, rgba(223, 137, 81, 0.16) 34%, rgba(80, 48, 30, 0.24) 100%),
+    url("./assets/layers/background_clean_ai.png");
+  background-position: center;
+  background-size: cover;
 }
 
 .lockscreen::before {

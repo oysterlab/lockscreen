@@ -162,46 +162,19 @@ function setupLights() {
 }
 
 function setupDiorama() {
-  const baseMaterial = new THREE.MeshStandardMaterial({
-    color: 0x8a6c4a,
-    roughness: 0.84,
-    metalness: 0.04,
-  });
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.78, 0.2, 112), baseMaterial);
-  base.position.y = -0.13;
-  base.receiveShadow = true;
-  world.add(base);
-
-  const rim = new THREE.Mesh(
-    new THREE.TorusGeometry(1.69, 0.016, 12, 128),
-    new THREE.MeshStandardMaterial({
-      color: 0xf8c06a,
-      emissive: 0x9a4f1f,
-      emissiveIntensity: 0.55,
-      roughness: 0.48,
-      metalness: 0.06,
+  const shadowCatcher = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.6, 2.8),
+    new THREE.ShadowMaterial({
+      color: 0x4e2f1e,
+      opacity: 0.24,
+      transparent: true,
+      depthWrite: false,
     }),
   );
-  rim.rotation.x = Math.PI / 2;
-  rim.position.y = -0.012;
-  world.add(rim);
-
-  const floor = new THREE.Mesh(
-    new THREE.CircleGeometry(1.64, 112),
-    new THREE.MeshStandardMaterial({
-      color: 0x9a7a55,
-      roughness: 0.92,
-      metalness: 0.02,
-    }),
-  );
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.y = 0.012;
-  floor.receiveShadow = true;
-  world.add(floor);
-
-  addTileLines();
-  addWarmBackdrop();
-  addCourtyardProps();
+  shadowCatcher.rotation.x = -Math.PI / 2;
+  shadowCatcher.position.set(0, 0, 0.18);
+  shadowCatcher.receiveShadow = true;
+  world.add(shadowCatcher);
 }
 
 function addTileLines() {
