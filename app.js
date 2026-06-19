@@ -15,16 +15,25 @@ const resetButton = document.querySelector("#resetButton");
 
 const CAMERA_HOME = {
   x: 0,
-  y: 1.16,
+  y: 1.34,
   z: 6.4,
   lookX: 0,
-  lookY: 0.99,
+  lookY: 1.1,
 };
 
 const MODEL_HOME = {
   yaw: 0,
   pitch: 0,
   roll: 0,
+};
+
+const PARALLAX = {
+  sensorDeadZoneY: 0.26,
+  pointerDeadZoneY: 0.08,
+  sensorYMin: -0.48,
+  sensorYMax: 0.16,
+  pointerYMin: -0.5,
+  pointerYMax: 0.24,
 };
 
 window.addEventListener("load", () => window.lucide?.createIcons());
@@ -478,7 +487,11 @@ function handleDeviceMotion(event) {
 
 function applyParallax(x, y, fromSensor) {
   const normalizedX = THREE.MathUtils.clamp(x, -1, 1);
-  const normalizedY = THREE.MathUtils.clamp(y, -1, 1);
+  const deadZoneY = fromSensor ? PARALLAX.sensorDeadZoneY : PARALLAX.pointerDeadZoneY;
+  const yMin = fromSensor ? PARALLAX.sensorYMin : PARALLAX.pointerYMin;
+  const yMax = fromSensor ? PARALLAX.sensorYMax : PARALLAX.pointerYMax;
+  const normalizedY = THREE.MathUtils.clamp(applyDeadZone(y, deadZoneY), yMin, yMax);
+  const verticalY = fromSensor ? 0 : normalizedY;
 
   if (fromSensor) {
     state.hasMotionReading = true;
@@ -486,13 +499,22 @@ function applyParallax(x, y, fromSensor) {
   }
 
   target.modelYaw = normalizedX * 0.26;
-  target.modelPitch = -normalizedY * 0.1;
+  target.modelPitch = verticalY < 0 ? -verticalY * 0.032 : -verticalY * 0.012;
   target.modelRoll = -normalizedX * 0.035;
   target.backdropYaw = -normalizedX * 0.08;
   target.cameraX = CAMERA_HOME.x + normalizedX * 0.28;
-  target.cameraY = CAMERA_HOME.y - normalizedY * 0.1;
+  target.cameraY = CAMERA_HOME.y - verticalY * 0.045;
   target.lookX = CAMERA_HOME.lookX + normalizedX * 0.1;
-  target.lookY = CAMERA_HOME.lookY - normalizedY * 0.05;
+  target.lookY = CAMERA_HOME.lookY - verticalY * 0.018;
+}
+
+function applyDeadZone(value, deadZone) {
+  const clamped = THREE.MathUtils.clamp(value, -1, 1);
+  const magnitude = Math.abs(clamped);
+  if (magnitude <= deadZone) return 0;
+
+  const normalized = (magnitude - deadZone) / (1 - deadZone);
+  return Math.sign(clamped) * Math.pow(normalized, 1.35);
 }
 
 function handlePointer(event) {

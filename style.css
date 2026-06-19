@@ -64,6 +64,13 @@ button {
   filter: saturate(1.18) sepia(0.23) contrast(1.02) brightness(1.02);
 }
 
+.lockscreen::before,
+#scene,
+.shade,
+.foreground-guard {
+  z-index: 0;
+}
+
 .shade {
   position: absolute;
   inset: 0;
@@ -73,8 +80,21 @@ button {
     radial-gradient(ellipse at 50% 50%, rgba(255, 151, 71, 0.04) 0%, transparent 54%, rgba(67, 32, 16, 0.44) 100%);
 }
 
+.foreground-guard {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 38svh;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(105, 61, 35, 0.24) 16%, rgba(72, 40, 24, 0.68) 55%, rgba(43, 25, 16, 0.84) 100%),
+    radial-gradient(ellipse at 50% 0%, rgba(255, 198, 119, 0.2), transparent 52%);
+}
+
 .clock {
   position: absolute;
+  z-index: 2;
   top: max(24px, env(safe-area-inset-top));
   left: 0;
   right: 0;
@@ -136,6 +156,7 @@ button {
 
 .controls {
   position: absolute;
+  z-index: 3;
   right: max(16px, env(safe-area-inset-right));
   bottom: max(22px, env(safe-area-inset-bottom));
   display: flex;
@@ -178,6 +199,7 @@ button {
 
 .status {
   position: absolute;
+  z-index: 3;
   left: 50%;
   bottom: max(26px, env(safe-area-inset-bottom));
   max-width: min(76vw, 360px);
