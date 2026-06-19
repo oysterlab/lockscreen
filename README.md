@@ -6,3 +6,4 @@ Black mobile lock-screen prototype using the local `sample (1).glb` model.
 - Pointer fallback on desktop
 - Static files only, ready for GitHub Pages
 - Meshopt-compressed GLB for faster mobile loading
+- Warm golden-hour lock-screen grade with calibrated gyro parallax

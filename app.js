@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { MeshoptDecoder } from "https://cdn.jsdelivr.net/npm/meshoptimizer@0.20.0/meshopt_decoder.module.js";
 
 const MODEL_URL = new URL("./cat-lock-meshopt.glb", import.meta.url).href;
@@ -12,46 +13,80 @@ const motionButton = document.querySelector("#motionButton");
 const fullscreenButton = document.querySelector("#fullscreenButton");
 const resetButton = document.querySelector("#resetButton");
 
+const CAMERA_HOME = {
+  x: 0,
+  y: 1.02,
+  z: 6.4,
+  lookX: 0,
+  lookY: 0.9,
+};
+
+const MODEL_HOME = {
+  yaw: 0,
+  pitch: 0,
+  roll: 0,
+};
+
 window.addEventListener("load", () => window.lucide?.createIcons());
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000);
+scene.fog = new THREE.FogExp2(0xf2b97c, 0.026);
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: true,
-  alpha: false,
+  alpha: true,
   powerPreference: "high-performance",
 });
+renderer.setClearColor(0x000000, 0);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.08;
+renderer.toneMappingExposure = 1.18;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
+const pmremGenerator = new THREE.PMREMGenerator(renderer);
+const roomEnvironment = new RoomEnvironment(renderer);
+scene.environment = pmremGenerator.fromScene(roomEnvironment, 0.045).texture;
+scene.environmentIntensity = 0.5;
+roomEnvironment.dispose();
+
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
 const world = new THREE.Group();
+const backdrop = new THREE.Group();
 const modelAnchor = new THREE.Group();
 const clock = new THREE.Clock();
 let mixer = null;
 
 scene.add(world);
+world.add(backdrop);
 world.add(modelAnchor);
 
 const target = {
-  cameraX: 0,
-  cameraY: 1.08,
-  cameraZ: 6.7,
-  rotationX: 0,
-  rotationY: 0,
-  rotationZ: 0,
+  cameraX: CAMERA_HOME.x,
+  cameraY: CAMERA_HOME.y,
+  cameraZ: CAMERA_HOME.z,
+  lookX: CAMERA_HOME.lookX,
+  lookY: CAMERA_HOME.lookY,
+  modelPitch: MODEL_HOME.pitch,
+  modelYaw: MODEL_HOME.yaw,
+  modelRoll: MODEL_HOME.roll,
+  backdropYaw: 0,
+};
+
+const motion = {
+  baseBeta: null,
+  baseGamma: null,
+  baseGravityX: null,
+  baseGravityY: null,
+  lastReadingAt: 0,
+  probeTimer: 0,
 };
 
 const state = {
   motionEnabled: false,
   hasMotionReading: false,
-  idle: true,
 };
 
 setupLights();
@@ -61,6 +96,7 @@ updateClock();
 setInterval(updateClock, 30_000);
 
 loadModel();
+startPassiveMotion();
 requestAnimationFrame(render);
 
 window.addEventListener("resize", resize);
@@ -73,76 +109,167 @@ resetButton.addEventListener("click", resetView);
 document.addEventListener("fullscreenchange", updateFullscreenButton);
 
 function setupLights() {
-  scene.add(new THREE.HemisphereLight(0xb9c4ff, 0x070707, 1.4));
+  scene.add(new THREE.HemisphereLight(0xffe7bf, 0x5e3a23, 1.75));
 
-  const key = new THREE.DirectionalLight(0xffffff, 2.6);
-  key.position.set(-3.2, 5.4, 4.8);
-  key.castShadow = true;
-  key.shadow.mapSize.set(1024, 1024);
-  key.shadow.camera.left = -4;
-  key.shadow.camera.right = 4;
-  key.shadow.camera.top = 4;
-  key.shadow.camera.bottom = -4;
-  scene.add(key);
+  const sun = new THREE.DirectionalLight(0xffc06f, 4.2);
+  sun.position.set(-3.6, 6.8, 5.4);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.camera.left = -4.2;
+  sun.shadow.camera.right = 4.2;
+  sun.shadow.camera.top = 4.2;
+  sun.shadow.camera.bottom = -4.2;
+  sun.shadow.bias = -0.00018;
+  scene.add(sun);
 
-  const cyan = new THREE.PointLight(0x7ff5df, 6.8, 7);
-  cyan.position.set(2.8, 1.6, 2.7);
-  scene.add(cyan);
+  const softSky = new THREE.DirectionalLight(0xd9e8ff, 0.55);
+  softSky.position.set(3.4, 3.8, 2.8);
+  scene.add(softSky);
 
-  const gold = new THREE.PointLight(0xffd27a, 4.8, 6);
-  gold.position.set(-2.5, 0.7, 3.5);
-  scene.add(gold);
+  const stallBulb = new THREE.PointLight(0xffb05f, 4.2, 5.2, 1.9);
+  stallBulb.position.set(1.4, 1.35, 1.15);
+  scene.add(stallBulb);
+
+  const windowGlow = new THREE.PointLight(0xffdf9a, 3.2, 4.8, 2);
+  windowGlow.position.set(-1.55, 1.05, 0.9);
+  scene.add(windowGlow);
 }
 
 function setupDiorama() {
   const baseMaterial = new THREE.MeshStandardMaterial({
-    color: 0x070707,
-    roughness: 0.72,
-    metalness: 0.28,
+    color: 0x8a6c4a,
+    roughness: 0.84,
+    metalness: 0.04,
   });
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(1.62, 1.72, 0.2, 96), baseMaterial);
-  base.position.y = -0.1;
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.78, 0.2, 112), baseMaterial);
+  base.position.y = -0.13;
   base.receiveShadow = true;
   world.add(base);
 
   const rim = new THREE.Mesh(
-    new THREE.TorusGeometry(1.64, 0.018, 12, 112),
+    new THREE.TorusGeometry(1.69, 0.016, 12, 128),
     new THREE.MeshStandardMaterial({
-      color: 0x7ff5df,
-      emissive: 0x184f48,
-      roughness: 0.45,
-      metalness: 0.35,
+      color: 0xf8c06a,
+      emissive: 0x9a4f1f,
+      emissiveIntensity: 0.55,
+      roughness: 0.48,
+      metalness: 0.06,
     }),
   );
   rim.rotation.x = Math.PI / 2;
-  rim.position.y = 0.012;
+  rim.position.y = -0.012;
   world.add(rim);
 
-  const backing = new THREE.Mesh(
-    new THREE.PlaneGeometry(4.4, 4.2),
-    new THREE.MeshStandardMaterial({
-      color: 0x020202,
-      roughness: 1,
-      metalness: 0,
-      side: THREE.DoubleSide,
-    }),
-  );
-  backing.position.set(0, 1.05, -1.25);
-  backing.receiveShadow = true;
-  world.add(backing);
-
   const floor = new THREE.Mesh(
-    new THREE.CircleGeometry(1.6, 96),
+    new THREE.CircleGeometry(1.64, 112),
     new THREE.MeshStandardMaterial({
-      color: 0x050505,
-      roughness: 0.9,
-      metalness: 0.08,
+      color: 0x9a7a55,
+      roughness: 0.92,
+      metalness: 0.02,
     }),
   );
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = 0.012;
   floor.receiveShadow = true;
   world.add(floor);
+
+  addTileLines();
+  addWarmBackdrop();
+  addCourtyardProps();
+}
+
+function addTileLines() {
+  const lineMaterial = new THREE.MeshBasicMaterial({
+    color: 0x5f4630,
+    transparent: true,
+    opacity: 0.34,
+  });
+
+  for (let i = -4; i <= 4; i += 1) {
+    const horizontal = new THREE.Mesh(new THREE.BoxGeometry(3.1, 0.006, 0.008), lineMaterial);
+    horizontal.position.set(0, 0.024, i * 0.28);
+    horizontal.rotation.x = -Math.PI / 2;
+    world.add(horizontal);
+
+    const vertical = new THREE.Mesh(new THREE.BoxGeometry(0.006, 3.1, 0.008), lineMaterial);
+    vertical.position.set(i * 0.28, 0.025, 0);
+    vertical.rotation.x = -Math.PI / 2;
+    world.add(vertical);
+  }
+}
+
+function addWarmBackdrop() {
+  const sky = new THREE.Mesh(
+    new THREE.PlaneGeometry(5.2, 5.4),
+    new THREE.MeshBasicMaterial({
+      color: 0xf6bd7a,
+      transparent: true,
+      opacity: 0.18,
+      depthWrite: false,
+    }),
+  );
+  sky.position.set(0, 1.6, -1.45);
+  backdrop.add(sky);
+
+  const wallMaterial = new THREE.MeshStandardMaterial({
+    color: 0x936447,
+    roughness: 0.88,
+    metalness: 0,
+  });
+  const wall = new THREE.Mesh(new THREE.BoxGeometry(3.7, 0.58, 0.08), wallMaterial);
+  wall.position.set(0, 0.34, -1.15);
+  wall.receiveShadow = true;
+  backdrop.add(wall);
+
+  const gateMaterial = new THREE.MeshStandardMaterial({
+    color: 0x4c744b,
+    roughness: 0.78,
+    metalness: 0.08,
+  });
+  for (let i = -2; i <= 2; i += 1) {
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.78, 0.035), gateMaterial);
+    bar.position.set(-0.56 + i * 0.18, 0.38, -1.05);
+    bar.castShadow = true;
+    backdrop.add(bar);
+  }
+
+  const topRail = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.045, 0.04), gateMaterial);
+  topRail.position.set(-0.56, 0.73, -1.04);
+  backdrop.add(topRail);
+}
+
+function addCourtyardProps() {
+  const potMaterial = new THREE.MeshStandardMaterial({
+    color: 0xb5673c,
+    roughness: 0.82,
+    metalness: 0.02,
+  });
+  const leafMaterial = new THREE.MeshStandardMaterial({
+    color: 0x6f8d40,
+    roughness: 0.76,
+    metalness: 0,
+  });
+
+  const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 0.22, 24), potMaterial);
+  pot.position.set(-1.18, 0.14, -0.34);
+  pot.castShadow = true;
+  world.add(pot);
+
+  for (let i = 0; i < 7; i += 1) {
+    const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 8), leafMaterial);
+    const angle = (i / 7) * Math.PI * 2;
+    leaf.scale.set(1.15, 0.55, 0.75);
+    leaf.position.set(-1.18 + Math.cos(angle) * 0.12, 0.28 + (i % 2) * 0.04, -0.34 + Math.sin(angle) * 0.08);
+    leaf.castShadow = true;
+    world.add(leaf);
+  }
+
+  const bulb = new THREE.Mesh(
+    new THREE.SphereGeometry(0.045, 18, 12),
+    new THREE.MeshBasicMaterial({ color: 0xffdda2 }),
+  );
+  bulb.position.set(1.2, 0.72, -0.58);
+  world.add(bulb);
 }
 
 async function loadModel() {
@@ -157,9 +284,7 @@ async function loadModel() {
         if (!node.isMesh) return;
         node.castShadow = true;
         node.receiveShadow = true;
-        if (node.material?.map) {
-          node.material.map.colorSpace = THREE.SRGBColorSpace;
-        }
+        warmMaterial(node.material);
       });
 
       fitModel(object);
@@ -179,25 +304,59 @@ async function loadModel() {
   );
 }
 
+function warmMaterial(material) {
+  if (Array.isArray(material)) {
+    material.forEach(warmMaterial);
+    return;
+  }
+
+  if (!material) return;
+
+  if (material.map) {
+    material.map.colorSpace = THREE.SRGBColorSpace;
+  }
+
+  if (material.color) {
+    material.color.offsetHSL(0.025, 0.08, 0.045);
+  }
+
+  if ("roughness" in material) {
+    material.roughness = THREE.MathUtils.clamp(Math.max(material.roughness ?? 0.72, 0.68), 0, 1);
+  }
+
+  if ("metalness" in material) {
+    material.metalness = Math.min(material.metalness ?? 0, 0.08);
+  }
+
+  if (material.emissive) {
+    material.emissive.lerp(new THREE.Color(0x2b1608), 0.18);
+    material.emissiveIntensity = Math.max(material.emissiveIntensity ?? 0, 0.035);
+  }
+
+  material.envMapIntensity = 0.42;
+  material.needsUpdate = true;
+}
+
 function fitModel(object) {
   const initialBox = new THREE.Box3().setFromObject(object);
   const center = initialBox.getCenter(new THREE.Vector3());
   const size = initialBox.getSize(new THREE.Vector3());
   const longestSide = Math.max(size.x, size.y, size.z) || 1;
-  const desiredSize = 2.35;
+  const desiredSize = 2.68;
 
   object.position.sub(center);
   object.scale.setScalar(desiredSize / longestSide);
 
   const fittedBox = new THREE.Box3().setFromObject(object);
-  object.position.y -= fittedBox.min.y - 0.018;
+  object.position.y -= fittedBox.min.y - 0.02;
+  object.rotation.y = -Math.PI / 2;
 }
 
 function resize() {
   const width = window.innerWidth;
   const height = window.innerHeight;
   const aspect = width / height;
-  const viewHeight = aspect < 0.72 ? 4.95 : 4.15;
+  const viewHeight = aspect < 0.72 ? 4.55 : 4.05;
   const viewWidth = viewHeight * aspect;
 
   renderer.setSize(width, height, false);
@@ -206,25 +365,23 @@ function resize() {
   camera.top = viewHeight / 2;
   camera.bottom = -viewHeight / 2;
   camera.position.set(target.cameraX, target.cameraY, target.cameraZ);
-  camera.lookAt(0, 0.86, 0);
+  camera.lookAt(target.lookX, target.lookY, 0);
   camera.updateProjectionMatrix();
 }
 
 function render() {
   const delta = clock.getDelta();
-  const elapsed = clock.elapsedTime;
   mixer?.update(delta);
 
-  const idleY = state.motionEnabled && state.hasMotionReading ? 0 : Math.sin(elapsed * 0.34) * 0.12;
-  const idleX = state.motionEnabled && state.hasMotionReading ? 0 : Math.sin(elapsed * 0.52) * 0.025;
-  world.rotation.x = THREE.MathUtils.lerp(world.rotation.x, target.rotationX + idleX, 0.055);
-  world.rotation.y = THREE.MathUtils.lerp(world.rotation.y, target.rotationY + idleY, 0.055);
-  world.rotation.z = THREE.MathUtils.lerp(world.rotation.z, target.rotationZ, 0.055);
+  modelAnchor.rotation.x = THREE.MathUtils.lerp(modelAnchor.rotation.x, target.modelPitch, 0.09);
+  modelAnchor.rotation.y = THREE.MathUtils.lerp(modelAnchor.rotation.y, target.modelYaw, 0.09);
+  modelAnchor.rotation.z = THREE.MathUtils.lerp(modelAnchor.rotation.z, target.modelRoll, 0.09);
+  backdrop.rotation.y = THREE.MathUtils.lerp(backdrop.rotation.y, target.backdropYaw, 0.065);
 
-  camera.position.x = THREE.MathUtils.lerp(camera.position.x, target.cameraX, 0.065);
-  camera.position.y = THREE.MathUtils.lerp(camera.position.y, target.cameraY, 0.065);
-  camera.position.z = THREE.MathUtils.lerp(camera.position.z, target.cameraZ, 0.065);
-  camera.lookAt(0, 0.86, 0);
+  camera.position.x = THREE.MathUtils.lerp(camera.position.x, target.cameraX, 0.08);
+  camera.position.y = THREE.MathUtils.lerp(camera.position.y, target.cameraY, 0.08);
+  camera.position.z = THREE.MathUtils.lerp(camera.position.z, target.cameraZ, 0.08);
+  camera.lookAt(target.lookX, target.lookY, 0);
 
   renderer.render(scene, camera);
   requestAnimationFrame(render);
@@ -232,50 +389,117 @@ function render() {
 
 async function enableMotion() {
   try {
-    const needsPermission = typeof DeviceOrientationEvent !== "undefined"
-      && typeof DeviceOrientationEvent.requestPermission === "function";
-
-    if (needsPermission) {
-      const permission = await DeviceOrientationEvent.requestPermission();
-      if (permission !== "granted") {
-        showStatus("움직임 권한이 필요합니다.", true);
-        return;
-      }
+    const canUseMotion = typeof DeviceOrientationEvent !== "undefined" || typeof DeviceMotionEvent !== "undefined";
+    if (!canUseMotion) {
+      showStatus("이 기기에서는 움직임 센서를 찾을 수 없습니다.", true);
+      return;
     }
 
-    window.addEventListener("deviceorientation", handleOrientation, true);
-    state.motionEnabled = true;
-    motionButton.classList.add("is-active");
-    showStatus("움직임 켜짐", true);
+    const orientationPermission = await requestSensorPermission(DeviceOrientationEvent);
+    const motionPermission = await requestSensorPermission(DeviceMotionEvent);
+    if (orientationPermission === "denied" || motionPermission === "denied") {
+      showStatus("움직임 권한이 필요합니다.", true);
+      return;
+    }
+
+    startMotion({ userInitiated: true });
   } catch {
     showStatus("이 브라우저에서는 움직임을 켤 수 없습니다.", true);
   }
 }
 
-function handleOrientation(event) {
-  const beta = THREE.MathUtils.clamp(event.beta ?? 0, -38, 38);
-  const gamma = THREE.MathUtils.clamp(event.gamma ?? 0, -34, 34);
-  const normalizedX = gamma / 34;
-  const normalizedY = beta / 38;
+async function requestSensorPermission(sensorEvent) {
+  if (typeof sensorEvent === "undefined" || typeof sensorEvent.requestPermission !== "function") {
+    return "granted";
+  }
 
-  state.hasMotionReading = true;
-  target.rotationY = normalizedX * 0.42;
-  target.rotationX = normalizedY * 0.18;
-  target.rotationZ = -normalizedX * 0.08;
-  target.cameraX = normalizedX * 0.42;
-  target.cameraY = 1.08 - normalizedY * 0.22;
+  return sensorEvent.requestPermission();
+}
+
+function startPassiveMotion() {
+  const needsTap = typeof DeviceOrientationEvent !== "undefined"
+    && typeof DeviceOrientationEvent.requestPermission === "function";
+
+  if (!needsTap && (typeof DeviceOrientationEvent !== "undefined" || typeof DeviceMotionEvent !== "undefined")) {
+    startMotion({ userInitiated: false });
+  }
+}
+
+function startMotion({ userInitiated }) {
+  if (!state.motionEnabled) {
+    window.addEventListener("deviceorientation", handleOrientation, { passive: true });
+    window.addEventListener("deviceorientationabsolute", handleOrientation, { passive: true });
+    window.addEventListener("devicemotion", handleDeviceMotion, { passive: true });
+  }
+
+  state.motionEnabled = true;
+  motionButton.classList.add("is-active");
+
+  if (userInitiated) {
+    showStatus("움직임 켜짐", true);
+  }
+
+  window.clearTimeout(motion.probeTimer);
+  motion.probeTimer = window.setTimeout(() => {
+    if (state.motionEnabled && Date.now() - motion.lastReadingAt > 1400) {
+      showStatus("센서 신호를 기다리는 중입니다.", true);
+    }
+  }, 1600);
+}
+
+function handleOrientation(event) {
+  if (!state.motionEnabled || event.beta == null || event.gamma == null) return;
+
+  if (motion.baseBeta == null || motion.baseGamma == null) {
+    motion.baseBeta = event.beta;
+    motion.baseGamma = event.gamma;
+  }
+
+  const deltaBeta = THREE.MathUtils.clamp(event.beta - motion.baseBeta, -24, 24);
+  const deltaGamma = THREE.MathUtils.clamp(event.gamma - motion.baseGamma, -24, 24);
+  applyParallax(deltaGamma / 24, deltaBeta / 24, true);
+}
+
+function handleDeviceMotion(event) {
+  if (!state.motionEnabled || state.hasMotionReading) return;
+
+  const gravity = event.accelerationIncludingGravity;
+  if (!gravity || gravity.x == null || gravity.y == null) return;
+
+  if (motion.baseGravityX == null || motion.baseGravityY == null) {
+    motion.baseGravityX = gravity.x;
+    motion.baseGravityY = gravity.y;
+  }
+
+  const deltaX = THREE.MathUtils.clamp(gravity.x - motion.baseGravityX, -5.8, 5.8);
+  const deltaY = THREE.MathUtils.clamp(gravity.y - motion.baseGravityY, -5.8, 5.8);
+  applyParallax(deltaX / 5.8, -deltaY / 5.8, true);
+}
+
+function applyParallax(x, y, fromSensor) {
+  const normalizedX = THREE.MathUtils.clamp(x, -1, 1);
+  const normalizedY = THREE.MathUtils.clamp(y, -1, 1);
+
+  if (fromSensor) {
+    state.hasMotionReading = true;
+    motion.lastReadingAt = Date.now();
+  }
+
+  target.modelYaw = normalizedX * 0.26;
+  target.modelPitch = -normalizedY * 0.1;
+  target.modelRoll = -normalizedX * 0.035;
+  target.backdropYaw = -normalizedX * 0.08;
+  target.cameraX = CAMERA_HOME.x + normalizedX * 0.28;
+  target.cameraY = CAMERA_HOME.y - normalizedY * 0.1;
+  target.lookX = CAMERA_HOME.lookX + normalizedX * 0.1;
+  target.lookY = CAMERA_HOME.lookY - normalizedY * 0.05;
 }
 
 function handlePointer(event) {
   if (state.motionEnabled && state.hasMotionReading) return;
   const x = (event.clientX / window.innerWidth - 0.5) * 2;
   const y = (event.clientY / window.innerHeight - 0.5) * 2;
-
-  target.rotationY = x * 0.36;
-  target.rotationX = y * 0.1;
-  target.rotationZ = -x * 0.05;
-  target.cameraX = x * 0.36;
-  target.cameraY = 1.08 - y * 0.12;
+  applyParallax(x * 0.85, y * 0.65, false);
 }
 
 async function toggleFullscreen() {
@@ -292,12 +516,20 @@ async function toggleFullscreen() {
 
 function resetView() {
   state.hasMotionReading = false;
-  target.cameraX = 0;
-  target.cameraY = 1.08;
-  target.rotationX = 0;
-  target.rotationY = 0;
-  target.rotationZ = 0;
-  showStatus("초기화됨", true);
+  motion.baseBeta = null;
+  motion.baseGamma = null;
+  motion.baseGravityX = null;
+  motion.baseGravityY = null;
+  target.cameraX = CAMERA_HOME.x;
+  target.cameraY = CAMERA_HOME.y;
+  target.cameraZ = CAMERA_HOME.z;
+  target.lookX = CAMERA_HOME.lookX;
+  target.lookY = CAMERA_HOME.lookY;
+  target.modelPitch = MODEL_HOME.pitch;
+  target.modelYaw = MODEL_HOME.yaw;
+  target.modelRoll = MODEL_HOME.roll;
+  target.backdropYaw = 0;
+  showStatus("정면으로 재설정됨", true);
 }
 
 function updateFullscreenButton() {
@@ -328,5 +560,5 @@ function showStatus(message, temporary = false) {
   showStatus.timeout = window.setTimeout(() => {
     statusEl.textContent = "";
     statusEl.classList.remove("is-visible");
-  }, 2200);
+  }, 2400);
 }
