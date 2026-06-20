@@ -41,7 +41,7 @@ const VIEW = {
   cutHigh: 0.14, // cut threshold inside the protected cat region (don't cut -> no stipple)
   overscan: 0.08, // texture zoom so cliffs/edges never expose the frame border
   pad: 1.15, // plane oversize beyond the view, for camera-orbit headroom
-  smooth: 0.13,
+  springFreq: 8.5, // critically-damped spring frequency — natural inertia / weight
   idleAmp: 0.26,
   idleSpeed: 0.0002,
 };
@@ -61,6 +61,9 @@ window.addEventListener("load", () => window.lucide?.createIcons());
 
 const target = { x: 0, y: 0 };
 const current = { x: 0, y: 0 };
+const vel = { x: 0, y: 0 };
+let lastFrame = typeof performance !== "undefined" ? performance.now() : 0;
+let lastInputAt = 0;
 const state = {
   motionEnabled: false,
   hasSensorReading: false,
@@ -225,18 +228,36 @@ document.addEventListener("fullscreenchange", () =>
 
 function loop() {
   if (!state.ready) return;
+  const now = performance.now();
+  const dt = Math.min((now - lastFrame) / 1000, 0.05); // clamp for stability
+  lastFrame = now;
+
+  // desktop polish: when the pointer leaves / goes idle, ease back to centre
+  // (gyro keeps its held tilt — that is the user's intent)
+  if (!state.hasSensorReading && !state.pointerActive && now - lastInputAt > 500) {
+    target.x *= 0.9;
+    target.y *= 0.9;
+  }
+
   if (debug.freeze) {
     current.x = target.x;
     current.y = target.y;
+    vel.x = vel.y = 0;
   } else {
-    current.x += (target.x - current.x) * VIEW.smooth;
-    current.y += (target.y - current.y) * VIEW.smooth;
+    // critically-damped spring: gives weight/inertia instead of a flat lerp
+    const w = VIEW.springFreq;
+    const ax = (target.x - current.x) * w * w - vel.x * 2 * w;
+    const ay = (target.y - current.y) * w * w - vel.y * 2 * w;
+    vel.x += ax * dt;
+    vel.y += ay * dt;
+    current.x += vel.x * dt;
+    current.y += vel.y * dt;
   }
 
   let ox = current.x;
   let oy = current.y;
   if (!debug.freeze && !state.pointerActive && !state.hasSensorReading) {
-    const t = (performance.now() - state.startTime) * VIEW.idleSpeed;
+    const t = (now - state.startTime) * VIEW.idleSpeed;
     ox += Math.sin(t) * VIEW.idleAmp;
     oy += Math.cos(t * 0.8) * VIEW.idleAmp * 0.5;
   }
@@ -299,6 +320,7 @@ function handlePointerMove(event) {
   const nx = (event.clientX / window.innerWidth - 0.5) * 2;
   const ny = (event.clientY / window.innerHeight - 0.5) * 2;
   setTargetFromNormalized(nx, -ny);
+  lastInputAt = performance.now();
 }
 
 function handlePointerUp() {
