@@ -25,7 +25,7 @@ const ASSETS = {
   bgDepth: P3D + "bg_depth.png",
 };
 
-const IMG_ASPECT = 864 / 1536;
+let IMG_ASPECT = 864 / 1536; // updated from the loaded plate so any aspect cover-fits
 
 const VIEW = {
   camZ: 6,
@@ -163,6 +163,7 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
     const tw = fgDepth.image?.width || 864;
     const th = fgDepth.image?.height || 1536;
     const texel = new THREE.Vector2(1.6 / tw, 1.6 / th);
+    if (fgColor.image?.width) IMG_ASPECT = fgColor.image.width / fgColor.image.height;
 
     backMat = new THREE.ShaderMaterial({
       uniforms: {
