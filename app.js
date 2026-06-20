@@ -36,17 +36,18 @@ const VIEW = {
   //              but kept high enough that the foreground tree edge doesn't smear.
   //              (Going to ~0.24 spreads background depth more but smears the tree —
   //              that needs real multi-view data, not a single-photo depth guess.)
-  orbit: 0.3, // camera xy travel at full tilt
+  orbit: 0.38, // camera xy travel at full tilt (a bit more travel for stronger motion)
   cutLow: 0.04, // cut threshold for the scene (cut tree/sky edges -> no smear)
   cutHigh: 0.14, // cut threshold inside the protected cat region (don't cut -> no stipple)
   overscan: 0.08, // texture zoom so cliffs/edges never expose the frame border
   pad: 1.15, // plane oversize beyond the view, for camera-orbit headroom
-  smooth: 0.085,
+  smooth: 0.13,
   idleAmp: 0.26,
   idleSpeed: 0.0002,
 };
 
-const SENSOR = { betaRange: 26, gammaRange: 26, gravityRange: 5.6, deadZone: 0.05 };
+// smaller ranges => a small phone tilt reaches full parallax (much more responsive)
+const SENSOR = { betaRange: 13, gammaRange: 13, gravityRange: 3.2, deadZone: 0.025 };
 
 const canvas = document.querySelector("#scene");
 const timeEl = document.querySelector("#time");
