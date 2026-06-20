@@ -1,2 +1,14 @@
 sample (1).glb
 .DS_Store
+android-live-wallpaper/.tooling/
+android-live-wallpaper/.gradle/
+android-live-wallpaper/app/build/
+.gstack/
+
+# heavy 3D model exports & experiment artifacts (not needed for the web lockscreen)
+*.glb
+room.png
+cat_multiview.png
+# heavy android sub-project and private strategy docs
+android-live-wallpaper/
+biz/

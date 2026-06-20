@@ -14,9 +14,7 @@
 
 import * as THREE from "three";
 
-// ?scene=d2 loads assets/photo3d_d2/ (a different diorama); default is the main scene
-const sceneParam = new URLSearchParams(location.search).get("scene");
-const P3D = sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d/";
+const P3D = "./assets/photo3d/";
 const ASSETS = {
   fgColor: P3D + "fg_color.png",
   fgDepth: P3D + "fg_depth.png",
@@ -32,10 +30,7 @@ const VIEW = {
   fov: 36,
   depthScale: 1.45, // foreground relief amount (strong 3D pop on the near subject)
   farScale: 0.42, // far band moves this fraction as much (keeps distant thin edges calm)
-  focus: 0.34, // still plane: lower than v1 (0.42) for a bit more midground depth,
-  //              but kept high enough that the foreground tree edge doesn't smear.
-  //              (Going to ~0.24 spreads background depth more but smears the tree —
-  //              that needs real multi-view data, not a single-photo depth guess.)
+  focus: 0.42, // depth that sits on the still plane (0 far … 1 near)
   orbit: 0.3, // camera xy travel at full tilt
   cutLow: 0.04, // cut threshold for the scene (cut tree/sky edges -> no smear)
   cutHigh: 0.14, // cut threshold inside the protected cat region (don't cut -> no stipple)
@@ -75,14 +70,12 @@ if (debug.freeze) {
   target.x = clamp(parseFloat(params.get("ox") || "0"), -1, 1);
   target.y = clamp(parseFloat(params.get("oy") || "0"), -1, 1);
 }
-// URL-tunable knobs for QA sweeps: ?ct=&cth=&ds=&ob=&fc=focus&fs=farScale
+// URL-tunable knobs for QA sweeps: ?ct=cutLow&cth=cutHigh&ds=depthScale&ob=orbit
 const tune = {
   cutLow: params.has("ct") ? parseFloat(params.get("ct")) : VIEW.cutLow,
   cutHigh: params.has("cth") ? parseFloat(params.get("cth")) : VIEW.cutHigh,
   depthScale: params.has("ds") ? parseFloat(params.get("ds")) : VIEW.depthScale,
   orbit: params.has("ob") ? parseFloat(params.get("ob")) : VIEW.orbit,
-  focus: params.has("fc") ? parseFloat(params.get("fc")) : VIEW.focus,
-  farScale: params.has("fs") ? parseFloat(params.get("fs")) : VIEW.farScale,
 };
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -165,8 +158,8 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
         uColor: { value: bgColor },
         uDepth: { value: bgDepth },
         uDepthScale: { value: tune.depthScale },
-        uFarScale: { value: tune.farScale },
-        uFocus: { value: tune.focus },
+        uFarScale: { value: VIEW.farScale },
+        uFocus: { value: VIEW.focus },
         uZBias: { value: -0.04 },
         uCover: { value: cover },
       },
@@ -182,8 +175,8 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
         uCutLow: { value: tune.cutLow },
         uCutHigh: { value: tune.cutHigh },
         uDepthScale: { value: tune.depthScale },
-        uFarScale: { value: tune.farScale },
-        uFocus: { value: tune.focus },
+        uFarScale: { value: VIEW.farScale },
+        uFocus: { value: VIEW.focus },
         uZBias: { value: 0.0 },
         uCover: { value: cover },
       },
