@@ -63,6 +63,7 @@ const SCENE_OVERRIDES = {
   cherry2: { depthScale: 1.55, farScale: 0.62, focus: 0.3 },
   latte2dio: { depthScale: 1.55, farScale: 0.62, focus: 0.3 },
   nila2dio: { depthScale: 1.55, farScale: 0.62, focus: 0.3 },
+  cherry2dio: { depthScale: 1.55, farScale: 0.62, focus: 0.3 },
   latteval: { depthScale: 1.55, farScale: 0.62, focus: 0.3 },
 };
 Object.assign(VIEW, SCENE_OVERRIDES[sceneParam] || {});
