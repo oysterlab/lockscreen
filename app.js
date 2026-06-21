@@ -49,6 +49,16 @@ const VIEW = {
   idleSpeed: 0.0002,
 };
 
+// per-scene depth overrides. lab1 (v3 soft-LDI) can take a DEEPER perspective than
+// the v2 default: its soft-matte + piecewise-flat layering keeps the far thin
+// structures (wires, tree, tower) clean even with the far band decompressed, so we
+// open up the distance (farScale up), push more midground depth (focus down) and a
+// stronger near pop (depthScale up) for a richer, more separated perspective.
+const SCENE_OVERRIDES = {
+  lab1: { depthScale: 1.65, farScale: 0.78, focus: 0.24 },
+};
+Object.assign(VIEW, SCENE_OVERRIDES[sceneParam] || {});
+
 // smaller ranges => a small phone tilt reaches full parallax (very responsive)
 const SENSOR = { betaRange: 9, gammaRange: 9, gravityRange: 2.3, deadZone: 0.02 };
 const TOUCH_SENS = 2.6; // drag distance (fraction of screen) -> parallax offset
