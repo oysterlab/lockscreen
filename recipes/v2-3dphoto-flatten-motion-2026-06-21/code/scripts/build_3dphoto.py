@@ -26,14 +26,6 @@ OUT = Path(os.environ.get("SCENE_OUT", ROOT / "assets/photo3d"))
 OUT.mkdir(parents=True, exist_ok=True)
 
 CLIFF_T = 14   # depth-gradient magnitude above this is a discontinuity ("cliff")
-# piecewise-flat depth: a DEPTH-domain bilateral flattens depth-smooth interiors
-# (an object body, the ground) so they translate rigidly under parallax (no warp),
-# while keeping depth cliffs (object silhouettes) sharp -> objects stay at distinct
-# depths (3D between them) but don't shear within themselves (diorama / pop-up book).
-FLAT_SC = float(os.environ.get("FLAT_SC", 26))    # bilateral range sigma (depth units)
-FLAT_SS = float(os.environ.get("FLAT_SS", 32))    # bilateral spatial sigma (px)
-FLAT_ITERS = int(os.environ.get("FLAT_ITERS", 3))
-FLAT_MIX = float(os.environ.get("FLAT_MIX", 0.7))  # 0 = full relief, 1 = fully flat
 
 
 def ell(px):
@@ -78,16 +70,6 @@ def main():
     dep = cv2.medianBlur(depth, 5).astype(np.float32) / 255.0
     dep = guided_filter(gray, dep, r=4, eps=1e-4)
     dep = guided_filter(gray, dep, r=2, eps=1e-4)
-    # piecewise-flat pass: a DEPTH-domain bilateral flattens depth-smooth interiors
-    # (object bodies, the ground) toward a constant depth so they translate RIGIDLY
-    # under parallax instead of warping, while keeping depth cliffs (silhouettes)
-    # sharp. Unlike a colour-guided filter, this ignores in-object texture, so a
-    # textured midground object (the scooter) actually flattens.
-    d8 = np.clip(dep * 255.0, 0, 255).astype(np.uint8)
-    for _ in range(FLAT_ITERS):
-        d8 = cv2.bilateralFilter(d8, 0, FLAT_SC, FLAT_SS)  # d=0 -> kernel from sigmaSpace
-    flat = d8.astype(np.float32) / 255.0
-    dep = dep * (1.0 - FLAT_MIX) + flat * FLAT_MIX
     depth_s = np.clip(dep * 255.0, 0, 255).astype(np.uint8)
 
     # The colour guide bakes the cat's knit-hat / fur texture into the depth, which
@@ -140,15 +122,6 @@ def main():
     # smear. A single global threshold can't separate the two -> spatial map.
     protect = cv2.GaussianBlur(cv2.dilate(catm, ell(11)), (0, 0), 5)
     Image.fromarray(protect).save(OUT / "protect.png")
-
-    # v3 soft-LDI: a SOFT subject matte. The renderer draws the subject as its own
-    # alpha-matted layer over the filled back layer, so the silhouette composites
-    # with a soft edge instead of a feathered depth-cut. This removes BOTH the
-    # stipple (no cut on the subject) AND the rubber-sheet stretch at the subject
-    # edge (the protect map used to trade stipple for stretch). Feather the matte
-    # over a few px; the back layer (LaMa) shows through behind the moving subject.
-    subject = cv2.GaussianBlur(catm, (0, 0), 2.4)
-    Image.fromarray(subject).save(OUT / "subject.png")
 
     Image.fromarray(plate_rgb).save(OUT / "fg_color.png")
     Image.fromarray(depth_s).save(OUT / "fg_depth.png")

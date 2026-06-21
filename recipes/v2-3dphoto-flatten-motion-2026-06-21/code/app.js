@@ -17,11 +17,10 @@ import * as THREE from "three";
 // ?scene=d2 loads assets/photo3d_d2/ (a different diorama); default is the main scene
 const sceneParam = new URLSearchParams(location.search).get("scene");
 const P3D = sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d/";
-// core layers always present; protect.png (v2) / subject.png (v3 soft-LDI) are
-// loaded optionally and decide which front-layer path runs (see below).
 const ASSETS = {
   fgColor: P3D + "fg_color.png",
   fgDepth: P3D + "fg_depth.png",
+  protect: P3D + "protect.png",
   bgColor: P3D + "bg_color.png",
   bgDepth: P3D + "bg_depth.png",
 };
@@ -127,46 +126,24 @@ const VERT = `
 const FRAG_FRONT = `
   uniform sampler2D uColor;
   uniform sampler2D uDepth;
-  uniform sampler2D uSubject;
   uniform sampler2D uProtect;
   uniform vec2 uTexel;
   uniform float uCutLow;
   uniform float uCutHigh;
-  uniform float uUseSubject;
   varying vec2 vUv;
   void main() {
-    // pixel-precise cliff cut on a steep depth wall (an object silhouette). The
-    // wall is discarded so it reveals the filled back layer instead of stretching;
-    // feathered so any residual fringe blends softly into the back.
+    // pixel-precise cliff cut on a steep depth wall (a stretched seam between
+    // foreground and background). Feathered: the wall fades out over the gradient
+    // so any residual fringe blends softly into the inpainted back layer.
     float l = texture2D(uDepth, vUv - vec2(uTexel.x, 0.0)).r;
     float r = texture2D(uDepth, vUv + vec2(uTexel.x, 0.0)).r;
     float u = texture2D(uDepth, vUv - vec2(0.0, uTexel.y)).r;
     float d = texture2D(uDepth, vUv + vec2(0.0, uTexel.y)).r;
     float grad = max(abs(r - l), abs(d - u));
-    float a;
-    if (uUseSubject > 0.5) {
-      // v3 soft-LDI: cut every silhouette uniformly, then remove the subject (it is
-      // drawn by its own soft-matte layer on top) -> no stretch/stipple at the edge.
-      a = 1.0 - smoothstep(uCutLow * 0.82, uCutLow * 1.08, grad);
-      a *= 1.0 - texture2D(uSubject, vUv).r;
-    } else {
-      // v2: spatially-varying threshold, high inside the protected cat region.
-      float cut = mix(uCutLow, uCutHigh, texture2D(uProtect, vUv).r);
-      a = 1.0 - smoothstep(cut * 0.82, cut * 1.08, grad);
-    }
-    if (a < 0.004) discard;
-    gl_FragColor = vec4(texture2D(uColor, vUv).rgb, a);
-  }`;
-
-// the subject: a soft alpha matte over the filled back layer. Displaced by the
-// (flattened) subject depth so it pops as one coherent plane; its soft edge
-// composites cleanly over the scene/back (no hard cut, no halo, no stretch).
-const FRAG_SUBJECT = `
-  uniform sampler2D uColor;
-  uniform sampler2D uSubject;
-  varying vec2 vUv;
-  void main() {
-    float a = texture2D(uSubject, vUv).r;
+    // spatially-varying threshold: high inside the cat (its moderate edges are NOT
+    // cut, so no stippled noise line) and low elsewhere (tree/sky edges ARE cut).
+    float cut = mix(uCutLow, uCutHigh, texture2D(uProtect, vUv).r);
+    float a = 1.0 - smoothstep(cut * 0.82, cut * 1.08, grad);
     if (a < 0.004) discard;
     gl_FragColor = vec4(texture2D(uColor, vUv).rgb, a);
   }`;
@@ -179,37 +156,18 @@ const FRAG_BACK = `
   }`;
 
 const cover = new THREE.Vector2(1, 1);
-let frontMat, backMat, subjectMat, frontMesh, backMesh, subjectMesh, geometry;
+let frontMat, backMat, frontMesh, backMesh, geometry;
 
 const loader = new THREE.TextureLoader();
-const BLANK = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1);
-BLANK.needsUpdate = true;
-const loadOpt = (url) => loadTexture(url).catch(() => null); // 404 -> null
 
 Promise.all(Object.values(ASSETS).map(loadTexture))
-  .then(async ([fgColor, fgDepth, bgColor, bgDepth]) => {
+  .then(([fgColor, fgDepth, protect, bgColor, bgDepth]) => {
     // textures are passed through unchanged (ShaderMaterial does no colour-space
     // conversion), so keep them raw — decoding to linear without re-encoding darkens.
     const tw = fgDepth.image?.width || 864;
     const th = fgDepth.image?.height || 1536;
     const texel = new THREE.Vector2(1.6 / tw, 1.6 / th);
     if (fgColor.image?.width) IMG_ASPECT = fgColor.image.width / fgColor.image.height;
-
-    // protect.png (v2) vs subject.png (v3 soft-LDI). If subject is present we run
-    // the 3-layer path: a dedicated soft-matte subject layer on top.
-    const [protect, subject] = await Promise.all([
-      loadOpt(P3D + "protect.png"),
-      loadOpt(P3D + "subject.png"),
-    ]);
-    const useSubject = subject !== null;
-
-    const reliefUniforms = () => ({
-      uDepth: { value: fgDepth },
-      uDepthScale: { value: tune.depthScale },
-      uFarScale: { value: tune.farScale },
-      uFocus: { value: tune.focus },
-      uCover: { value: cover },
-    });
 
     backMat = new THREE.ShaderMaterial({
       uniforms: {
@@ -227,14 +185,16 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
     frontMat = new THREE.ShaderMaterial({
       uniforms: {
         uColor: { value: fgColor },
-        uSubject: { value: subject || BLANK },
-        uProtect: { value: protect || BLANK },
+        uDepth: { value: fgDepth },
         uTexel: { value: texel },
+        uProtect: { value: protect },
         uCutLow: { value: tune.cutLow },
         uCutHigh: { value: tune.cutHigh },
-        uUseSubject: { value: useSubject ? 1 : 0 },
+        uDepthScale: { value: tune.depthScale },
+        uFarScale: { value: tune.farScale },
+        uFocus: { value: tune.focus },
         uZBias: { value: 0.0 },
-        ...reliefUniforms(),
+        uCover: { value: cover },
       },
       vertexShader: VERT,
       fragmentShader: FRAG_FRONT,
@@ -247,24 +207,6 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
     backMesh.renderOrder = 0;
     frontMesh.renderOrder = 1;
     scene.add(backMesh, frontMesh);
-
-    if (useSubject) {
-      subjectMat = new THREE.ShaderMaterial({
-        uniforms: {
-          uColor: { value: fgColor },
-          uSubject: { value: subject },
-          uZBias: { value: 0.0 },
-          ...reliefUniforms(),
-        },
-        vertexShader: VERT,
-        fragmentShader: FRAG_SUBJECT,
-        transparent: true,
-        depthWrite: false,
-      });
-      subjectMesh = new THREE.Mesh(new THREE.BufferGeometry(), subjectMat);
-      subjectMesh.renderOrder = 2;
-      scene.add(subjectMesh);
-    }
 
     resize();
     state.ready = true;
@@ -363,7 +305,6 @@ function resize() {
   geometry = next;
   if (frontMesh) frontMesh.geometry = geometry;
   if (backMesh) backMesh.geometry = geometry;
-  if (subjectMesh) subjectMesh.geometry = geometry;
 }
 
 /* ---------- input ---------- */
