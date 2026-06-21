@@ -19,7 +19,7 @@ const sceneParam = new URLSearchParams(location.search).get("scene");
 const P3D = sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d/";
 // asset cache-buster: bump on any rebuilt PNG so phones don't serve a stale image
 // (index.html's ?v= only refreshes the code, not these depth/colour PNGs).
-const AV = "?a=lab3a";
+const AV = "?a=lab3c";
 // core layers always present; protect.png (v2) / subject.png (v3 soft-LDI) are
 // loaded optionally and decide which front-layer path runs (see below).
 const ASSETS = {
@@ -59,7 +59,7 @@ const VIEW = {
 // stronger near pop (depthScale up) for a richer, more separated perspective.
 const SCENE_OVERRIDES = {
   lab1: { depthScale: 1.65, farScale: 0.78, focus: 0.24 },
-  lab3: { depthScale: 1.6, farScale: 0.7, focus: 0.26 },
+  lab3: { depthScale: 1.2, farScale: 0.5, focus: 0.3 },
 };
 Object.assign(VIEW, SCENE_OVERRIDES[sceneParam] || {});
 
@@ -238,7 +238,7 @@ function initLab3() {
           uDepthScale: { value: 0.0 }, // flat backdrop
           uFarScale: { value: 1.0 },
           uFocus: { value: 0.0 },
-          uZBias: { value: -1.9 }, // pushed back so it parallaxes least
+          uZBias: { value: -0.7 }, // close behind so the gap stays small
           uCover: { value: cover },
         },
         vertexShader: VERT,
