@@ -36,7 +36,9 @@ const VIEW = {
   //              but kept high enough that the foreground tree edge doesn't smear.
   //              (Going to ~0.24 spreads background depth more but smears the tree —
   //              that needs real multi-view data, not a single-photo depth guess.)
-  orbit: 0.44, // camera xy travel at full tilt (stronger motion)
+  orbit: 0.44, // horizontal camera travel at full tilt (strong)
+  orbitYScale: 0.45, // vertical travel is gentler — full vertical parallax pushes
+  //                    a bottom/top-anchored subject off-screen (face cut)
   cutLow: 0.04, // cut threshold for the scene (cut tree/sky edges -> no smear)
   cutHigh: 0.14, // cut threshold inside the protected cat region (don't cut -> no stipple)
   overscan: 0.08, // texture zoom so cliffs/edges never expose the frame border
@@ -266,7 +268,7 @@ function loop() {
   }
 
   camera.position.x = ox * tune.orbit;
-  camera.position.y = oy * tune.orbit;
+  camera.position.y = oy * tune.orbit * VIEW.orbitYScale;
   camera.lookAt(0, 0, 0);
   renderer.render(scene, camera);
 }
