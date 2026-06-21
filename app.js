@@ -19,7 +19,7 @@ const sceneParam = new URLSearchParams(location.search).get("scene");
 const P3D = sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d/";
 // asset cache-buster: bump on any rebuilt PNG so phones don't serve a stale image
 // (index.html's ?v= only refreshes the code, not these depth/colour PNGs).
-const AV = "?a=ch2p";
+const AV = "?a=lv1";
 // core layers always present; protect.png (v2) / subject.png (v3 soft-LDI) are
 // loaded optionally and decide which front-layer path runs (see below).
 const ASSETS = {
@@ -61,6 +61,9 @@ const SCENE_OVERRIDES = {
   lab1: { depthScale: 1.65, farScale: 0.78, focus: 0.24 },
   lab3: { depthScale: 1.2, farScale: 0.5, focus: 0.3 },
   cherry2: { depthScale: 1.55, farScale: 0.62, focus: 0.3 },
+  latte2dio: { depthScale: 1.55, farScale: 0.62, focus: 0.3 },
+  nila2dio: { depthScale: 1.55, farScale: 0.62, focus: 0.3 },
+  latteval: { depthScale: 1.55, farScale: 0.62, focus: 0.3 },
 };
 Object.assign(VIEW, SCENE_OVERRIDES[sceneParam] || {});
 
