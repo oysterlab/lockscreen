@@ -120,6 +120,20 @@ def main():
         depth_s = (depth_s * (1 - rf) + flatr * rf).astype(np.uint8)
         print("rigid-flattened:", rp.strip())
 
+    # FAR backdrop: flatten the distant band (sky + far hills + tower + far buildings)
+    # toward a single constant depth so the whole distance reads as ONE coherent flat
+    # backdrop the foreground slides over, instead of distant elements warping apart.
+    far_pct = float(os.environ.get("FAR_FLATTEN", 0))
+    if far_pct > 0:
+        thr = np.percentile(depth_s, far_pct)
+        farm = depth_s < thr
+        if farm.sum() > 500:
+            fmean = float(depth_s[farm].mean())
+            farf = cv2.GaussianBlur(farm.astype(np.uint8) * 255, (0, 0), 4.0).astype(np.float32) / 255.0
+            flatf = fmean + (depth_s.astype(np.float32) - fmean) * 0.15
+            depth_s = (depth_s * (1 - farf) + flatf * farf).astype(np.uint8)
+            print("far-flattened below percentile", far_pct)
+
     # cliff mask: where depth changes sharply (object silhouettes). Keep the cut
     # band THIN so only a sliver of the softer inpainted back shows through.
     gx = cv2.Sobel(depth_s.astype(np.float32), cv2.CV_32F, 1, 0, ksize=3)
