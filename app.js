@@ -19,7 +19,7 @@ const sceneParam = new URLSearchParams(location.search).get("scene");
 const P3D = sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d/";
 // asset cache-buster: bump on any rebuilt PNG so phones don't serve a stale image
 // (index.html's ?v= only refreshes the code, not these depth/colour PNGs).
-const AV = "?a=far1";
+const AV = "?a=lab3a";
 // core layers always present; protect.png (v2) / subject.png (v3 soft-LDI) are
 // loaded optionally and decide which front-layer path runs (see below).
 const ASSETS = {
@@ -59,6 +59,7 @@ const VIEW = {
 // stronger near pop (depthScale up) for a richer, more separated perspective.
 const SCENE_OVERRIDES = {
   lab1: { depthScale: 1.65, farScale: 0.78, focus: 0.24 },
+  lab3: { depthScale: 1.6, farScale: 0.7, focus: 0.26 },
 };
 Object.assign(VIEW, SCENE_OVERRIDES[sceneParam] || {});
 
@@ -191,6 +192,17 @@ const FRAG_BACK = `
     gl_FragColor = texture2D(uColor, vUv);
   }`;
 
+// lab3: an explicit pre-cut RGBA layer (foreground/cat). Uses the texture's OWN
+// alpha (no depth-gradient cut) so the layer composites exactly as authored.
+const FRAG_LAYER = `
+  uniform sampler2D uColor;
+  varying vec2 vUv;
+  void main() {
+    vec4 c = texture2D(uColor, vUv);
+    if (c.a < 0.01) discard;
+    gl_FragColor = c;
+  }`;
+
 const cover = new THREE.Vector2(1, 1);
 let frontMat, backMat, subjectMat, frontMesh, backMesh, subjectMesh, geometry;
 
@@ -199,6 +211,70 @@ const BLANK = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1);
 BLANK.needsUpdate = true;
 const loadOpt = (url) => loadTexture(url).catch(() => null); // 404 -> null
 
+// lab3: explicit hand-authored layers (background / foreground / cat), each its own
+// RGBA texture. Background = flat skyline backdrop; foreground + cat are displaced by
+// the depth map and composited by their own alpha.
+function initLab3() {
+  Promise.all([
+    loadTexture(P3D + "bg_color.png" + AV),
+    loadTexture(P3D + "fg_layer.png" + AV),
+    loadTexture(P3D + "cat_layer.png" + AV),
+    loadTexture(P3D + "fg_depth.png" + AV),
+  ])
+    .then(([bgTex, fgTex, catTex, depthTex]) => {
+      if (fgTex.image?.width) IMG_ASPECT = fgTex.image.width / fgTex.image.height;
+      const relief = (zb) => ({
+        uDepth: { value: depthTex },
+        uDepthScale: { value: tune.depthScale },
+        uFarScale: { value: tune.farScale },
+        uFocus: { value: tune.focus },
+        uZBias: { value: zb },
+        uCover: { value: cover },
+      });
+      backMat = new THREE.ShaderMaterial({
+        uniforms: {
+          uColor: { value: bgTex },
+          uDepth: { value: depthTex },
+          uDepthScale: { value: 0.0 }, // flat backdrop
+          uFarScale: { value: 1.0 },
+          uFocus: { value: 0.0 },
+          uZBias: { value: -1.9 }, // pushed back so it parallaxes least
+          uCover: { value: cover },
+        },
+        vertexShader: VERT,
+        fragmentShader: FRAG_BACK,
+      });
+      frontMat = new THREE.ShaderMaterial({
+        uniforms: { uColor: { value: fgTex }, ...relief(0.0) },
+        vertexShader: VERT,
+        fragmentShader: FRAG_LAYER,
+        transparent: true,
+        depthWrite: false,
+      });
+      subjectMat = new THREE.ShaderMaterial({
+        uniforms: { uColor: { value: catTex }, ...relief(0.02) },
+        vertexShader: VERT,
+        fragmentShader: FRAG_LAYER,
+        transparent: true,
+        depthWrite: false,
+      });
+      backMesh = new THREE.Mesh(new THREE.BufferGeometry(), backMat);
+      frontMesh = new THREE.Mesh(new THREE.BufferGeometry(), frontMat);
+      subjectMesh = new THREE.Mesh(new THREE.BufferGeometry(), subjectMat);
+      backMesh.renderOrder = 0;
+      frontMesh.renderOrder = 1;
+      subjectMesh.renderOrder = 2;
+      scene.add(backMesh, frontMesh, subjectMesh);
+      resize();
+      state.ready = true;
+      startPassiveMotion();
+      renderer.setAnimationLoop(loop);
+    })
+    .catch(() => showStatus("3D 레이어를 불러오지 못했습니다.", false));
+}
+
+if (sceneParam === "lab3") initLab3();
+else
 Promise.all(Object.values(ASSETS).map(loadTexture))
   .then(async ([fgColor, fgDepth, bgColor, bgDepth]) => {
     // textures are passed through unchanged (ShaderMaterial does no colour-space
