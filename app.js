@@ -36,7 +36,7 @@ const VIEW = {
   //              but kept high enough that the foreground tree edge doesn't smear.
   //              (Going to ~0.24 spreads background depth more but smears the tree —
   //              that needs real multi-view data, not a single-photo depth guess.)
-  orbit: 0.38, // camera xy travel at full tilt (a bit more travel for stronger motion)
+  orbit: 0.44, // camera xy travel at full tilt (stronger motion)
   cutLow: 0.04, // cut threshold for the scene (cut tree/sky edges -> no smear)
   cutHigh: 0.14, // cut threshold inside the protected cat region (don't cut -> no stipple)
   overscan: 0.08, // texture zoom so cliffs/edges never expose the frame border
@@ -46,8 +46,9 @@ const VIEW = {
   idleSpeed: 0.0002,
 };
 
-// smaller ranges => a small phone tilt reaches full parallax (much more responsive)
-const SENSOR = { betaRange: 13, gammaRange: 13, gravityRange: 3.2, deadZone: 0.025 };
+// smaller ranges => a small phone tilt reaches full parallax (very responsive)
+const SENSOR = { betaRange: 9, gammaRange: 9, gravityRange: 2.3, deadZone: 0.02 };
+const TOUCH_SENS = 2.6; // drag distance (fraction of screen) -> parallax offset
 
 const canvas = document.querySelector("#scene");
 const timeEl = document.querySelector("#time");
@@ -62,6 +63,7 @@ window.addEventListener("load", () => window.lucide?.createIcons());
 const target = { x: 0, y: 0 };
 const current = { x: 0, y: 0 };
 const vel = { x: 0, y: 0 };
+const drag = { touch: false, startX: 0, startY: 0, baseX: 0, baseY: 0 };
 let lastFrame = typeof performance !== "undefined" ? performance.now() : 0;
 let lastInputAt = 0;
 const state = {
@@ -313,11 +315,25 @@ function setTargetFromNormalized(nx, ny) {
 function handlePointerDown(event) {
   if (debug.freeze || event.target.closest(".controls")) return;
   state.pointerActive = true;
-  handlePointerMove(event);
+  drag.touch = event.pointerType === "touch";
+  drag.startX = event.clientX;
+  drag.startY = event.clientY;
+  drag.baseX = target.x;
+  drag.baseY = target.y;
+  if (!drag.touch) handlePointerMove(event); // desktop mouse: absolute hover
 }
 
 function handlePointerMove(event) {
-  if (debug.freeze || state.hasSensorReading) return;
+  if (debug.freeze) return;
+  if (state.pointerActive && drag.touch) {
+    // touch drag = relative look-around; overrides gyro while the finger is down
+    const dx = (event.clientX - drag.startX) / window.innerWidth;
+    const dy = (event.clientY - drag.startY) / window.innerHeight;
+    setTargetFromNormalized(drag.baseX + dx * TOUCH_SENS, drag.baseY - dy * TOUCH_SENS);
+    lastInputAt = performance.now();
+    return;
+  }
+  if (state.hasSensorReading) return; // gyro drives when not dragging
   const nx = (event.clientX / window.innerWidth - 0.5) * 2;
   const ny = (event.clientY / window.innerHeight - 0.5) * 2;
   setTargetFromNormalized(nx, -ny);
@@ -379,7 +395,7 @@ function startMotion(userInitiated) {
 }
 
 function handleOrientation(event) {
-  if (debug.freeze || !state.motionEnabled || event.beta == null || event.gamma == null) return;
+  if (debug.freeze || state.pointerActive || !state.motionEnabled || event.beta == null || event.gamma == null) return;
   if (sensor.baseBeta == null) {
     sensor.baseBeta = event.beta;
     sensor.baseGamma = event.gamma;
@@ -391,7 +407,7 @@ function handleOrientation(event) {
 }
 
 function handleDeviceMotion(event) {
-  if (debug.freeze || !state.motionEnabled || state.hasSensorReading) return;
+  if (debug.freeze || state.pointerActive || !state.motionEnabled || state.hasSensorReading) return;
   const g = event.accelerationIncludingGravity;
   if (!g || g.x == null || g.y == null) return;
   if (sensor.baseGX == null) {
