@@ -185,18 +185,30 @@ def main():
     fill = cv2.dilate(fill, ell(3))
 
     scene_bg = os.environ.get("SCENE_BG")
+    scene_bg_depth = os.environ.get("SCENE_BG_DEPTH")
     if scene_bg:
-        # use a pre-made background plate (e.g. a Codex generative inpaint of the
-        # cat-removed scene) instead of LaMa for the colour back layer.
+        # use a pre-made cat-free background plate (the real render) instead of LaMa.
         print("using external background:", scene_bg)
         bg_color = np.array(Image.open(scene_bg).convert("RGB").resize(plate_rgb.shape[1::-1]))
     else:
         print("inpainting colour with LaMa ...")
         bg_color = lama_inpaint(plate_rgb, fill)
-    print("inpainting depth with LaMa ...")
-    depth_rgb = cv2.cvtColor(depth_s, cv2.COLOR_GRAY2RGB)
-    bg_depth_rgb = lama_inpaint(depth_rgb, fill)
-    bg_depth = cv2.cvtColor(bg_depth_rgb, cv2.COLOR_RGB2GRAY)
+
+    if scene_bg_depth:
+        # the back layer has its OWN real depth (estimated directly from the cat-free
+        # plate) — far better than LaMa guessing depth where the cat used to be. Refine
+        # it the same colour-guided way as the front so its edges stay crisp.
+        print("using external background depth:", scene_bg_depth)
+        bgd_raw = np.array(Image.open(scene_bg_depth).convert("L"))
+        bg_gray = cv2.cvtColor(bg_color, cv2.COLOR_RGB2GRAY).astype(np.float32) / 255.0
+        bgd = cv2.medianBlur(bgd_raw, 5).astype(np.float32) / 255.0
+        bgd = guided_filter(bg_gray, bgd, r=4, eps=1e-4)
+        bg_depth = np.clip(bgd * 255.0, 0, 255).astype(np.uint8)
+    else:
+        print("inpainting depth with LaMa ...")
+        depth_rgb = cv2.cvtColor(depth_s, cv2.COLOR_GRAY2RGB)
+        bg_depth_rgb = lama_inpaint(depth_rgb, fill)
+        bg_depth = cv2.cvtColor(bg_depth_rgb, cv2.COLOR_RGB2GRAY)
 
     # cat "protect" map: where the cut should be CONSERVATIVE. The cat's moderate
     # edges (hat brim vs gate) must not be cut (cutting them stipples a dotted
