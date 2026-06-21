@@ -17,13 +17,16 @@ import * as THREE from "three";
 // ?scene=d2 loads assets/photo3d_d2/ (a different diorama); default is the main scene
 const sceneParam = new URLSearchParams(location.search).get("scene");
 const P3D = sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d/";
+// asset cache-buster: bump on any rebuilt PNG so phones don't serve a stale image
+// (index.html's ?v= only refreshes the code, not these depth/colour PNGs).
+const AV = "?a=large1";
 // core layers always present; protect.png (v2) / subject.png (v3 soft-LDI) are
 // loaded optionally and decide which front-layer path runs (see below).
 const ASSETS = {
-  fgColor: P3D + "fg_color.png",
-  fgDepth: P3D + "fg_depth.png",
-  bgColor: P3D + "bg_color.png",
-  bgDepth: P3D + "bg_depth.png",
+  fgColor: P3D + "fg_color.png" + AV,
+  fgDepth: P3D + "fg_depth.png" + AV,
+  bgColor: P3D + "bg_color.png" + AV,
+  bgDepth: P3D + "bg_depth.png" + AV,
 };
 
 let IMG_ASPECT = 864 / 1536; // updated from the loaded plate so any aspect cover-fits
@@ -208,8 +211,8 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
     // protect.png (v2) vs subject.png (v3 soft-LDI). If subject is present we run
     // the 3-layer path: a dedicated soft-matte subject layer on top.
     const [protect, subject] = await Promise.all([
-      loadOpt(P3D + "protect.png"),
-      loadOpt(P3D + "subject.png"),
+      loadOpt(P3D + "protect.png" + AV),
+      loadOpt(P3D + "subject.png" + AV),
     ]);
     const useSubject = subject !== null;
 
