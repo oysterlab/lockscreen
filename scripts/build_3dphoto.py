@@ -106,6 +106,20 @@ def main():
         cat_smooth = mean + (cat_smooth - mean) * 0.45  # 0.45 = flatten internal depth
     depth_s = (depth_s * (1 - catf) + cat_smooth * catf).astype(np.uint8)
 
+    # extra RIGID objects (thin foreground structures such as the tree) flattened to
+    # a near-constant depth so they translate as ONE plane under parallax instead of
+    # the thin leaves/twigs shearing. SCENE_RIGID = comma-separated matte PNGs (alpha).
+    for rp in filter(None, os.environ.get("SCENE_RIGID", "").split(",")):
+        ralpha = np.array(Image.open(rp.strip()).convert("RGBA"))[:, :, 3]
+        rm = ralpha > 40
+        if rm.sum() < 200:
+            continue
+        rf = cv2.GaussianBlur(rm.astype(np.uint8) * 255, (0, 0), 2.5).astype(np.float32) / 255.0
+        rmean = float(depth_s[rm].mean())
+        flatr = rmean + (depth_s.astype(np.float32) - rmean) * 0.30
+        depth_s = (depth_s * (1 - rf) + flatr * rf).astype(np.uint8)
+        print("rigid-flattened:", rp.strip())
+
     # cliff mask: where depth changes sharply (object silhouettes). Keep the cut
     # band THIN so only a sliver of the softer inpainted back shows through.
     gx = cv2.Sobel(depth_s.astype(np.float32), cv2.CV_32F, 1, 0, ksize=3)
