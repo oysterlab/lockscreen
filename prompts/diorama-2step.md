@@ -60,14 +60,28 @@ as Image 2 (green gate, brick walls, lantern, potted daisies, striped food stall
 scooter, recycling crate, leafy tree, utility pole, distant rooftops and Namsan tower),
 same palette, lighting and framing.
 
-Balance ~60% Image-1 cat identity + its pose/action, 40% Image-2 chibi craft style.
-Do NOT just recolour Image 2's cat — give it the brief's pose, build and action.
+The cat occupies only about 60% of the cushion, with a generous visible cushion border
+showing around it on all sides — it must NOT fill or overflow the cushion.
+
+Balance ~55% Image-1 cat identity + its pose/action, 45% Image-2 chibi craft style —
+push the CUTENESS: rounder head, bigger rounder eyes, chubbier cheeks, softer chunkier
+chibi proportions and a sweeter expression, while keeping the SAME recognizable cat from
+the brief. Do NOT just recolour Image 2's cat — give it the brief's pose, build and action.
 
 LAYOUT for 3D parallax: the cat is the single foreground hero on the cushion, LOWER-
 CENTER, clear empty margin all around, NOT touching any frame edge. Keep a simple
 contrasting tone right behind the cat's outline so its silhouette reads. Three clear
 depth layers (near cat / midground props with gaps / far sky + tower). Solid matte
 opaque materials only; thin wires/branches only in the far sky plane.
+
+SCALE — anchor on the CUSHION, not the cat (the cat grows when the cushion grows):
+render the woven cushion SMALL, like a single floor cushion seen from a few steps back
+— it occupies only about 40% of the frame WIDTH and sits low, with visible paving all
+around it (paving on both sides and in front). The cat is a small chibi figurine
+resting ON that small cushion, so it naturally stays small too. Match the small
+cushion-and-cat size of Image 2 exactly: in Image 2 the cushion is a small patch in the
+lower third with the whole alley (gate, walls, stall, tree, sky, tower) clearly visible
+around and above it. Do NOT enlarge the cushion or let the cushion+cat fill the frame.
 
 No text, no clock, no UI, no watermark, no people. Output ONE vertical 9:16 image.
 ```
