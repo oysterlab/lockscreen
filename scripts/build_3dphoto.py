@@ -26,6 +26,8 @@ OUT = Path(os.environ.get("SCENE_OUT", ROOT / "assets/photo3d"))
 OUT.mkdir(parents=True, exist_ok=True)
 
 CLIFF_T = 14   # depth-gradient magnitude above this is a discontinuity ("cliff")
+PROTECT_PX = int(os.environ.get("PROTECT_PX", 21))       # cat-protect dilation radius
+PROTECT_FEATHER = float(os.environ.get("PROTECT_FEATHER", 9))
 # piecewise-flat depth: a DEPTH-domain bilateral flattens depth-smooth interiors
 # (an object body, the ground) so they translate rigidly under parallax (no warp),
 # while keeping depth cliffs (object silhouettes) sharp -> objects stay at distinct
@@ -65,11 +67,45 @@ def lama_inpaint(rgb_u8, mask_u8):
     return np.asarray(out.convert("RGB"))
 
 
+def refine_subject_mask(plate_rgb, cat, depth):
+    """Recover bits the saliency mask missed (e.g. a pointy ear) so the protect map
+    can never cut them. grabCut-refine using the mask as a seed, then UNION with the
+    seed so we only ever ADD, never remove. Colour + depth agreement gates growth."""
+    H, W = cat.shape
+    seed = cat > 110
+    if seed.sum() < 500:
+        return cat
+    gc = np.full((H, W), cv2.GC_PR_BGD, np.uint8)
+    # near the seed -> probable fg; deep inside -> definite fg
+    gc[cv2.dilate(seed.astype(np.uint8), ell(25)) > 0] = cv2.GC_PR_FGD
+    gc[cv2.erode(seed.astype(np.uint8), ell(9)) > 0] = cv2.GC_FGD
+    far = cv2.dilate(seed.astype(np.uint8), ell(60)) == 0
+    gc[far] = cv2.GC_BGD
+    try:
+        cv2.grabCut(cv2.cvtColor(plate_rgb, cv2.COLOR_RGB2BGR), gc, None,
+                    np.zeros((1, 65), np.float64), np.zeros((1, 65), np.float64),
+                    5, cv2.GC_INIT_WITH_MASK)
+        grow = ((gc == cv2.GC_FGD) | (gc == cv2.GC_PR_FGD))
+    except cv2.error:
+        grow = seed
+    # only keep growth that touches the seed (one blob) and is near it
+    m = (seed | (grow & (cv2.dilate(seed.astype(np.uint8), ell(40)) > 0))).astype(np.uint8) * 255
+    m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, ell(15))
+    n, lbl, st, _ = cv2.connectedComponentsWithStats(m)
+    if n > 1:
+        m = (lbl == 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))).astype(np.uint8) * 255
+    return np.maximum(m, cat)  # never shrink below the original
+
+
 def main():
     plate_rgb = np.array(Image.open(PLATE).convert("RGB"))
     depth = np.array(Image.open(DEPTH).convert("L"))
     cat = np.array(Image.open(CATM).convert("L"))
     H, W = depth.shape
+    if os.environ.get("REFINE_MASK", "1") == "1":
+        before = (cat > 110).sum()
+        cat = refine_subject_mask(plate_rgb, cat, depth)
+        print("mask refine: +%.1f%% recovered" % (100 * ((cat > 110).sum() - before) / max(before, 1)))
 
     # colour-guided depth refine: snap depth edges onto the photo's edges so thin
     # silhouettes (twigs, wires, lamp arm) get a crisp depth wall and cut cleanly,
@@ -166,7 +202,10 @@ def main():
     # edges (hat brim vs gate) must not be cut (cutting them stipples a dotted
     # noise line), while the rest of the scene (tree vs sky) must be cut to avoid
     # smear. A single global threshold can't separate the two -> spatial map.
-    protect = cv2.GaussianBlur(cv2.dilate(catm, ell(11)), (0, 0), 5)
+    # Dilate generously (PROTECT_PX) and feather wide so the protected zone extends
+    # well past the silhouette — a thin ear poking out of the mask is still inside
+    # the protected band and is never cut ("absolute" cat protection).
+    protect = cv2.GaussianBlur(cv2.dilate(catm, ell(PROTECT_PX)), (0, 0), PROTECT_FEATHER)
     Image.fromarray(protect).save(OUT / "protect.png")
 
     # v3 soft-LDI: a SOFT subject matte. The renderer draws the subject as its own
