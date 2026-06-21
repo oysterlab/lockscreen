@@ -19,7 +19,7 @@ const sceneParam = new URLSearchParams(location.search).get("scene");
 const P3D = sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d/";
 // asset cache-buster: bump on any rebuilt PNG so phones don't serve a stale image
 // (index.html's ?v= only refreshes the code, not these depth/colour PNGs).
-const AV = "?a=ch2c";
+const AV = "?a=ch2L";
 // core layers always present; protect.png (v2) / subject.png (v3 soft-LDI) are
 // loaded optionally and decide which front-layer path runs (see below).
 const ASSETS = {
