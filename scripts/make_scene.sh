@@ -11,8 +11,8 @@ mkdir -p "$SCENE"
 echo "[1/4] resize -> 864x1536 (9:16)"
 $PY -c "from PIL import Image; Image.open('$PHOTO').convert('RGB').resize((864,1536), Image.LANCZOS).save('$SCENE/plate_clean.png')"
 
-echo "[2/4] depth (Depth Anything V2 Base)"
-( cd /tmp/depthtool && LOCAL_MODEL_DIR=/tmp/depthtool/models MODEL_NAME=depth-anything-v2-base DTYPE=q8 \
+echo "[2/4] depth (Depth Anything V2 Large, fp16 — sharp edges, accurate midground)"
+( cd /tmp/depthtool && LOCAL_MODEL_DIR=/tmp/depthtool/models MODEL_NAME=depth-anything-v2-large DTYPE=fp16 \
     node depth.mjs "$SCENE/plate_clean.png" "$SCENE/depth.png" 1536 >/dev/null 2>&1 )
 
 echo "[3/4] auto subject mask (rembg / U2Net)"
