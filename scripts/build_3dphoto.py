@@ -78,7 +78,14 @@ def main():
     # the cut is a clean edge instead of speckle.
     catm = cv2.morphologyEx((cat > 100).astype(np.uint8) * 255, cv2.MORPH_CLOSE, ell(15))
     catf = (cv2.GaussianBlur(catm, (0, 0), 2.5).astype(np.float32) / 255.0)
-    cat_smooth = cv2.GaussianBlur(depth_s, (0, 0), 3.5)
+    # smooth out knit/fur stipple AND compress the subject's internal depth toward
+    # its mean, so it moves as ONE coherent plane instead of the near centre and far
+    # edges shearing apart ("split into two depths").
+    mask = catm > 127
+    cat_smooth = cv2.GaussianBlur(depth_s, (0, 0), 3.5).astype(np.float32)
+    if mask.sum() > 500:
+        mean = float(cat_smooth[mask].mean())
+        cat_smooth = mean + (cat_smooth - mean) * 0.45  # 0.45 = flatten internal depth
     depth_s = (depth_s * (1 - catf) + cat_smooth * catf).astype(np.uint8)
 
     # cliff mask: where depth changes sharply (object silhouettes). Keep the cut
