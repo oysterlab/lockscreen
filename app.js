@@ -37,8 +37,8 @@ const VIEW = {
   //              (Going to ~0.24 spreads background depth more but smears the tree —
   //              that needs real multi-view data, not a single-photo depth guess.)
   orbit: 0.44, // horizontal camera travel at full tilt (strong)
-  orbitYScale: 0.45, // vertical travel is gentler — full vertical parallax pushes
-  //                    a bottom/top-anchored subject off-screen (face cut)
+  orbitYScale: 0.7, // vertical travel a bit gentler than horizontal — full vertical
+  //                   parallax can push a bottom/top-anchored subject off-screen
   cutLow: 0.04, // cut threshold for the scene (cut tree/sky edges -> no smear)
   cutHigh: 0.14, // cut threshold inside the protected cat region (don't cut -> no stipple)
   overscan: 0.08, // texture zoom so cliffs/edges never expose the frame border
