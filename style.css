@@ -36,8 +36,10 @@ button {
   inset: 0;
   min-height: 100svh;
   overflow: hidden;
-  /* clean plate as a pre-load / no-JS fallback; the layer stack covers it. */
-  background: #1c130b url("./assets/depth/plate_clean.png") center / cover no-repeat;
+  /* solid dark pre-load background; the WebGL layer covers it once loaded. A
+     per-scene image here would flash the wrong (main) cat before the right scene
+     loads, so keep it a neutral colour, not the main plate. */
+  background: #1c130b;
 }
 
 #scene {
