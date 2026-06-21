@@ -9,6 +9,11 @@ android-live-wallpaper/app/build/
 *.glb
 room.png
 cat_multiview.png
-# heavy android sub-project and private strategy docs
-android-live-wallpaper/
+# android: track source, ignore build/tooling artifacts
+android-live-wallpaper/.tooling/
+android-live-wallpaper/.gradle/
+android-live-wallpaper/app/build/
+android-live-wallpaper/build/
+android-live-wallpaper/local.properties
+android-live-wallpaper/.idea/
 biz/

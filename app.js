@@ -467,6 +467,18 @@ function setTargetFromNormalized(nx, ny) {
   target.y = clamp(ny, -1, 1);
 }
 
+// Native tilt bridge: the Android WebView live-wallpaper drives parallax from a
+// native WAKEUP rotation-vector sensor (which keeps firing on the lock screen, where
+// the browser's DeviceOrientation is suspended) and calls this with normalized tilt.
+// Once native tilt arrives we treat it like a sensor reading so pointer-idle recentre
+// and web DeviceOrientation don't fight it.
+window.__nativeTilt = function (nx, ny) {
+  if (debug.freeze || state.pointerActive) return;
+  state.hasSensorReading = true;
+  setTargetFromNormalized(clamp(nx, -1, 1), clamp(ny, -1, 1));
+  lastInputAt = typeof performance !== "undefined" ? performance.now() : 0;
+};
+
 function handlePointerDown(event) {
   if (debug.freeze || event.target.closest(".controls")) return;
   state.pointerActive = true;
