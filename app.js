@@ -37,19 +37,22 @@ const ASSETS = {
 
 let IMG_ASPECT = 864 / 1536; // updated from the loaded plate so any aspect cover-fits
 
+// Depth tuning baseline before the extra-depth pass (mesh-59, 2026-06-22):
+// default: depthScale 1.72, farScale 0.58, focus 0.29, orbit 0.58, orbitYScale 0.75
+// cherry2dio / latte2dio / nila2dio: depthScale 1.72, farScale 0.68, focus 0.28
 const VIEW = {
   camZ: 6,
   fov: 36,
-  depthScale: 1.72, // stronger foreground relief without the "inflated sticker" look
-  farScale: 0.58, // opens mid/far parallax so the room reads deeper
-  focus: 0.29, // lower still plane = more depth separation across the whole scene
-  orbit: 0.58, // horizontal camera travel at full tilt (noticeably stronger)
-  orbitYScale: 0.75, // vertical travel a bit gentler than horizontal — full vertical
+  depthScale: 1.84, // stronger foreground relief without the "inflated sticker" look
+  farScale: 0.64, // opens mid/far parallax so the room reads deeper
+  focus: 0.27, // lower still plane = more depth separation across the whole scene
+  orbit: 0.64, // horizontal camera travel at full tilt (noticeably stronger)
+  orbitYScale: 0.78, // vertical travel a bit gentler than horizontal — full vertical
   //                   parallax can push a bottom/top-anchored subject off-screen
   cutLow: 0.04, // cut threshold for the scene (cut tree/sky edges -> no smear)
   cutHigh: 0.14, // cut threshold inside the protected cat region (don't cut -> no stipple)
-  overscan: 0.1, // texture zoom so stronger orbit never exposes the frame border
-  pad: 1.22, // plane oversize beyond the view, for camera-orbit headroom
+  overscan: 0.12, // texture zoom so stronger orbit never exposes the frame border
+  pad: 1.26, // plane oversize beyond the view, for camera-orbit headroom
   springFreq: 9.2, // slightly snappier so motion is easier to perceive
   idleAmp: 0.34,
   idleSpeed: 0.0002,
@@ -64,9 +67,9 @@ const SCENE_OVERRIDES = {
   lab1: { depthScale: 1.82, farScale: 0.82, focus: 0.23 },
   lab3: { depthScale: 1.55, farScale: 0.58, focus: 0.28 },
   cherry2: { depthScale: 1.72, farScale: 0.68, focus: 0.28 },
-  latte2dio: { depthScale: 1.72, farScale: 0.68, focus: 0.28 },
-  nila2dio: { depthScale: 1.72, farScale: 0.68, focus: 0.28 },
-  cherry2dio: { depthScale: 1.72, farScale: 0.68, focus: 0.28 },
+  latte2dio: { depthScale: 1.84, farScale: 0.74, focus: 0.26 },
+  nila2dio: { depthScale: 1.84, farScale: 0.74, focus: 0.26 },
+  cherry2dio: { depthScale: 1.84, farScale: 0.74, focus: 0.26 },
   latteval: { depthScale: 1.72, farScale: 0.68, focus: 0.28 },
 };
 Object.assign(VIEW, SCENE_OVERRIDES[sceneParam] || {});
