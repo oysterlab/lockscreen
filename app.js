@@ -15,11 +15,17 @@
 import * as THREE from "three";
 
 // ?scene=d2 loads assets/photo3d_d2/ (a different diorama); default is the main scene
-const sceneParam = new URLSearchParams(location.search).get("scene");
+const params = new URLSearchParams(location.search);
+const sceneParam = params.get("scene");
+const wallpaperMode = params.has("wallpaper");
+if (wallpaperMode) document.documentElement.classList.add("wallpaper-mode");
 const P3D = sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d/";
 // asset cache-buster: bump on any rebuilt PNG so phones don't serve a stale image
 // (index.html's ?v= only refreshes the code, not these depth/colour PNGs).
-const AV = "?a=dio5";
+const AV = location.protocol === "file:" ? "" : "?a=dio5";
+// scenes that carry an idle-flick animation (assets/photo3d_<scene>/anim/manifest.json):
+// the foreground plate is swapped through a short clip every ~10s, then held.
+const ANIM_SCENES = new Set(["cherry2dio"]);
 // core layers always present; protect.png (v2) / subject.png (v3 soft-LDI) are
 // loaded optionally and decide which front-layer path runs (see below).
 const ASSETS = {
@@ -34,21 +40,18 @@ let IMG_ASPECT = 864 / 1536; // updated from the loaded plate so any aspect cove
 const VIEW = {
   camZ: 6,
   fov: 36,
-  depthScale: 1.45, // foreground relief amount (strong 3D pop on the near subject)
-  farScale: 0.42, // far band moves this fraction as much (keeps distant thin edges calm)
-  focus: 0.34, // still plane: lower than v1 (0.42) for a bit more midground depth,
-  //              but kept high enough that the foreground tree edge doesn't smear.
-  //              (Going to ~0.24 spreads background depth more but smears the tree —
-  //              that needs real multi-view data, not a single-photo depth guess.)
-  orbit: 0.44, // horizontal camera travel at full tilt (strong)
-  orbitYScale: 0.7, // vertical travel a bit gentler than horizontal — full vertical
+  depthScale: 1.72, // stronger foreground relief without the "inflated sticker" look
+  farScale: 0.58, // opens mid/far parallax so the room reads deeper
+  focus: 0.29, // lower still plane = more depth separation across the whole scene
+  orbit: 0.58, // horizontal camera travel at full tilt (noticeably stronger)
+  orbitYScale: 0.75, // vertical travel a bit gentler than horizontal — full vertical
   //                   parallax can push a bottom/top-anchored subject off-screen
   cutLow: 0.04, // cut threshold for the scene (cut tree/sky edges -> no smear)
   cutHigh: 0.14, // cut threshold inside the protected cat region (don't cut -> no stipple)
-  overscan: 0.08, // texture zoom so cliffs/edges never expose the frame border
-  pad: 1.15, // plane oversize beyond the view, for camera-orbit headroom
-  springFreq: 8.5, // critically-damped spring frequency — natural inertia / weight
-  idleAmp: 0.26,
+  overscan: 0.1, // texture zoom so stronger orbit never exposes the frame border
+  pad: 1.22, // plane oversize beyond the view, for camera-orbit headroom
+  springFreq: 9.2, // slightly snappier so motion is easier to perceive
+  idleAmp: 0.34,
   idleSpeed: 0.0002,
 };
 
@@ -58,19 +61,19 @@ const VIEW = {
 // open up the distance (farScale up), push more midground depth (focus down) and a
 // stronger near pop (depthScale up) for a richer, more separated perspective.
 const SCENE_OVERRIDES = {
-  lab1: { depthScale: 1.65, farScale: 0.78, focus: 0.24 },
-  lab3: { depthScale: 1.2, farScale: 0.5, focus: 0.3 },
-  cherry2: { depthScale: 1.55, farScale: 0.62, focus: 0.3 },
-  latte2dio: { depthScale: 1.55, farScale: 0.62, focus: 0.3 },
-  nila2dio: { depthScale: 1.55, farScale: 0.62, focus: 0.3 },
-  cherry2dio: { depthScale: 1.55, farScale: 0.62, focus: 0.3 },
-  latteval: { depthScale: 1.55, farScale: 0.62, focus: 0.3 },
+  lab1: { depthScale: 1.82, farScale: 0.82, focus: 0.23 },
+  lab3: { depthScale: 1.55, farScale: 0.58, focus: 0.28 },
+  cherry2: { depthScale: 1.72, farScale: 0.68, focus: 0.28 },
+  latte2dio: { depthScale: 1.72, farScale: 0.68, focus: 0.28 },
+  nila2dio: { depthScale: 1.72, farScale: 0.68, focus: 0.28 },
+  cherry2dio: { depthScale: 1.72, farScale: 0.68, focus: 0.28 },
+  latteval: { depthScale: 1.72, farScale: 0.68, focus: 0.28 },
 };
 Object.assign(VIEW, SCENE_OVERRIDES[sceneParam] || {});
 
 // smaller ranges => a small phone tilt reaches full parallax (very responsive)
-const SENSOR = { betaRange: 9, gammaRange: 9, gravityRange: 2.3, deadZone: 0.02 };
-const TOUCH_SENS = 2.6; // drag distance (fraction of screen) -> parallax offset
+const SENSOR = { betaRange: 6.5, gammaRange: 6.5, gravityRange: 1.8, deadZone: 0.015 };
+const TOUCH_SENS = 3.4; // drag distance (fraction of screen) -> parallax offset
 
 const canvas = document.querySelector("#scene");
 const timeEl = document.querySelector("#time");
@@ -97,7 +100,6 @@ const state = {
 };
 const sensor = { baseBeta: null, baseGamma: null, baseGX: null, baseGY: null };
 
-const params = new URLSearchParams(location.search);
 const debug = { freeze: params.has("ox") || params.has("oy") };
 if (debug.freeze) {
   target.x = clamp(parseFloat(params.get("ox") || "0"), -1, 1);
@@ -364,6 +366,7 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
     state.ready = true;
     startPassiveMotion();
     renderer.setAnimationLoop(loop);
+    if (ANIM_SCENES.has(sceneParam)) initAnim();
   })
   .catch(() => showStatus("3D 레이어를 불러오지 못했습니다.", false));
 
@@ -372,16 +375,18 @@ setInterval(updateClock, 15_000);
 
 window.addEventListener("resize", resize);
 window.visualViewport?.addEventListener("resize", resize);
-window.addEventListener("pointermove", handlePointerMove, { passive: true });
-window.addEventListener("pointerdown", handlePointerDown, { passive: true });
-window.addEventListener("pointerup", handlePointerUp, { passive: true });
-window.addEventListener("pointercancel", handlePointerUp, { passive: true });
-motionButton.addEventListener("click", enableMotion);
-fullscreenButton.addEventListener("click", toggleFullscreen);
-resetButton.addEventListener("click", resetView);
-document.addEventListener("fullscreenchange", () =>
-  fullscreenButton.classList.toggle("is-active", Boolean(document.fullscreenElement)),
-);
+if (!wallpaperMode) {
+  window.addEventListener("pointermove", handlePointerMove, { passive: true });
+  window.addEventListener("pointerdown", handlePointerDown, { passive: true });
+  window.addEventListener("pointerup", handlePointerUp, { passive: true });
+  window.addEventListener("pointercancel", handlePointerUp, { passive: true });
+  motionButton.addEventListener("click", enableMotion);
+  fullscreenButton.addEventListener("click", toggleFullscreen);
+  resetButton.addEventListener("click", resetView);
+  document.addEventListener("fullscreenchange", () =>
+    fullscreenButton.classList.toggle("is-active", Boolean(document.fullscreenElement)),
+  );
+}
 
 function loop() {
   if (!state.ready) return;
@@ -422,7 +427,93 @@ function loop() {
   camera.position.x = ox * tune.orbit;
   camera.position.y = oy * tune.orbit * VIEW.orbitYScale;
   camera.lookAt(0, 0, 0);
+  tickAnim(now, dt);
   renderer.render(scene, camera);
+}
+
+/* ---------- idle-flick animation ---------- */
+// Holds the foreground plate on a rest frame, then every ~10s (jittered) plays a
+// short clip once — a living "twitch" — by swapping the front + subject layer
+// colour through the deduped frame textures, then returns to the hold frame.
+const anim = {
+  enabled: false,
+  textures: [],
+  timeline: [],
+  fps: 8,
+  hold: 0,
+  playing: false,
+  slot: 0,
+  slotTime: 0,
+  nextPlayAt: 0,
+};
+let ANIM_BASE = 10000; // ms between plays
+let ANIM_JITTER = 4000; // ± randomness so it never feels mechanical
+
+function setAnimFrame(uniqueIdx) {
+  const tex = anim.textures[uniqueIdx];
+  if (!tex) return;
+  if (frontMat) frontMat.uniforms.uColor.value = tex;
+  if (subjectMat) subjectMat.uniforms.uColor.value = tex;
+}
+
+function scheduleNextPlay(now) {
+  anim.nextPlayAt = now + ANIM_BASE + (Math.random() * 2 - 1) * ANIM_JITTER;
+}
+
+async function initAnim() {
+  try {
+    const res = await fetch(P3D + "anim/manifest.json" + AV);
+    if (!res.ok) return;
+    const m = await res.json();
+    anim.fps = m.fps || 8;
+    anim.timeline = m.frames || [];
+    anim.hold = m.hold || 0;
+    anim.textures = await Promise.all(
+      Array.from({ length: m.count }, (_, i) =>
+        loadTexture(P3D + `anim/u${String(i).padStart(2, "0")}.jpg` + AV)),
+    );
+    anim.enabled = anim.textures.length > 0 && anim.timeline.length > 0;
+    if (anim.enabled) {
+      // QA: ?flick=N freezes on timeline slot N; ?animfast plays almost immediately
+      if (params.has("flick")) {
+        const s = clamp(parseInt(params.get("flick")) || 0, 0, anim.timeline.length - 1);
+        setAnimFrame(anim.timeline[s]);
+        anim.enabled = false;
+        return;
+      }
+      if (params.has("animfast")) { ANIM_BASE = 600; ANIM_JITTER = 200; }
+      setAnimFrame(anim.timeline[anim.hold]);
+      scheduleNextPlay(performance.now());
+    }
+  } catch {
+    /* no animation for this scene */
+  }
+}
+
+function tickAnim(now, dt) {
+  if (!anim.enabled) return;
+  if (!anim.playing) {
+    if (now >= anim.nextPlayAt) {
+      anim.playing = true;
+      anim.slot = 0;
+      anim.slotTime = 0;
+      setAnimFrame(anim.timeline[0]);
+    }
+    return;
+  }
+  anim.slotTime += dt;
+  const slotDur = 1 / anim.fps;
+  while (anim.slotTime >= slotDur) {
+    anim.slotTime -= slotDur;
+    anim.slot += 1;
+    if (anim.slot >= anim.timeline.length) {
+      anim.playing = false;
+      setAnimFrame(anim.timeline[anim.hold]);
+      scheduleNextPlay(now);
+      return;
+    }
+    setAnimFrame(anim.timeline[anim.slot]);
+  }
 }
 
 /* ---------- geometry / sizing ---------- */
@@ -473,13 +564,14 @@ function setTargetFromNormalized(nx, ny) {
 // Once native tilt arrives we treat it like a sensor reading so pointer-idle recentre
 // and web DeviceOrientation don't fight it.
 window.__nativeTilt = function (nx, ny) {
-  if (debug.freeze || state.pointerActive) return;
+  if (debug.freeze || (!wallpaperMode && state.pointerActive)) return;
   state.hasSensorReading = true;
   setTargetFromNormalized(clamp(nx, -1, 1), clamp(ny, -1, 1));
   lastInputAt = typeof performance !== "undefined" ? performance.now() : 0;
 };
 
 function handlePointerDown(event) {
+  if (wallpaperMode) return;
   if (debug.freeze || event.target.closest(".controls")) return;
   state.pointerActive = true;
   drag.touch = event.pointerType === "touch";
@@ -491,6 +583,7 @@ function handlePointerDown(event) {
 }
 
 function handlePointerMove(event) {
+  if (wallpaperMode) return;
   if (debug.freeze) return;
   if (state.pointerActive && drag.touch) {
     // touch drag = relative look-around; overrides gyro while the finger is down
@@ -508,6 +601,7 @@ function handlePointerMove(event) {
 }
 
 function handlePointerUp() {
+  if (wallpaperMode) return;
   state.pointerActive = false;
 }
 
@@ -539,6 +633,7 @@ function requestSensorPermission(sensorEvent) {
 }
 
 function startPassiveMotion() {
+  if (wallpaperMode) return;
   const needsTap =
     typeof DeviceOrientationEvent !== "undefined" &&
     typeof DeviceOrientationEvent.requestPermission === "function";
