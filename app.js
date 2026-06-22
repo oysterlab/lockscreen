@@ -91,7 +91,15 @@ window.addEventListener("load", () => window.lucide?.createIcons());
 const target = { x: 0, y: 0 };
 const current = { x: 0, y: 0 };
 const vel = { x: 0, y: 0 };
-const drag = { touch: false, startX: 0, startY: 0, baseX: 0, baseY: 0 };
+const drag = {
+  touch: false,
+  pointerId: null,
+  startX: 0,
+  startY: 0,
+  baseX: 0,
+  baseY: 0,
+  captureTarget: null,
+};
 let lastFrame = typeof performance !== "undefined" ? performance.now() : 0;
 let lastInputAt = 0;
 const state = {
@@ -101,7 +109,13 @@ const state = {
   ready: false,
   startTime: typeof performance !== "undefined" ? performance.now() : 0,
 };
-const sensor = { baseBeta: null, baseGamma: null, baseGX: null, baseGY: null };
+const sensor = {
+  baseBeta: null,
+  baseGamma: null,
+  baseGX: null,
+  baseGY: null,
+  lastOrientationAt: 0,
+};
 
 const debug = { freeze: params.has("ox") || params.has("oy") };
 if (debug.freeze) {
@@ -379,10 +393,14 @@ setInterval(updateClock, 15_000);
 window.addEventListener("resize", resize);
 window.visualViewport?.addEventListener("resize", resize);
 if (!wallpaperMode) {
-  window.addEventListener("pointermove", handlePointerMove, { passive: true });
-  window.addEventListener("pointerdown", handlePointerDown, { passive: true });
-  window.addEventListener("pointerup", handlePointerUp, { passive: true });
-  window.addEventListener("pointercancel", handlePointerUp, { passive: true });
+  window.addEventListener("pointermove", handlePointerMove, { passive: false });
+  window.addEventListener("pointerdown", handlePointerDown, { passive: false });
+  window.addEventListener("pointerup", handlePointerUp, { passive: false });
+  window.addEventListener("pointercancel", handlePointerUp, { passive: false });
+  window.addEventListener("touchstart", handleTouchStart, { passive: false });
+  window.addEventListener("touchmove", handleTouchMove, { passive: false });
+  window.addEventListener("touchend", handleTouchEnd, { passive: false });
+  window.addEventListener("touchcancel", handleTouchEnd, { passive: false });
   motionButton.addEventListener("click", enableMotion);
   fullscreenButton.addEventListener("click", toggleFullscreen);
   resetButton.addEventListener("click", resetView);
@@ -575,25 +593,30 @@ window.__nativeTilt = function (nx, ny) {
 
 function handlePointerDown(event) {
   if (wallpaperMode) return;
-  if (debug.freeze || event.target.closest(".controls")) return;
+  if (debug.freeze || isControlTarget(event.target)) return;
+  if (event.cancelable) event.preventDefault();
   state.pointerActive = true;
   drag.touch = event.pointerType === "touch";
+  drag.pointerId = event.pointerId;
   drag.startX = event.clientX;
   drag.startY = event.clientY;
-  drag.baseX = target.x;
-  drag.baseY = target.y;
+  // Touch should always create a visible look-around gesture. If we start from the
+  // previous gyro/idle target, one direction can feel dead when that axis is already
+  // near its clamp. Mouse drag keeps the current base; hover stays absolute below.
+  drag.baseX = drag.touch ? 0 : target.x;
+  drag.baseY = drag.touch ? 0 : target.y;
+  drag.captureTarget = event.target?.setPointerCapture ? event.target : null;
+  try { drag.captureTarget?.setPointerCapture(event.pointerId); } catch {}
   if (!drag.touch) handlePointerMove(event); // desktop mouse: absolute hover
 }
 
 function handlePointerMove(event) {
   if (wallpaperMode) return;
   if (debug.freeze) return;
-  if (state.pointerActive && drag.touch) {
-    // touch drag = relative look-around; overrides gyro while the finger is down
-    const dx = (event.clientX - drag.startX) / window.innerWidth;
-    const dy = (event.clientY - drag.startY) / window.innerHeight;
-    setTargetFromNormalized(drag.baseX + dx * TOUCH_SENS, drag.baseY - dy * TOUCH_SENS);
-    lastInputAt = performance.now();
+  if (state.pointerActive) {
+    if (drag.pointerId != null && event.pointerId !== drag.pointerId) return;
+    if (event.cancelable) event.preventDefault();
+    setTargetFromDrag(event.clientX, event.clientY);
     return;
   }
   if (state.hasSensorReading) return; // gyro drives when not dragging
@@ -605,7 +628,49 @@ function handlePointerMove(event) {
 
 function handlePointerUp() {
   if (wallpaperMode) return;
+  try {
+    if (drag.pointerId != null) drag.captureTarget?.releasePointerCapture(drag.pointerId);
+  } catch {}
   state.pointerActive = false;
+  drag.pointerId = null;
+  drag.captureTarget = null;
+}
+
+function handleTouchStart(event) {
+  if (wallpaperMode || debug.freeze || isControlTarget(event.target)) return;
+  const touch = event.touches?.[0];
+  if (!touch) return;
+  if (event.cancelable) event.preventDefault();
+  state.pointerActive = true;
+  drag.touch = true;
+  drag.pointerId = null;
+  drag.captureTarget = null;
+  drag.startX = touch.clientX;
+  drag.startY = touch.clientY;
+  drag.baseX = 0;
+  drag.baseY = 0;
+}
+
+function handleTouchMove(event) {
+  if (wallpaperMode || debug.freeze || !state.pointerActive || drag.pointerId != null) return;
+  const touch = event.touches?.[0];
+  if (!touch) return;
+  if (event.cancelable) event.preventDefault();
+  setTargetFromDrag(touch.clientX, touch.clientY);
+}
+
+function handleTouchEnd(event) {
+  if (wallpaperMode || drag.pointerId != null) return;
+  if (event.cancelable) event.preventDefault();
+  state.pointerActive = false;
+}
+
+function setTargetFromDrag(clientX, clientY) {
+  // drag = relative look-around; overrides gyro while the finger/mouse is down
+  const dx = (clientX - drag.startX) / window.innerWidth;
+  const dy = (clientY - drag.startY) / window.innerHeight;
+  setTargetFromNormalized(drag.baseX + dx * TOUCH_SENS, drag.baseY - dy * TOUCH_SENS);
+  lastInputAt = performance.now();
 }
 
 async function enableMotion() {
@@ -668,11 +733,15 @@ function handleOrientation(event) {
   const dBeta = clamp(event.beta - sensor.baseBeta, -SENSOR.betaRange, SENSOR.betaRange);
   const dGamma = clamp(event.gamma - sensor.baseGamma, -SENSOR.gammaRange, SENSOR.gammaRange);
   state.hasSensorReading = true;
+  sensor.lastOrientationAt = performance.now();
   setTargetFromNormalized(deadZone(dGamma / SENSOR.gammaRange), deadZone(-dBeta / SENSOR.betaRange));
 }
 
 function handleDeviceMotion(event) {
-  if (debug.freeze || state.pointerActive || !state.motionEnabled || state.hasSensorReading) return;
+  if (debug.freeze || state.pointerActive || !state.motionEnabled) return;
+  // Some mobile browsers expose both streams but only one is useful. Prefer fresh
+  // orientation data, but let gravity fallback recover if orientation stalls.
+  if (performance.now() - sensor.lastOrientationAt < 250) return;
   const g = event.accelerationIncludingGravity;
   if (!g || g.x == null || g.y == null) return;
   if (sensor.baseGX == null) {
@@ -703,6 +772,7 @@ function resetView() {
   state.hasSensorReading = false;
   state.pointerActive = false;
   sensor.baseBeta = sensor.baseGamma = sensor.baseGX = sensor.baseGY = null;
+  sensor.lastOrientationAt = 0;
   target.x = target.y = 0;
   showStatus("정면으로 재설정됨", true);
 }
@@ -760,4 +830,8 @@ function deadZone(v) {
   if (m <= SENSOR.deadZone) return 0;
   const n = (m - SENSOR.deadZone) / (1 - SENSOR.deadZone);
   return Math.sign(v) * n;
+}
+
+function isControlTarget(target) {
+  return Boolean(target?.closest?.(".controls"));
 }
