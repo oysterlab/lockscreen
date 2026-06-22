@@ -74,6 +74,13 @@ const SCENE_OVERRIDES = {
 };
 Object.assign(VIEW, SCENE_OVERRIDES[sceneParam] || {});
 
+// Cherry's ear tips are too thin for the full depth mesh: vertices just outside
+// the matte can still be pulled by background depth, making the tip look pinned.
+// Render that subject as a separate foreground card instead.
+const SUBJECT_CARD_SCENES = new Set(["cherry2dio"]);
+const SUBJECT_CARD_Z = params.has("cardz") ? parseFloat(params.get("cardz")) : 0.42;
+const SUBJECT_CARD_SCALE = (VIEW.camZ - SUBJECT_CARD_Z) / VIEW.camZ;
+
 // smaller ranges => a small phone tilt reaches full parallax (very responsive)
 const SENSOR = { betaRange: 6.5, gammaRange: 6.5, gravityRange: 1.8, deadZone: 0.015 };
 const TOUCH_SENS = 3.4; // drag distance (fraction of screen) -> parallax offset
@@ -164,6 +171,20 @@ const VERT = `
     float edgeFollow = max(mask, 0.42);
     float maskedRelief = mix(1.0, edgeFollow, uReliefMaskStrength);
     p.z += rel * maskedRelief * uDepthScale * s + uZBias;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+  }`;
+
+const VERT_SUBJECT_CARD = `
+  uniform float uCardZ;
+  uniform float uCardScale;
+  uniform vec2 uCover;
+  varying vec2 vUv;
+  void main() {
+    vec2 tuv = (uv - 0.5) * uCover + 0.5;
+    vUv = tuv;
+    vec3 p = position;
+    p.xy *= uCardScale;
+    p.z += uCardZ;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
   }`;
 
@@ -377,14 +398,23 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
     scene.add(backMesh, frontMesh);
 
     if (useSubject) {
+      const useSubjectCard = SUBJECT_CARD_SCENES.has(sceneParam);
       subjectMat = new THREE.ShaderMaterial({
-        uniforms: {
-          uColor: { value: fgColor },
-          uSubject: { value: subject },
-          uZBias: { value: 0.0 },
-          ...reliefUniforms(subject, 0.85),
-        },
-        vertexShader: VERT,
+        uniforms: useSubjectCard
+          ? {
+              uColor: { value: fgColor },
+              uSubject: { value: subject },
+              uCardZ: { value: SUBJECT_CARD_Z },
+              uCardScale: { value: SUBJECT_CARD_SCALE },
+              uCover: { value: cover },
+            }
+          : {
+              uColor: { value: fgColor },
+              uSubject: { value: subject },
+              uZBias: { value: 0.0 },
+              ...reliefUniforms(subject, 0.85),
+            },
+        vertexShader: useSubjectCard ? VERT_SUBJECT_CARD : VERT,
         fragmentShader: FRAG_SUBJECT,
         transparent: true,
         depthWrite: false,
