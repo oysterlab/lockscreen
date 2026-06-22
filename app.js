@@ -61,7 +61,7 @@ const VIEW = {
 const PET_MOTION = {
   // Small subject-only motion. Keep this below "sticker wobble" territory: it
   // should read like breathing/weight shift, not like the whole cutout shaking.
-  enabled: true,
+  enabled: false,
   breatheScale: 0.0065,
   bob: 0.012,
   sway: 0.007,
@@ -69,6 +69,15 @@ const PET_MOTION = {
   tiltShift: 0.018,
   tiltRoll: 0.004,
   speed: 0.00105,
+};
+
+const SUBJECT_DEPTH = {
+  // Make the cat feel closer than the room. This is different from animation:
+  // the subject gets a little more relief and sits slightly in front in camera
+  // space, so tilt/parallax separates it from the diorama.
+  depthScaleBoost: 1.16,
+  focusOffset: -0.035,
+  zBias: 0.075,
 };
 
 // per-scene depth overrides. lab1 (v3 soft-LDI) can take a DEEPER perspective than
@@ -260,11 +269,11 @@ function initLab3() {
   ])
     .then(([bgTex, fgTex, catTex, depthTex]) => {
       if (fgTex.image?.width) IMG_ASPECT = fgTex.image.width / fgTex.image.height;
-      const relief = (zb) => ({
+      const relief = (zb, depthScaleBoost = 1, focusOffset = 0) => ({
         uDepth: { value: depthTex },
-        uDepthScale: { value: tune.depthScale },
+        uDepthScale: { value: tune.depthScale * depthScaleBoost },
         uFarScale: { value: tune.farScale },
-        uFocus: { value: tune.focus },
+        uFocus: { value: tune.focus + focusOffset },
         uZBias: { value: zb },
         uCover: { value: cover },
       });
@@ -289,7 +298,10 @@ function initLab3() {
         depthWrite: false,
       });
       subjectMat = new THREE.ShaderMaterial({
-        uniforms: { uColor: { value: catTex }, ...relief(0.02) },
+        uniforms: {
+          uColor: { value: catTex },
+          ...relief(SUBJECT_DEPTH.zBias, SUBJECT_DEPTH.depthScaleBoost, SUBJECT_DEPTH.focusOffset),
+        },
         vertexShader: VERT,
         fragmentShader: FRAG_LAYER,
         transparent: true,
@@ -329,11 +341,11 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
     ]);
     const useSubject = subject !== null;
 
-    const reliefUniforms = () => ({
+    const reliefUniforms = (depthScaleBoost = 1, focusOffset = 0) => ({
       uDepth: { value: fgDepth },
-      uDepthScale: { value: tune.depthScale },
+      uDepthScale: { value: tune.depthScale * depthScaleBoost },
       uFarScale: { value: tune.farScale },
-      uFocus: { value: tune.focus },
+      uFocus: { value: tune.focus + focusOffset },
       uCover: { value: cover },
     });
 
@@ -379,8 +391,8 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
         uniforms: {
           uColor: { value: fgColor },
           uSubject: { value: subject },
-          uZBias: { value: 0.0 },
-          ...reliefUniforms(),
+          uZBias: { value: SUBJECT_DEPTH.zBias },
+          ...reliefUniforms(SUBJECT_DEPTH.depthScaleBoost, SUBJECT_DEPTH.focusOffset),
         },
         vertexShader: VERT,
         fragmentShader: FRAG_SUBJECT,
