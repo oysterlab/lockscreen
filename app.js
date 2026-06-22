@@ -147,6 +147,8 @@ const VERT = `
   uniform float uFarScale;
   uniform float uFocus;
   uniform float uZBias;
+  uniform sampler2D uReliefMask;
+  uniform float uReliefMaskStrength;
   uniform vec2 uCover;
   varying vec2 vUv;
   void main() {
@@ -158,7 +160,9 @@ const VERT = `
     // band so distant thin edges (wires, twigs) barely move and stay artifact-free.
     float rel = d - uFocus;
     float s = rel < 0.0 ? uFarScale : 1.0;
-    p.z += rel * uDepthScale * s + uZBias;
+    float mask = smoothstep(0.08, 0.65, texture2D(uReliefMask, tuv).r);
+    float maskedRelief = mix(1.0, mask, uReliefMaskStrength);
+    p.z += rel * maskedRelief * uDepthScale * s + uZBias;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
   }`;
 
@@ -185,8 +189,10 @@ const FRAG_FRONT = `
     if (uUseSubject > 0.5) {
       // v3 soft-LDI: cut every silhouette uniformly, then remove the subject (it is
       // drawn by its own soft-matte layer on top) -> no stretch/stipple at the edge.
+      float subjectA = texture2D(uSubject, vUv).r;
+      float subjectCut = smoothstep(0.02, 0.22, subjectA);
       a = 1.0 - smoothstep(uCutLow * 0.82, uCutLow * 1.08, grad);
-      a *= 1.0 - texture2D(uSubject, vUv).r;
+      a *= 1.0 - subjectCut;
     } else {
       // v2: spatially-varying threshold, high inside the protected cat region.
       float cut = mix(uCutLow, uCutHigh, texture2D(uProtect, vUv).r);
@@ -196,9 +202,9 @@ const FRAG_FRONT = `
     gl_FragColor = vec4(texture2D(uColor, vUv).rgb, a);
   }`;
 
-// the subject: a soft alpha matte over the filled back layer. Displaced by the
-// (flattened) subject depth so it pops as one coherent plane; its soft edge
-// composites cleanly over the scene/back (no hard cut, no halo, no stretch).
+// the subject: a soft alpha matte over the filled back layer. Its relief is
+// masked by the subject matte so thin edges are not pulled by the far background
+// depth sitting just outside the silhouette.
 const FRAG_SUBJECT = `
   uniform sampler2D uColor;
   uniform sampler2D uSubject;
@@ -253,6 +259,8 @@ function initLab3() {
         uFarScale: { value: tune.farScale },
         uFocus: { value: tune.focus },
         uZBias: { value: zb },
+        uReliefMask: { value: BLANK },
+        uReliefMaskStrength: { value: 0.0 },
         uCover: { value: cover },
       });
       backMat = new THREE.ShaderMaterial({
@@ -263,6 +271,8 @@ function initLab3() {
           uFarScale: { value: 1.0 },
           uFocus: { value: 0.0 },
           uZBias: { value: -0.7 }, // close behind so the gap stays small
+          uReliefMask: { value: BLANK },
+          uReliefMaskStrength: { value: 0.0 },
           uCover: { value: cover },
         },
         vertexShader: VERT,
@@ -316,11 +326,13 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
     ]);
     const useSubject = subject !== null;
 
-    const reliefUniforms = () => ({
+    const reliefUniforms = (reliefMask = BLANK, reliefMaskStrength = 0.0) => ({
       uDepth: { value: fgDepth },
       uDepthScale: { value: tune.depthScale },
       uFarScale: { value: tune.farScale },
       uFocus: { value: tune.focus },
+      uReliefMask: { value: reliefMask },
+      uReliefMaskStrength: { value: reliefMaskStrength },
       uCover: { value: cover },
     });
 
@@ -332,6 +344,8 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
         uFarScale: { value: tune.farScale },
         uFocus: { value: tune.focus },
         uZBias: { value: -0.04 },
+        uReliefMask: { value: BLANK },
+        uReliefMaskStrength: { value: 0.0 },
         uCover: { value: cover },
       },
       vertexShader: VERT,
@@ -367,7 +381,7 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
           uColor: { value: fgColor },
           uSubject: { value: subject },
           uZBias: { value: 0.0 },
-          ...reliefUniforms(),
+          ...reliefUniforms(subject, 1.0),
         },
         vertexShader: VERT,
         fragmentShader: FRAG_SUBJECT,
