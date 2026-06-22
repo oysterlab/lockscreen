@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Cat Lock Wallpaper</string>
     <string name="wallpaper_name">My Cat 3D Lock</string>
-    <string name="wallpaper_description">A generated 3D cat lock-screen live wallpaper.</string>
-    <string name="open_wallpaper">Set live wallpaper</string>
-    <string name="fallback_wallpaper">Open wallpaper picker</string>
+    <string name="wallpaper_description">3D 고양이 잠금화면 라이브 배경화면</string>
+    <string name="open_wallpaper">배경화면 설정</string>
+    <string name="fallback_wallpaper">배경화면 선택기 열기</string>
 </resources>

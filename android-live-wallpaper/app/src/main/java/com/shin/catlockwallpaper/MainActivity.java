@@ -5,11 +5,9 @@ import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.Gravity;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -38,7 +36,7 @@ public class MainActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setGravity(Gravity.CENTER_HORIZONTAL);
-        root.setPadding(56, 80, 56, 56);
+        root.setPadding(dp(24), dp(36), dp(24), dp(24));
         root.setBackgroundColor(0xff19130f);
 
         TextView title = new TextView(this);
@@ -53,7 +51,7 @@ public class MainActivity extends Activity {
         body.setTextColor(0xccfff2d7);
         body.setTextSize(15);
         body.setGravity(Gravity.CENTER);
-        body.setPadding(0, 18, 0, 30);
+        body.setPadding(0, dp(8), 0, dp(14));
         root.addView(body, wrap());
 
         list = new LinearLayout(this);
@@ -66,7 +64,7 @@ public class MainActivity extends Activity {
         setButton.setAllCaps(false);
         setButton.setOnClickListener(v -> openWallpaperSetter());
         LinearLayout.LayoutParams bp = wrap();
-        bp.topMargin = 36;
+        bp.topMargin = dp(20);
         root.addView(setButton, bp);
 
         setContentView(root);
@@ -82,15 +80,14 @@ public class MainActivity extends Activity {
             row.setText((active ? "●  " : "○  ") + label);
             row.setTextColor(active ? 0xffffd79b : 0xffded3c4);
             row.setTextSize(18);
-            row.setPadding(40, 30, 40, 30);
+            row.setPadding(dp(18), dp(14), dp(18), dp(14));
             row.setBackgroundColor(active ? 0xff2c2117 : 0xff211a12);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            lp.topMargin = 14;
+            lp.topMargin = dp(8);
             row.setOnClickListener(v -> {
                 selected = scene;
-                getSharedPreferences(CatWallpaperService.PREFS, MODE_PRIVATE)
-                        .edit().putString(CatWallpaperService.KEY_SCENE, scene).apply();
+                persistAndNotifyScene(scene);
                 renderChoices();
             });
             list.addView(row, lp);
@@ -99,8 +96,7 @@ public class MainActivity extends Activity {
 
     private void openWallpaperSetter() {
         // persist selection (already saved on tap, but ensure it)
-        getSharedPreferences(CatWallpaperService.PREFS, MODE_PRIVATE)
-                .edit().putString(CatWallpaperService.KEY_SCENE, selected).apply();
+        persistAndNotifyScene(selected);
 
         ComponentName component = new ComponentName(this, CatWallpaperService.class);
         Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
@@ -124,5 +120,18 @@ public class MainActivity extends Activity {
     private LinearLayout.LayoutParams match() {
         return new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
+    }
+
+    private void persistAndNotifyScene(String scene) {
+        getSharedPreferences(CatWallpaperService.PREFS, MODE_PRIVATE)
+                .edit().putString(CatWallpaperService.KEY_SCENE, scene).commit();
+        Intent intent = new Intent(CatWallpaperService.ACTION_SCENE_CHANGED);
+        intent.setPackage(getPackageName());
+        intent.putExtra(CatWallpaperService.EXTRA_SCENE, scene);
+        sendBroadcast(intent);
     }
 }

@@ -18,6 +18,7 @@ import android.os.Looper;
 import android.service.wallpaper.WallpaperService;
 import android.view.Display;
 import android.view.Surface;
+import android.view.View;
 import android.view.SurfaceHolder;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -38,7 +39,16 @@ public class CatWallpaperService extends WallpaperService {
     static final String PREFS = "catlock_prefs";
     static final String KEY_SCENE = "scene";
     static final String DEFAULT_SCENE = "cherry2dio";
-    private static final String BASE_URL = "https://oysterlab.github.io/lockscreen/";
+    static final String ACTION_SCENE_CHANGED =
+            "com.shin.catlockwallpaper.action.SCENE_CHANGED";
+    static final String EXTRA_SCENE = "scene";
+    private static final String BASE_URL = "file:///android_asset/index.html";
+    private static final String WALLPAPER_UI_JS =
+            "(function(){"
+                    + "document.documentElement.classList.add('wallpaper-mode');"
+                    + "var nodes=document.querySelectorAll('.clock,.controls,.status');"
+                    + "for(var i=0;i<nodes.length;i++){nodes[i].style.display='none';}"
+                    + "})();";
 
     @Override
     public WallpaperService.Engine onCreateEngine() {
@@ -56,6 +66,7 @@ public class CatWallpaperService extends WallpaperService {
         private SensorManager sensorManager;
         private Sensor tiltSensor;
         private boolean tiltSensorIsWakeup;
+        private boolean sensorRegistered;
         private ScreenReceiver screenReceiver;
 
         private int width = 1;
@@ -82,7 +93,8 @@ public class CatWallpaperService extends WallpaperService {
             f.addAction(Intent.ACTION_SCREEN_ON);
             f.addAction(Intent.ACTION_SCREEN_OFF);
             f.addAction(Intent.ACTION_USER_PRESENT);
-            registerReceiver(screenReceiver, f);
+            f.addAction(ACTION_SCENE_CHANGED);
+            registerInternalReceiver(screenReceiver, f);
         }
 
         @Override
@@ -95,6 +107,7 @@ public class CatWallpaperService extends WallpaperService {
 
         @Override
         public void onSurfaceDestroyed(SurfaceHolder holder) {
+            unregisterSensor();
             tearDownPresentation();
             super.onSurfaceDestroyed(holder);
         }
@@ -108,8 +121,9 @@ public class CatWallpaperService extends WallpaperService {
                 registerSensor();
                 if (webView != null) webView.onResume();
             } else {
-                unregisterSensor();
-                if (webView != null) webView.onPause();
+                // Samsung Launcher can report false while the home wallpaper is still
+                // materially visible behind the launcher. Keep native tilt alive; screen
+                // off and surface destruction are the hard stop paths.
             }
         }
 
@@ -128,40 +142,74 @@ public class CatWallpaperService extends WallpaperService {
 
         private void rebuildPresentation(Surface surface) {
             tearDownPresentation();
-            if (surface == null || width <= 1 || height <= 1) return;
-            int densityDpi = getResources().getDisplayMetrics().densityDpi;
-            virtualDisplay = displayManager.createVirtualDisplay(
-                    "catlock", width, height, densityDpi, surface,
-                    DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION);
-            if (virtualDisplay == null) return;
-
-            presentation = new Presentation(CatWallpaperService.this, virtualDisplay.getDisplay());
-            presentation.getWindow().setType(android.view.WindowManager.LayoutParams.TYPE_APPLICATION);
-            FrameLayout container = new FrameLayout(presentation.getContext());
-
-            webView = new WebView(presentation.getContext());
-            WebSettings s = webView.getSettings();
-            s.setJavaScriptEnabled(true);
-            s.setDomStorageEnabled(true);
-            s.setMediaPlaybackRequiresUserGesture(false);
-            s.setCacheMode(WebSettings.LOAD_DEFAULT);
-            webView.setBackgroundColor(0xff19130f);
-            webView.setWebViewClient(new WebViewClient() {
-                @Override
-                public void onPageFinished(WebView v, String url) {
-                    pageReady = true;
-                }
-            });
-            container.addView(webView, new FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-            presentation.setContentView(container);
-            try {
-                presentation.show();
-            } catch (Exception ignored) {
+            if (surface == null || width <= 1 || height <= 1) {
+                android.util.Log.w("CatLock", "rebuild skipped surface=" + surface + " " + width + "x" + height);
                 return;
             }
-            pageReady = false;
-            webView.loadUrl(BASE_URL + "?scene=" + currentScene());
+            try {
+                int densityDpi = getResources().getDisplayMetrics().densityDpi;
+                virtualDisplay = displayManager.createVirtualDisplay(
+                        "catlock", width, height, densityDpi, surface,
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION);
+                if (virtualDisplay == null) {
+                    android.util.Log.e("CatLock", "createVirtualDisplay returned null");
+                    return;
+                }
+                WebView.setWebContentsDebuggingEnabled(
+                        (getApplicationInfo().flags
+                                & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0);
+                presentation = new Presentation(getApplicationContext(), virtualDisplay.getDisplay());
+                android.view.Window pw = presentation.getWindow();
+                pw.setType(android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION);
+                // force a hardware-accelerated, translucent window so the WebView's WebGL
+                // canvas composites onto the virtual-display surface (else the GL content
+                // is invisible / black).
+                pw.addFlags(android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+                pw.setFormat(PixelFormat.TRANSLUCENT);
+                FrameLayout container = new FrameLayout(presentation.getContext());
+
+                webView = new WebView(presentation.getContext());
+                webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                WebSettings s = webView.getSettings();
+                s.setJavaScriptEnabled(true);
+                s.setDomStorageEnabled(true);
+                s.setAllowFileAccess(true);
+                s.setAllowContentAccess(true);
+                s.setAllowFileAccessFromFileURLs(true);
+                s.setMediaPlaybackRequiresUserGesture(false);
+                s.setCacheMode(WebSettings.LOAD_DEFAULT);
+                webView.setBackgroundColor(0xff19130f);
+                webView.setWebViewClient(new WebViewClient() {
+                    @Override
+                    public void onPageFinished(WebView v, String url) {
+                        applyWallpaperMode(v);
+                        pageReady = true;
+                        android.util.Log.i("CatLock", "page finished: " + url);
+                    }
+                    @Override
+                    public void onReceivedError(WebView v, android.webkit.WebResourceRequest req,
+                                                android.webkit.WebResourceError err) {
+                        android.util.Log.e("CatLock", "web error: " + err.getDescription());
+                    }
+                });
+                webView.setWebChromeClient(new android.webkit.WebChromeClient() {
+                    @Override
+                    public boolean onConsoleMessage(android.webkit.ConsoleMessage m) {
+                        android.util.Log.i("CatLock", "console: " + m.message());
+                        return true;
+                    }
+                });
+                container.addView(webView, new FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+                presentation.setContentView(container);
+                presentation.show();
+                pageReady = false;
+                loadScene(currentScene(), "initial load");
+                if (webView != null) webView.onResume();
+                registerSensor();
+            } catch (Throwable t) {
+                android.util.Log.e("CatLock", "rebuild failed", t);
+            }
         }
 
         private void tearDownPresentation() {
@@ -183,6 +231,33 @@ public class CatWallpaperService extends WallpaperService {
         private String currentScene() {
             SharedPreferences p = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
             return p.getString(KEY_SCENE, DEFAULT_SCENE);
+        }
+
+        private void loadScene(String scene, String reason) {
+            if (webView == null) return;
+            pageReady = false;
+            baseValid = 0f;
+            String url = BASE_URL + "?scene=" + scene + "&wallpaper=1&app=0.2.3";
+            int displayId = virtualDisplay != null
+                    ? virtualDisplay.getDisplay().getDisplayId()
+                    : Display.DEFAULT_DISPLAY;
+            android.util.Log.i("CatLock", "loading " + url + " on display "
+                    + displayId + " (" + reason + ")");
+            webView.loadUrl(url);
+        }
+
+        private void applyWallpaperMode(WebView v) {
+            try {
+                v.evaluateJavascript(WALLPAPER_UI_JS, null);
+            } catch (Exception ignored) {}
+        }
+
+        private void registerInternalReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+            if (android.os.Build.VERSION.SDK_INT >= 33) {
+                registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
+            } else {
+                registerReceiver(receiver, filter);
+            }
         }
 
         /* ---------- sensor: wakeup rotation vector -> JS bridge ---------- */
@@ -208,14 +283,16 @@ public class CatWallpaperService extends WallpaperService {
         }
 
         private void registerSensor() {
-            if (sensorManager != null && tiltSensor != null) {
+            if (!sensorRegistered && sensorManager != null && tiltSensor != null) {
                 sensorManager.registerListener(this, tiltSensor, SensorManager.SENSOR_DELAY_GAME);
+                sensorRegistered = true;
             }
         }
 
         private void unregisterSensor() {
-            if (sensorManager != null) {
+            if (sensorRegistered && sensorManager != null) {
                 sensorManager.unregisterListener(this);
+                sensorRegistered = false;
             }
         }
 
@@ -250,7 +327,7 @@ public class CatWallpaperService extends WallpaperService {
         }
 
         private void pushTilt(final float nx, final float ny) {
-            if (!visible || webView == null || !pageReady) return;
+            if (webView == null || !pageReady) return;
             final WebView wv = webView;
             handler.post(() -> {
                 if (wv == null) return;
@@ -265,11 +342,22 @@ public class CatWallpaperService extends WallpaperService {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String a = intent.getAction();
+                if (ACTION_SCENE_CHANGED.equals(a)) {
+                    String scene = intent.getStringExtra(EXTRA_SCENE);
+                    loadScene(scene != null ? scene : currentScene(), "scene changed");
+                    return;
+                }
                 if (Intent.ACTION_SCREEN_OFF.equals(a)) {
                     // reset baseline so re-show recentres
                     baseValid = 0f;
+                    visible = false;
+                    unregisterSensor();
+                    if (webView != null) webView.onPause();
                 } else {
-                    // re-register defensively (One UI may have dropped it)
+                    // One UI can miss the normal visibility callback on the lock screen.
+                    // Treat screen-on/user-present as visible enough for sensor-driven parallax.
+                    visible = true;
+                    if (webView != null) webView.onResume();
                     unregisterSensor();
                     registerSensor();
                 }
