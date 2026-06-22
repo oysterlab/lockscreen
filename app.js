@@ -109,6 +109,7 @@ const drag = {
   captureTarget: null,
 };
 let lastFrame = typeof performance !== "undefined" ? performance.now() : 0;
+let lastRenderAt = 0;
 let lastInputAt = 0;
 const state = {
   motionEnabled: false,
@@ -140,8 +141,16 @@ const tune = {
   farScale: params.has("fs") ? parseFloat(params.get("fs")) : VIEW.farScale,
 };
 
+const maxDpr = params.has("dpr")
+  ? parseFloat(params.get("dpr"))
+  : (wallpaperMode ? 1.5 : 2);
+const renderFps = params.has("fps")
+  ? parseFloat(params.get("fps"))
+  : (wallpaperMode ? 30 : 60);
+const minRenderMs = renderFps >= 59 ? 0 : Math.max(0, 1000 / Math.max(1, renderFps) - 0.5);
+
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr));
 renderer.outputColorSpace = THREE.LinearSRGBColorSpace; // ShaderMaterial passthrough
 renderer.setClearColor(0x2a1a0e, 1);
 
@@ -475,7 +484,9 @@ if (!wallpaperMode) {
 function loop() {
   if (!state.ready) return;
   const now = performance.now();
+  if (!debug.freeze && now - lastRenderAt < minRenderMs) return;
   const dt = Math.min((now - lastFrame) / 1000, 0.05); // clamp for stability
+  lastRenderAt = now;
   lastFrame = now;
 
   // desktop polish: when the pointer leaves / goes idle, ease back to centre

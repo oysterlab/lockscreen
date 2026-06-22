@@ -49,6 +49,10 @@ public class CatWallpaperService extends WallpaperService {
                     + "var nodes=document.querySelectorAll('.clock,.controls,.status');"
                     + "for(var i=0;i<nodes.length;i++){nodes[i].style.display='none';}"
                     + "})();";
+    private static final int SENSOR_PERIOD_US = 33_333; // ~30Hz is enough for parallax.
+    private static final int SENSOR_MAX_LATENCY_US = 66_666;
+    private static final long TILT_PUSH_INTERVAL_NS = 33_000_000L;
+    private static final float TILT_EPSILON = 0.006f;
 
     @Override
     public WallpaperService.Engine onCreateEngine() {
@@ -80,6 +84,9 @@ public class CatWallpaperService extends WallpaperService {
         private float baseRoll;
         private final float[] rotMatrix = new float[9];
         private final float[] orientation = new float[3];
+        private long lastTiltPushAtNs;
+        private float lastPushedNx = Float.NaN;
+        private float lastPushedNy = Float.NaN;
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
@@ -237,7 +244,8 @@ public class CatWallpaperService extends WallpaperService {
             if (webView == null) return;
             pageReady = false;
             baseValid = 0f;
-            String url = BASE_URL + "?scene=" + scene + "&wallpaper=1&app=0.2.4";
+            resetTiltThrottle();
+            String url = BASE_URL + "?scene=" + scene + "&wallpaper=1&app=0.2.5";
             int displayId = virtualDisplay != null
                     ? virtualDisplay.getDisplay().getDisplayId()
                     : Display.DEFAULT_DISPLAY;
@@ -284,7 +292,8 @@ public class CatWallpaperService extends WallpaperService {
 
         private void registerSensor() {
             if (!sensorRegistered && sensorManager != null && tiltSensor != null) {
-                sensorManager.registerListener(this, tiltSensor, SensorManager.SENSOR_DELAY_GAME);
+                sensorManager.registerListener(
+                        this, tiltSensor, SENSOR_PERIOD_US, SENSOR_MAX_LATENCY_US);
                 sensorRegistered = true;
             }
         }
@@ -315,11 +324,12 @@ public class CatWallpaperService extends WallpaperService {
                 basePitch = pitch;
                 baseRoll = roll;
                 baseValid = 1f;
+                resetTiltThrottle();
             }
             // relative to the hold baseline; small tilt reaches full effect (range ~0.5 rad)
             float nx = clamp((roll - baseRoll) / 0.5f, -1f, 1f);
             float ny = clamp((pitch - basePitch) / 0.5f, -1f, 1f);
-            pushTilt(nx, ny);
+            maybePushTilt(nx, ny, event.timestamp);
         }
 
         @Override
@@ -338,6 +348,31 @@ public class CatWallpaperService extends WallpaperService {
             });
         }
 
+        private void maybePushTilt(float nx, float ny, long eventTimeNs) {
+            if (webView == null || !pageReady) return;
+            long nowNs = eventTimeNs > 0L ? eventTimeNs : System.nanoTime();
+            if (lastTiltPushAtNs != 0L
+                    && nowNs > lastTiltPushAtNs
+                    && nowNs - lastTiltPushAtNs < TILT_PUSH_INTERVAL_NS) {
+                return;
+            }
+            if (!Float.isNaN(lastPushedNx)
+                    && Math.abs(nx - lastPushedNx) < TILT_EPSILON
+                    && Math.abs(ny - lastPushedNy) < TILT_EPSILON) {
+                return;
+            }
+            lastTiltPushAtNs = nowNs;
+            lastPushedNx = nx;
+            lastPushedNy = ny;
+            pushTilt(nx, ny);
+        }
+
+        private void resetTiltThrottle() {
+            lastTiltPushAtNs = 0L;
+            lastPushedNx = Float.NaN;
+            lastPushedNy = Float.NaN;
+        }
+
         private final class ScreenReceiver extends BroadcastReceiver {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -350,6 +385,7 @@ public class CatWallpaperService extends WallpaperService {
                 if (Intent.ACTION_SCREEN_OFF.equals(a)) {
                     // reset baseline so re-show recentres
                     baseValid = 0f;
+                    resetTiltThrottle();
                     visible = false;
                     unregisterSensor();
                     if (webView != null) webView.onPause();
