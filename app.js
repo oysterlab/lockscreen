@@ -76,10 +76,10 @@ Object.assign(VIEW, SCENE_OVERRIDES[sceneParam] || {});
 
 // Cherry's ear tips are too thin for the full depth mesh: vertices just outside
 // the matte can still be pulled by background depth, making the tip look pinned.
-// Render that subject as a separate foreground card instead.
-const SUBJECT_CARD_SCENES = new Set(["cherry2dio"]);
-const SUBJECT_CARD_Z = params.has("cardz") ? parseFloat(params.get("cardz")) : 0.42;
-const SUBJECT_CARD_SCALE = (VIEW.camZ - SUBJECT_CARD_Z) / VIEW.camZ;
+// Render that subject with a masked cat-only depth field instead: inside the
+// matte keeps the image depth, outside/soft edges are filled with cat-average depth.
+const SUBJECT_DEPTH_SCENES = new Set(["cherry2dio"]);
+const SUBJECT_BASE_DEPTH = params.has("sbd") ? parseFloat(params.get("sbd")) : 0.43;
 
 // smaller ranges => a small phone tilt reaches full parallax (very responsive)
 const SENSOR = { betaRange: 6.5, gammaRange: 6.5, gravityRange: 1.8, deadZone: 0.015 };
@@ -174,17 +174,27 @@ const VERT = `
     gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
   }`;
 
-const VERT_SUBJECT_CARD = `
-  uniform float uCardZ;
-  uniform float uCardScale;
+const VERT_SUBJECT_DEPTH = `
+  uniform sampler2D uDepth;
+  uniform sampler2D uSubject;
+  uniform float uDepthScale;
+  uniform float uFarScale;
+  uniform float uFocus;
+  uniform float uZBias;
+  uniform float uSubjectBaseDepth;
   uniform vec2 uCover;
   varying vec2 vUv;
   void main() {
     vec2 tuv = (uv - 0.5) * uCover + 0.5;
     vUv = tuv;
+    float rawDepth = texture2D(uDepth, tuv).r;
+    float matte = texture2D(uSubject, tuv).r;
+    float core = smoothstep(0.18, 0.62, matte);
+    float d = mix(uSubjectBaseDepth, rawDepth, core);
     vec3 p = position;
-    p.xy *= uCardScale;
-    p.z += uCardZ;
+    float rel = d - uFocus;
+    float s = rel < 0.0 ? uFarScale : 1.0;
+    p.z += rel * uDepthScale * s + uZBias;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
   }`;
 
@@ -398,14 +408,18 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
     scene.add(backMesh, frontMesh);
 
     if (useSubject) {
-      const useSubjectCard = SUBJECT_CARD_SCENES.has(sceneParam);
+      const useSubjectDepth = SUBJECT_DEPTH_SCENES.has(sceneParam);
       subjectMat = new THREE.ShaderMaterial({
-        uniforms: useSubjectCard
+        uniforms: useSubjectDepth
           ? {
               uColor: { value: fgColor },
               uSubject: { value: subject },
-              uCardZ: { value: SUBJECT_CARD_Z },
-              uCardScale: { value: SUBJECT_CARD_SCALE },
+              uDepth: { value: fgDepth },
+              uDepthScale: { value: tune.depthScale },
+              uFarScale: { value: tune.farScale },
+              uFocus: { value: tune.focus },
+              uZBias: { value: 0.0 },
+              uSubjectBaseDepth: { value: SUBJECT_BASE_DEPTH },
               uCover: { value: cover },
             }
           : {
@@ -414,7 +428,7 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
               uZBias: { value: 0.0 },
               ...reliefUniforms(subject, 0.85),
             },
-        vertexShader: useSubjectCard ? VERT_SUBJECT_CARD : VERT,
+        vertexShader: useSubjectDepth ? VERT_SUBJECT_DEPTH : VERT,
         fragmentShader: FRAG_SUBJECT,
         transparent: true,
         depthWrite: false,
