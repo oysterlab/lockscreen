@@ -160,8 +160,9 @@ const VERT = `
     // band so distant thin edges (wires, twigs) barely move and stay artifact-free.
     float rel = d - uFocus;
     float s = rel < 0.0 ? uFarScale : 1.0;
-    float mask = smoothstep(0.08, 0.65, texture2D(uReliefMask, tuv).r);
-    float maskedRelief = mix(1.0, mask, uReliefMaskStrength);
+    float mask = smoothstep(0.04, 0.48, texture2D(uReliefMask, tuv).r);
+    float edgeFollow = max(mask, 0.42);
+    float maskedRelief = mix(1.0, edgeFollow, uReliefMaskStrength);
     p.z += rel * maskedRelief * uDepthScale * s + uZBias;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
   }`;
@@ -381,7 +382,7 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
           uColor: { value: fgColor },
           uSubject: { value: subject },
           uZBias: { value: 0.0 },
-          ...reliefUniforms(subject, 1.0),
+          ...reliefUniforms(subject, 0.85),
         },
         vertexShader: VERT,
         fragmentShader: FRAG_SUBJECT,
