@@ -58,6 +58,19 @@ const VIEW = {
   idleSpeed: 0.0002,
 };
 
+const PET_MOTION = {
+  // Small subject-only motion. Keep this below "sticker wobble" territory: it
+  // should read like breathing/weight shift, not like the whole cutout shaking.
+  enabled: true,
+  breatheScale: 0.0065,
+  bob: 0.012,
+  sway: 0.007,
+  roll: 0.004,
+  tiltShift: 0.018,
+  tiltRoll: 0.004,
+  speed: 0.00105,
+};
+
 // per-scene depth overrides. lab1 (v3 soft-LDI) can take a DEEPER perspective than
 // the v2 default: its soft-matte + piecewise-flat layering keeps the far thin
 // structures (wires, tree, tower) clean even with the far band decompressed, so we
@@ -448,8 +461,22 @@ function loop() {
   camera.position.x = ox * tune.orbit;
   camera.position.y = oy * tune.orbit * VIEW.orbitYScale;
   camera.lookAt(0, 0, 0);
+  tickPetMotion(now, ox, oy);
   tickAnim(now, dt);
   renderer.render(scene, camera);
+}
+
+function tickPetMotion(now, ox, oy) {
+  if (!PET_MOTION.enabled || !subjectMesh) return;
+  const t = (now - state.startTime) * PET_MOTION.speed;
+  const breathe = (Math.sin(t * Math.PI * 2) + 1) * 0.5;
+  const sway = Math.sin(t * Math.PI * 1.35 + 0.7);
+  const bob = Math.sin(t * Math.PI * 2 + 1.2);
+  subjectMesh.scale.setScalar(1 + breathe * PET_MOTION.breatheScale);
+  subjectMesh.position.x = sway * PET_MOTION.sway - ox * PET_MOTION.tiltShift;
+  subjectMesh.position.y = bob * PET_MOTION.bob + oy * PET_MOTION.tiltShift * 0.45;
+  subjectMesh.position.z = 0.02;
+  subjectMesh.rotation.z = sway * PET_MOTION.roll - ox * PET_MOTION.tiltRoll;
 }
 
 /* ---------- idle-flick animation ---------- */
