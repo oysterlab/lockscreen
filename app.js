@@ -80,6 +80,7 @@ Object.assign(VIEW, SCENE_OVERRIDES[sceneParam] || {});
 // matte keeps the image depth, outside/soft edges are filled with cat-average depth.
 const SUBJECT_DEPTH_SCENES = new Set(["cherry2dio"]);
 const SUBJECT_BASE_DEPTH = params.has("sbd") ? parseFloat(params.get("sbd")) : 0.43;
+const SUBJECT_DEPTH_CONTRAST = params.has("sdc") ? parseFloat(params.get("sdc")) : 1.12;
 
 // smaller ranges => a small phone tilt reaches full parallax (very responsive)
 const SENSOR = { betaRange: 6.5, gammaRange: 6.5, gravityRange: 1.8, deadZone: 0.015 };
@@ -182,6 +183,7 @@ const VERT_SUBJECT_DEPTH = `
   uniform float uFocus;
   uniform float uZBias;
   uniform float uSubjectBaseDepth;
+  uniform float uSubjectDepthContrast;
   uniform vec2 uCover;
   varying vec2 vUv;
   void main() {
@@ -191,6 +193,7 @@ const VERT_SUBJECT_DEPTH = `
     float matte = texture2D(uSubject, tuv).r;
     float core = smoothstep(0.18, 0.62, matte);
     float d = mix(uSubjectBaseDepth, rawDepth, core);
+    d = clamp(uSubjectBaseDepth + (d - uSubjectBaseDepth) * uSubjectDepthContrast, 0.0, 1.0);
     vec3 p = position;
     float rel = d - uFocus;
     float s = rel < 0.0 ? uFarScale : 1.0;
@@ -420,6 +423,7 @@ Promise.all(Object.values(ASSETS).map(loadTexture))
               uFocus: { value: tune.focus },
               uZBias: { value: 0.0 },
               uSubjectBaseDepth: { value: SUBJECT_BASE_DEPTH },
+              uSubjectDepthContrast: { value: SUBJECT_DEPTH_CONTRAST },
               uCover: { value: cover },
             }
           : {

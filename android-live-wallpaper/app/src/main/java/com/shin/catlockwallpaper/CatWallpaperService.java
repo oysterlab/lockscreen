@@ -237,7 +237,7 @@ public class CatWallpaperService extends WallpaperService {
             if (webView == null) return;
             pageReady = false;
             baseValid = 0f;
-            String url = BASE_URL + "?scene=" + scene + "&wallpaper=1&app=0.2.3";
+            String url = BASE_URL + "?scene=" + scene + "&wallpaper=1&app=0.2.4";
             int displayId = virtualDisplay != null
                     ? virtualDisplay.getDisplay().getDisplayId()
                     : Display.DEFAULT_DISPLAY;
