@@ -46,8 +46,8 @@ const VIEW = {
   depthScale: 1.84, // stronger foreground relief without the "inflated sticker" look
   farScale: 0.64, // opens mid/far parallax so the room reads deeper
   focus: 0.27, // lower still plane = more depth separation across the whole scene
-  orbit: 0.64, // horizontal camera travel at full tilt (noticeably stronger)
-  orbitYScale: 0.78, // vertical travel a bit gentler than horizontal — full vertical
+  orbit: 0.68, // slightly more horizontal camera travel at full tilt
+  orbitYScale: 0.70, // keep vertical travel tighter than horizontal; full vertical
   //                   parallax can push a bottom/top-anchored subject off-screen
   cutLow: 0.04, // cut threshold for the scene (cut tree/sky edges -> no smear)
   cutHigh: 0.14, // cut threshold inside the protected cat region (don't cut -> no stipple)
