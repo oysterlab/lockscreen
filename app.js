@@ -48,14 +48,14 @@ const VIEW = {
   depthScale: 1.84, // stronger foreground relief without the "inflated sticker" look
   farScale: 0.64, // opens mid/far parallax so the room reads deeper
   focus: 0.27, // lower still plane = more depth separation across the whole scene
-  orbit: 0.68, // slightly more horizontal camera travel at full tilt
-  orbitYScale: 0.70, // keep vertical travel tighter than horizontal; full vertical
+  orbit: 0.84, // stronger horizontal camera travel at full tilt
+  orbitYScale: 0.76, // allow small vertical motion to read more clearly
   //                   parallax can push a bottom/top-anchored subject off-screen
   cutLow: 0.04, // cut threshold for the scene (cut tree/sky edges -> no smear)
   cutHigh: 0.14, // cut threshold inside the protected cat region (don't cut -> no stipple)
   overscan: 0.12, // texture zoom so stronger orbit never exposes the frame border
   pad: 1.26, // plane oversize beyond the view, for camera-orbit headroom
-  springFreq: 9.2, // slightly snappier so motion is easier to perceive
+  springFreq: 13.0, // snappier so small gyro changes register immediately
   idleAmp: 0.34,
   idleSpeed: 0.0002,
 };
@@ -72,6 +72,7 @@ const SCENE_OVERRIDES = {
   latte2dio: { depthScale: 1.84, farScale: 0.74, focus: 0.26 },
   nila2dio: { depthScale: 1.84, farScale: 0.74, focus: 0.26 },
   cherry2dio: { depthScale: 1.84, farScale: 0.74, focus: 0.26 },
+  jeju_cherry: { depthScale: 1.84, farScale: 0.74, focus: 0.26 },
   latteval: { depthScale: 1.72, farScale: 0.68, focus: 0.28 },
 };
 Object.assign(VIEW, SCENE_OVERRIDES[sceneParam] || {});
@@ -80,12 +81,12 @@ Object.assign(VIEW, SCENE_OVERRIDES[sceneParam] || {});
 // the matte can still be pulled by background depth, making the tip look pinned.
 // Render that subject with a masked cat-only depth field instead: inside the
 // matte keeps the image depth, outside/soft edges are filled with cat-average depth.
-const SUBJECT_DEPTH_SCENES = new Set(["cherry2dio"]);
+const SUBJECT_DEPTH_SCENES = new Set(["cherry2dio", "jeju_cherry"]);
 const SUBJECT_BASE_DEPTH = params.has("sbd") ? parseFloat(params.get("sbd")) : 0.43;
 const SUBJECT_DEPTH_CONTRAST = params.has("sdc") ? parseFloat(params.get("sdc")) : 1.12;
 
 // smaller ranges => a small phone tilt reaches full parallax (very responsive)
-const SENSOR = { betaRange: 6.5, gammaRange: 6.5, gravityRange: 1.8, deadZone: 0.015 };
+const SENSOR = { betaRange: 4.2, gammaRange: 4.2, gravityRange: 1.15, deadZone: 0.006 };
 const TOUCH_SENS = 3.4; // drag distance (fraction of screen) -> parallax offset
 
 const canvas = document.querySelector("#scene");
