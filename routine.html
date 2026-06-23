@@ -397,6 +397,64 @@ Avoid tiny wires, crowds, many small props, transparent objects, complex signage
         </figure>
       </section>
 
+      <section class="band band--results" aria-labelledby="results-2000-title">
+        <div class="section-head">
+          <p class="eyebrow">Generated and verified</p>
+          <h2 id="results-2000-title">20:00 최종 비교 라운드</h2>
+          <p>
+            17-19시의 strongest 후보를 바탕으로 경복궁, 실내 수면방, 소나무 자연 배경을 다시 정리했다.
+            세 후보 모두 depth/WebGL은 통과했지만, 실제 잠금화면 안전 여백과 안정성 기준으로는
+            실내 수면방 최종안이 가장 강하다.
+          </p>
+        </div>
+
+        <div class="result-grid">
+          <article class="result-card result-card--pass">
+            <img src="./assets/concept-sprint/2026-06-23/round-2000/2000-a-gyeongbokgung-final.png" alt="경복궁 최종 비교 치비 고양이 디오라마 잠금화면 후보" />
+            <div class="result-card__body">
+              <span class="verdict verdict--pass">PASS / landmark</span>
+              <h3>2000-a. 경복궁 최종</h3>
+              <p>
+                랜드마크 매력은 가장 강하다. WebGL에서는 동작하지만 고양이가 크게 확대되어
+                쿠션 하단 안전 여백이 부족해 최종 2순위로 둔다.
+              </p>
+              <a href="./index.html?scene=sprint2000_gyeongbokgung_final&wallpaper">WebGL scene</a>
+            </div>
+          </article>
+
+          <article class="result-card result-card--pass">
+            <img src="./assets/concept-sprint/2026-06-23/round-2000/2000-b-sleep-room-final.png" alt="수면방 최종 비교 치비 고양이 디오라마 잠금화면 후보" />
+            <div class="result-card__body">
+              <span class="verdict verdict--pass">PASS / strongest</span>
+              <h3>2000-b. 수면방 최종</h3>
+              <p>
+                background가 가장 단순하고 subject mask도 안정적이다. 원본 감성, 고양이 중심성,
+                WebGL 안전 여백이 모두 좋아 현재 전체 sprint의 최우선 후보로 둔다.
+              </p>
+              <a href="./index.html?scene=sprint2000_sleep_room_final&wallpaper">WebGL scene</a>
+            </div>
+          </article>
+
+          <article class="result-card result-card--pass">
+            <img src="./assets/concept-sprint/2026-06-23/round-2000/2000-c-pine-final.png" alt="소나무 자연 최종 비교 치비 고양이 디오라마 잠금화면 후보" />
+            <div class="result-card__body">
+              <span class="verdict verdict--pass">PASS / cropped</span>
+              <h3>2000-c. 소나무 최종</h3>
+              <p>
+                자연 배경 감성은 좋지만 고양이와 쿠션이 너무 크게 들어와 강한 오프셋에서 하단이 잘린다.
+                depth는 통과, 최종 적용 후보로는 3순위다.
+              </p>
+              <a href="./index.html?scene=sprint2000_pine_final&wallpaper">WebGL scene</a>
+            </div>
+          </article>
+        </div>
+
+        <figure class="qa-sheet">
+          <img src="./assets/concept-sprint/2026-06-23/round-2000/2000-algorithm-sheet.jpg" alt="20시 후보의 원본, depth, subject mask, cliff mask 비교 시트" />
+          <figcaption>각 행은 후보 하나, 각 열은 원본 / depth / subject mask / cliff mask 순서.</figcaption>
+        </figure>
+      </section>
+
       <section class="band band--log" aria-labelledby="log-title">
         <div class="section-head">
           <p class="eyebrow">Build log</p>
@@ -467,6 +525,18 @@ Avoid tiny wires, crowds, many small props, transparent objects, complex signage
             <span role="cell">Algorithm + WebGL QA</span>
             <span role="cell">Ran make_scene.sh for all 3 and captured wallpaper-mode parallax previews.</span>
             <span role="cell">Pass: 1900-a, 1900-b, 1900-c. Strongest: 1900-b.</span>
+          </div>
+          <div role="row" class="log-row">
+            <span role="cell">20:00</span>
+            <span role="cell">Imagegen</span>
+            <span role="cell">Generated 3 final comparison candidates: Gyeongbokgung, sleep room, pine nature.</span>
+            <span role="cell">All kept 9:16 and reference-locked chibi cat styling.</span>
+          </div>
+          <div role="row" class="log-row">
+            <span role="cell">20:00</span>
+            <span role="cell">Algorithm + WebGL QA</span>
+            <span role="cell">Ran make_scene.sh for all 3 and captured wallpaper-mode parallax previews.</span>
+            <span role="cell">Pass: all 3. Ranking: 2000-b, 2000-a, 2000-c.</span>
           </div>
         </div>
       </section>
