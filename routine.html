@@ -73,7 +73,8 @@
 
         <pre class="prompt-block"><code>9:16 vertical full-bleed Galaxy live lockscreen wallpaper concept.
 Premium handcrafted miniature Korean diorama, warm original Cat Lock mood.
-One personalized cat hero: small cute cat wearing a soft green knit bonnet, sitting on a simple cushion.
+One personalized cat hero: squat chibi tabby cat, oversized round head, tiny body, cute sleepy-grumpy face.
+Keep the green crochet bonnet with scalloped edge and pom-pom ties, mustard woven cushion, and one green yarn ball.
 Depth-safe composition: exactly three clean planes.
 Foreground: cat and cushion, sharp silhouette.
 Midground: one or two large matte props only.
@@ -222,6 +223,64 @@ Avoid tiny wires, crowds, many small props, transparent objects, complex signage
         </ol>
       </section>
 
+      <section class="band band--results" aria-labelledby="results-title">
+        <div class="section-head">
+          <p class="eyebrow">Generated and verified</p>
+          <h2 id="results-title">17:00 레퍼런스 고정 재생성</h2>
+          <p>
+            이전 단순 스튜디오 방향은 원본 레퍼런스와 어긋나서 폐기했다. 이번 라운드는 치비 체형,
+            뚱한 표정, 니트 보닛, 노란 방석을 고정하고 배경만 바꿔 실제 depth 파이프라인과 WebGL
+            월페이퍼 모드로 검증했다.
+          </p>
+        </div>
+
+        <div class="result-grid">
+          <article class="result-card result-card--pass">
+            <img src="./assets/concept-sprint/2026-06-23/round-1700/1700-a-ondol-room.png" alt="온돌방 디오라마 고양이 잠금화면 후보" />
+            <div class="result-card__body">
+              <span class="verdict verdict--pass">PASS / algorithm</span>
+              <h3>1700-a. 온돌방</h3>
+              <p>
+                고양이 스타일과 subject mask는 좋다. 다만 배경이 얌전해서 다음 실내안은 한국적 배경 신호를
+                한 덩어리만 더 넣는다.
+              </p>
+              <a href="./index.html?scene=sprint1700_ondol&wallpaper">WebGL scene</a>
+            </div>
+          </article>
+
+          <article class="result-card result-card--pass">
+            <img src="./assets/concept-sprint/2026-06-23/round-1700/1700-b-gyeongbokgung-diorama.png" alt="경복궁 배경 치비 고양이 디오라마 잠금화면 후보" />
+            <div class="result-card__body">
+              <span class="verdict verdict--pass">PASS / style + depth</span>
+              <h3>1700-b. 경복궁</h3>
+              <p>
+                원본의 고양이 감성과 한국 랜드마크 확장이 동시에 살아 있다. depth/cliff도 배경 파손이 적어
+                현재 라운드의 우선 후보로 둔다.
+              </p>
+              <a href="./index.html?scene=sprint1700_gyeongbokgung&wallpaper">WebGL scene</a>
+            </div>
+          </article>
+
+          <article class="result-card result-card--fail">
+            <img src="./assets/concept-sprint/2026-06-23/round-1700/1700-c-rooftop-jangdokdae.png" alt="장독대 옥상 배경 치비 고양이 디오라마 잠금화면 후보" />
+            <div class="result-card__body">
+              <span class="verdict verdict--fail">FAIL / cliff line</span>
+              <h3>1700-c. 장독대 옥상</h3>
+              <p>
+                장면 매력은 좋지만 cliff mask에 긴 담장 가로선이 떠서 자이로 이동 시 배경 경계가 튈 수 있다.
+                다음 라운드에서는 낮은 담을 더 멀리 보내거나 큰 벽면 하나로 단순화한다.
+              </p>
+              <a href="./index.html?scene=sprint1700_jangdokdae&wallpaper">WebGL scene</a>
+            </div>
+          </article>
+        </div>
+
+        <figure class="qa-sheet">
+          <img src="./assets/concept-sprint/2026-06-23/round-1700/1700-algorithm-sheet.jpg" alt="17시 후보의 원본, depth, subject mask, cliff mask 비교 시트" />
+          <figcaption>각 행은 후보 하나, 각 열은 원본 / depth / subject mask / cliff mask 순서.</figcaption>
+        </figure>
+      </section>
+
       <section class="band band--log" aria-labelledby="log-title">
         <div class="section-head">
           <p class="eyebrow">Build log</p>
@@ -244,6 +303,30 @@ Avoid tiny wires, crowds, many small props, transparent objects, complex signage
             <span role="cell">Reset</span>
             <span role="cell">Generation paused. Strategy rewritten for depth-safe Korean diorama variations.</span>
             <span role="cell">No more bulk generation; create two images per hour only.</span>
+          </div>
+          <div role="row" class="log-row">
+            <span role="cell">16:00</span>
+            <span role="cell">Rejected</span>
+            <span role="cell">Simple studio/room direction was too serious and not close enough to the original chibi reference.</span>
+            <span role="cell">Fail: style mismatch. Prompt tightened around squat chibi cat, bonnet, cushion, yarn.</span>
+          </div>
+          <div role="row" class="log-row">
+            <span role="cell">17:12</span>
+            <span role="cell">Imagegen</span>
+            <span role="cell">Generated 3 reference-locked candidates: ondol room, Gyeongbokgung, rooftop jangdokdae.</span>
+            <span role="cell">All kept 9:16. Cat expression and proportions now match the original reference direction.</span>
+          </div>
+          <div role="row" class="log-row">
+            <span role="cell">17:20</span>
+            <span role="cell">Algorithm QA</span>
+            <span role="cell">Ran make_scene.sh for all 3 and reviewed depth, subject mask, cliff mask.</span>
+            <span role="cell">Pass: 1700-a, 1700-b. Fail: 1700-c due long horizontal cliff line.</span>
+          </div>
+          <div role="row" class="log-row">
+            <span role="cell">17:23</span>
+            <span role="cell">WebGL QA</span>
+            <span role="cell">Captured wallpaper-mode previews with fixed parallax offset.</span>
+            <span role="cell">No blank render. 1700-b is the current strongest candidate.</span>
           </div>
         </div>
       </section>

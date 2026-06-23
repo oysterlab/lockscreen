@@ -179,6 +179,12 @@ p {
   background: #f5f1f7;
 }
 
+.band--results {
+  background: #f6f2e8;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
 .evidence-grid,
 .concept-grid,
 .timeline {
@@ -295,6 +301,97 @@ p {
 
 .concept-grid {
   grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.result-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+}
+
+.result-card--pass {
+  border-top: 5px solid var(--green);
+}
+
+.result-card--fail {
+  border-top: 5px solid var(--coral);
+}
+
+.result-card img {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  background: #2a241f;
+}
+
+.result-card__body {
+  padding: 16px;
+}
+
+.result-card__body h3 {
+  margin: 8px 0 8px;
+  font-size: 18px;
+}
+
+.result-card__body p {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.result-card__body a {
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.verdict {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 9px;
+  border: 1px solid rgba(24, 23, 19, 0.14);
+  color: #29241f;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.verdict--pass {
+  background: rgba(69, 111, 85, 0.14);
+}
+
+.verdict--fail {
+  background: rgba(198, 93, 66, 0.14);
+}
+
+.qa-sheet {
+  max-width: 920px;
+  margin: 22px 0 0;
+}
+
+.qa-sheet img {
+  width: 100%;
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #111;
+}
+
+.qa-sheet figcaption {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .prompt-block {
