@@ -24,7 +24,7 @@ if (qaMode) document.documentElement.classList.add("qa-mode");
 const P3D = sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d/";
 // asset cache-buster: bump on any rebuilt PNG so phones don't serve a stale image
 // (index.html's ?v= only refreshes the code, not these depth/colour PNGs).
-const AV = location.protocol === "file:" ? "" : "?a=dio5";
+const AV = location.protocol === "file:" ? "" : "?a=dio6";
 // scenes that carry an idle-flick animation (assets/photo3d_<scene>/anim/manifest.json):
 // the foreground plate is swapped through a short clip every ~10s, then held.
 const ANIM_SCENES = new Set(["cherry2dio"]);
@@ -72,10 +72,17 @@ const SCENE_OVERRIDES = {
   latte2dio: { depthScale: 1.84, farScale: 0.74, focus: 0.26 },
   nila2dio: { depthScale: 1.84, farScale: 0.74, focus: 0.26 },
   cherry2dio: { depthScale: 1.84, farScale: 0.74, focus: 0.26 },
-  jeju_cherry: { depthScale: 1.84, farScale: 0.74, focus: 0.26 },
+  jeju_cherry: { depthScale: 1.55, farScale: 0.74, focus: 0.26 },
   latteval: { depthScale: 1.72, farScale: 0.68, focus: 0.28 },
 };
 Object.assign(VIEW, SCENE_OVERRIDES[sceneParam] || {});
+
+// fit mode per scene. 'cover' fills the screen (crops the 9:16 plate's sides on a
+// tall phone); 'width' fits the whole image width so the full composition shows —
+// the top/bottom margin is filled by edge-clamp (sky extends up, ground extends
+// down) so there are no black bars. URL override: ?fit=cover|width.
+const SCENE_FIT = { jeju_cherry: "width" };
+const fitMode = params.get("fit") || SCENE_FIT[sceneParam] || "cover";
 
 // Cherry's ear tips are too thin for the full depth mesh: vertices just outside
 // the matte can still be pulled by background depth, making the tip look pinned.
@@ -629,15 +636,22 @@ function resize() {
   const planeW = halfW * 2 * VIEW.pad;
   const planeH = halfH * 2 * VIEW.pad;
 
-  // cover-fit the image into the view, then scale by pad so the view shows the
-  // full cover image and the padded margin maps to image beyond it (orbit room).
+  // map the image onto the plane. k carries the orbit headroom (pad) minus the
+  // overscan margin. 'width' always fits by width (whole image visible, edge-clamp
+  // fills the vertical margin); 'cover' fills the screen, cropping the cross axis.
   const screenAspect = w / h;
-  if (screenAspect < IMG_ASPECT) {
-    cover.set(screenAspect / IMG_ASPECT, 1);
+  const k = (1 - VIEW.overscan) * VIEW.pad;
+  const byWidth = () => cover.set(k, (k * IMG_ASPECT) / screenAspect);
+  const byHeight = () => cover.set((k * screenAspect) / IMG_ASPECT, k);
+  if (fitMode === "width") {
+    byWidth();
+  } else if (fitMode === "height") {
+    byHeight();
   } else {
-    cover.set(1, IMG_ASPECT / screenAspect);
+    // cover: fill the screen by matching the limiting axis, crop the other
+    if (screenAspect < IMG_ASPECT) byHeight();
+    else byWidth();
   }
-  cover.multiplyScalar((1 - VIEW.overscan) * VIEW.pad);
 
   const segX = Math.max(140, Math.round(planeW * 150));
   const segY = Math.max(140, Math.round(planeH * 150));
