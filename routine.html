@@ -281,6 +281,64 @@ Avoid tiny wires, crowds, many small props, transparent objects, complex signage
         </figure>
       </section>
 
+      <section class="band band--results" aria-labelledby="results-1800-title">
+        <div class="section-head">
+          <p class="eyebrow">Generated and verified</p>
+          <h2 id="results-1800-title">18:00 자연 한국 배경 라운드</h2>
+          <p>
+            17시 실패 원인이었던 긴 가로 cliff를 막기 위해 돌담/난간을 프레임 전체에 두지 않고,
+            큰 자연 덩어리와 넓은 배경면만 남겼다. 모든 후보는 원본 레퍼런스의 치비 고양이 비율과
+            초록 니트 보닛을 유지했다.
+          </p>
+        </div>
+
+        <div class="result-grid">
+          <article class="result-card result-card--pass">
+            <img src="./assets/concept-sprint/2026-06-23/round-1800/1800-a-jeju-basalt.png" alt="제주 현무암 배경 치비 고양이 디오라마 잠금화면 후보" />
+            <div class="result-card__body">
+              <span class="verdict verdict--pass">PASS / depth</span>
+              <h3>1800-a. 제주 현무암</h3>
+              <p>
+                수평 벽선 없이 돌무더기와 오름이 분리된다. WebGL 강한 오프셋에서 하단 쿠션이 조금 잘리므로
+                실제 적용 시 orbit을 살짝 낮추는 쪽이 좋다.
+              </p>
+              <a href="./index.html?scene=sprint1800_basalt&wallpaper">WebGL scene</a>
+            </div>
+          </article>
+
+          <article class="result-card result-card--pass">
+            <img src="./assets/concept-sprint/2026-06-23/round-1800/1800-b-pine-picnic.png" alt="소나무 피크닉 배경 치비 고양이 디오라마 잠금화면 후보" />
+            <div class="result-card__body">
+              <span class="verdict verdict--pass">PASS / WebGL</span>
+              <h3>1800-b. 소나무 피크닉</h3>
+              <p>
+                큰 나무줄기 edge가 있지만 화면 가장자리라 WebGL에서 크게 튀지 않았다. 고양이 존재감과
+                레퍼런스 감성이 가장 안정적인 자연 배경 후보로 둔다.
+              </p>
+              <a href="./index.html?scene=sprint1800_pine&wallpaper">WebGL scene</a>
+            </div>
+          </article>
+
+          <article class="result-card result-card--fail">
+            <img src="./assets/concept-sprint/2026-06-23/round-1800/1800-c-tangerine-courtyard.png" alt="귤나무 마당 배경 치비 고양이 디오라마 잠금화면 후보" />
+            <div class="result-card__body">
+              <span class="verdict verdict--fail">FAIL / wall + leaves</span>
+              <h3>1800-c. 귤나무 마당</h3>
+              <p>
+                고양이는 좋지만 배경의 흰 벽 수평선과 귤나무 잎 경계가 cliff mask에 크게 남았다.
+                다음 라운드에서는 full-width wall과 잎 많은 식물을 제외한다.
+              </p>
+              <a href="./index.html?scene=sprint1800_tangerine&wallpaper">WebGL scene</a>
+            </div>
+          </article>
+        </div>
+
+        <figure class="qa-sheet">
+          <img src="./assets/concept-sprint/2026-06-23/round-1800/1800-algorithm-sheet.jpg" alt="18시 후보의 원본, depth, subject mask, cliff mask 비교 시트" />
+          <figcaption>각 행은 후보 하나, 각 열은 원본 / depth / subject mask / cliff mask 순서.</figcaption>
+        </figure>
+      </section>
+
       <section class="band band--log" aria-labelledby="log-title">
         <div class="section-head">
           <p class="eyebrow">Build log</p>
@@ -327,6 +385,18 @@ Avoid tiny wires, crowds, many small props, transparent objects, complex signage
             <span role="cell">WebGL QA</span>
             <span role="cell">Captured wallpaper-mode previews with fixed parallax offset.</span>
             <span role="cell">No blank render. 1700-b is the current strongest candidate.</span>
+          </div>
+          <div role="row" class="log-row">
+            <span role="cell">18:00</span>
+            <span role="cell">Imagegen</span>
+            <span role="cell">Generated 3 nature Korea candidates: Jeju basalt, pine picnic, tangerine courtyard.</span>
+            <span role="cell">All kept 9:16 and reference-locked chibi cat styling.</span>
+          </div>
+          <div role="row" class="log-row">
+            <span role="cell">18:01</span>
+            <span role="cell">Algorithm + WebGL QA</span>
+            <span role="cell">Ran make_scene.sh for all 3 and captured wallpaper-mode parallax previews.</span>
+            <span role="cell">Pass: 1800-a, 1800-b. Fail: 1800-c due full-width wall line and dense leaf cliffs.</span>
           </div>
         </div>
       </section>
