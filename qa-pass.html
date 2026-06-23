@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#17120d" />
+    <title>Cat Lock PASS Interactive QA</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #17120d;
+        --surface: #241b14;
+        --surface-2: #2d2219;
+        --line: rgba(255, 239, 214, 0.2);
+        --text: rgba(255, 247, 234, 0.95);
+        --muted: rgba(255, 247, 234, 0.68);
+        --accent: #9be48f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, ui-sans-serif,
+          system-ui, "Segoe UI", sans-serif;
+      }
+
+      body {
+        min-width: 320px;
+        margin: 0;
+        background:
+          linear-gradient(140deg, rgba(90, 112, 70, 0.16), transparent 38%),
+          linear-gradient(220deg, rgba(198, 93, 66, 0.12), transparent 42%),
+          var(--bg);
+      }
+
+      header,
+      main {
+        width: min(1680px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      header {
+        padding: 28px 0 16px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 980px;
+        margin-bottom: 10px;
+        font-size: clamp(30px, 5vw, 58px);
+        line-height: 1.02;
+        letter-spacing: 0;
+      }
+
+      .lede {
+        max-width: 960px;
+        margin-bottom: 16px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      a {
+        color: var(--text);
+        text-decoration: none;
+        border-bottom: 1px solid rgba(255, 247, 234, 0.42);
+      }
+
+      .nav a {
+        min-height: 34px;
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+        gap: 18px;
+        padding: 10px 0 40px;
+      }
+
+      article {
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .viewer {
+        aspect-ratio: 9 / 16;
+        background: #080604;
+      }
+
+      iframe {
+        width: 100%;
+        height: 100%;
+        display: block;
+        border: 0;
+      }
+
+      .body {
+        padding: 14px;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: var(--accent);
+        color: #15100b;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .round {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      h2 {
+        margin: 0 0 8px;
+        font-size: 18px;
+        line-height: 1.25;
+        letter-spacing: 0;
+      }
+
+      p {
+        margin-bottom: 12px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .actions a {
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .strongest {
+        border-color: rgba(155, 228, 143, 0.5);
+        box-shadow: 0 0 0 1px rgba(155, 228, 143, 0.16) inset;
+      }
+
+      .strongest .body {
+        background:
+          linear-gradient(180deg, rgba(155, 228, 143, 0.08), transparent 42%),
+          var(--surface-2);
+      }
+
+      @media (max-width: 720px) {
+        header,
+        main {
+          width: min(100% - 20px, 1680px);
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+          gap: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>PASS 후보 전체 인터랙티브 QA</h1>
+      <p class="lede">
+        17:00부터 21:00까지 depth/WebGL 검증을 통과한 후보만 모았다. 각 화면 안에서 바로 드래그해서
+        parallax, 하단 크롭, foreground 찢김, 배경 경계 흔들림을 비교한다.
+      </p>
+      <nav class="nav" aria-label="Related QA pages">
+        <a href="./routine.html">전체 루틴 보기</a>
+        <a href="./qa-2100.html">21:00 PASS/FAIL 비교</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="grid" aria-label="All pass case interactive viewers">
+        <article>
+          <div class="viewer">
+            <iframe
+              title="1700-a ondol room interactive preview"
+              loading="lazy"
+              src="./index.html?scene=sprint1700_ondol&amp;qa&amp;fps=45&amp;dpr=1.25"
+            ></iframe>
+          </div>
+          <div class="body">
+            <div class="meta"><span class="badge">PASS</span><span class="round">17:00</span></div>
+            <h2>1700-a. 온돌방</h2>
+            <p>초기 실내 통과안. 고양이 마스크는 좋고 배경은 얌전한 편이라 기준점으로 보기 좋다.</p>
+            <div class="actions">
+              <a href="./index.html?scene=sprint1700_ondol&amp;qa&amp;fps=60&amp;dpr=1.5">크게 열기</a>
+            </div>
+          </div>
+        </article>
+
+        <article>
+          <div class="viewer">
+            <iframe
+              title="1700-b gyeongbokgung interactive preview"
+              loading="lazy"
+              src="./index.html?scene=sprint1700_gyeongbokgung&amp;qa&amp;fps=45&amp;dpr=1.25"
+            ></iframe>
+          </div>
+          <div class="body">
+            <div class="meta"><span class="badge">PASS</span><span class="round">17:00</span></div>
+            <h2>1700-b. 경복궁</h2>
+            <p>랜드마크 확장감이 강한 통과안. 궁궐 배경과 고양이 실루엣 분리를 확인한다.</p>
+            <div class="actions">
+              <a href="./index.html?scene=sprint1700_gyeongbokgung&amp;qa&amp;fps=60&amp;dpr=1.5">크게 열기</a>
+            </div>
+          </div>
+        </article>
+
+        <article>
+          <div class="viewer">
+            <iframe
+              title="1800-a jeju basalt interactive preview"
+              loading="lazy"
+              src="./index.html?scene=sprint1800_basalt&amp;qa&amp;fps=45&amp;dpr=1.25"
+            ></iframe>
+          </div>
+          <div class="body">
+            <div class="meta"><span class="badge">PASS</span><span class="round">18:00</span></div>
+            <h2>1800-a. 제주 현무암</h2>
+            <p>자연 배경 통과안. 강한 드래그에서 하단 쿠션 크롭이 얼마나 보이는지 확인한다.</p>
+            <div class="actions">
+              <a href="./index.html?scene=sprint1800_basalt&amp;qa&amp;fps=60&amp;dpr=1.5">크게 열기</a>
+            </div>
+          </div>
+        </article>
+
+        <article>
+          <div class="viewer">
+            <iframe
+              title="1800-b pine picnic interactive preview"
+              loading="lazy"
+              src="./index.html?scene=sprint1800_pine&amp;qa&amp;fps=45&amp;dpr=1.25"
+            ></iframe>
+          </div>
+          <div class="body">
+            <div class="meta"><span class="badge">PASS</span><span class="round">18:00</span></div>
+            <h2>1800-b. 소나무 피크닉</h2>
+            <p>자연 배경 중 레퍼런스 감성이 안정적인 후보. 가장자리 나무줄기 edge를 확인한다.</p>
+            <div class="actions">
+              <a href="./index.html?scene=sprint1800_pine&amp;qa&amp;fps=60&amp;dpr=1.5">크게 열기</a>
+            </div>
+          </div>
+        </article>
+
+        <article>
+          <div class="viewer">
+            <iframe
+              title="1900-a moon hanji wall interactive preview"
+              loading="lazy"
+              src="./index.html?scene=sprint1900_moon_hanji&amp;qa&amp;fps=45&amp;dpr=1.25"
+            ></iframe>
+          </div>
+          <div class="body">
+            <div class="meta"><span class="badge">PASS</span><span class="round">19:00</span></div>
+            <h2>1900-a. 달 원반 한지 벽</h2>
+            <p>수면 모드 감성이 좋은 후보. 큰 원형 배경이 화면 끝에서 어떻게 움직이는지 확인한다.</p>
+            <div class="actions">
+              <a href="./index.html?scene=sprint1900_moon_hanji&amp;qa&amp;fps=60&amp;dpr=1.5">크게 열기</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="strongest">
+          <div class="viewer">
+            <iframe
+              title="1900-b low lamp blanket interactive preview"
+              loading="lazy"
+              src="./index.html?scene=sprint1900_lamp_blanket&amp;qa&amp;fps=45&amp;dpr=1.25"
+            ></iframe>
+          </div>
+          <div class="body">
+            <div class="meta"><span class="badge">PASS</span><span class="round">19:00 strongest</span></div>
+            <h2>1900-b. 낮은 램프와 담요</h2>
+            <p>19시 최우선 후보. 단순 배경, 안정적인 subject mask, 따뜻한 실내감이 균형 좋다.</p>
+            <div class="actions">
+              <a href="./index.html?scene=sprint1900_lamp_blanket&amp;qa&amp;fps=60&amp;dpr=1.5">크게 열기</a>
+            </div>
+          </div>
+        </article>
+
+        <article>
+          <div class="viewer">
+            <iframe
+              title="1900-c indigo fabric interactive preview"
+              loading="lazy"
+              src="./index.html?scene=sprint1900_indigo_fabric&amp;qa&amp;fps=45&amp;dpr=1.25"
+            ></iframe>
+          </div>
+          <div class="body">
+            <div class="meta"><span class="badge">PASS</span><span class="round">19:00</span></div>
+            <h2>1900-c. 남색 보자기 패널</h2>
+            <p>패브릭 배경 통과안. 천 seam과 작은 디테일이 드래그에서 튀는지 확인한다.</p>
+            <div class="actions">
+              <a href="./index.html?scene=sprint1900_indigo_fabric&amp;qa&amp;fps=60&amp;dpr=1.5">크게 열기</a>
+            </div>
+          </div>
+        </article>
+
+        <article>
+          <div class="viewer">
+            <iframe
+              title="2000-a gyeongbokgung final interactive preview"
+              loading="lazy"
+              src="./index.html?scene=sprint2000_gyeongbokgung_final&amp;qa&amp;fps=45&amp;dpr=1.25"
+            ></iframe>
+          </div>
+          <div class="body">
+            <div class="meta"><span class="badge">PASS</span><span class="round">20:00</span></div>
+            <h2>2000-a. 경복궁 최종</h2>
+            <p>랜드마크 최종 후보. 고양이 확대감과 하단 안전 여백을 같이 본다.</p>
+            <div class="actions">
+              <a href="./index.html?scene=sprint2000_gyeongbokgung_final&amp;qa&amp;fps=60&amp;dpr=1.5">크게 열기</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="strongest">
+          <div class="viewer">
+            <iframe
+              title="2000-b sleep room final interactive preview"
+              loading="lazy"
+              src="./index.html?scene=sprint2000_sleep_room_final&amp;qa&amp;fps=45&amp;dpr=1.25"
+            ></iframe>
+          </div>
+          <div class="body">
+            <div class="meta"><span class="badge">PASS</span><span class="round">20:00 strongest</span></div>
+            <h2>2000-b. 수면방 최종</h2>
+            <p>20시 전체 최우선 후보. 가장 단순하고 안정적인 배경으로 실제 적용 안전성이 좋다.</p>
+            <div class="actions">
+              <a href="./index.html?scene=sprint2000_sleep_room_final&amp;qa&amp;fps=60&amp;dpr=1.5">크게 열기</a>
+            </div>
+          </div>
+        </article>
+
+        <article>
+          <div class="viewer">
+            <iframe
+              title="2000-c pine final interactive preview"
+              loading="lazy"
+              src="./index.html?scene=sprint2000_pine_final&amp;qa&amp;fps=45&amp;dpr=1.25"
+            ></iframe>
+          </div>
+          <div class="body">
+            <div class="meta"><span class="badge">PASS</span><span class="round">20:00</span></div>
+            <h2>2000-c. 소나무 최종</h2>
+            <p>자연 배경 최종 후보. 하단 크롭과 고양이 크기 부담을 확인한다.</p>
+            <div class="actions">
+              <a href="./index.html?scene=sprint2000_pine_final&amp;qa&amp;fps=60&amp;dpr=1.5">크게 열기</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="strongest">
+          <div class="viewer">
+            <iframe
+              title="2100-a chibi alley interactive preview"
+              loading="lazy"
+              src="./index.html?scene=sprint2100_chibi_alley&amp;qa&amp;fps=45&amp;dpr=1.25"
+            ></iframe>
+          </div>
+          <div class="body">
+            <div class="meta"><span class="badge">PASS</span><span class="round">21:00 release</span></div>
+            <h2>2100-a. 치비 서울 골목</h2>
+            <p>레퍼런스 재고정 후 최종 출시 후보 1순위. 캐릭터성, 한국 동네감, 마스크 안정성이 가장 좋다.</p>
+            <div class="actions">
+              <a href="./index.html?scene=sprint2100_chibi_alley&amp;qa&amp;fps=60&amp;dpr=1.5">크게 열기</a>
+              <a href="./qa-2100.html">21시 비교 보기</a>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>
