@@ -455,6 +455,64 @@ Avoid tiny wires, crowds, many small props, transparent objects, complex signage
         </figure>
       </section>
 
+      <section class="band band--results" aria-labelledby="results-2100-title">
+        <div class="section-head">
+          <p class="eyebrow">Generated, verified, interactive</p>
+          <h2 id="results-2100-title">21:00 레퍼런스 재고정 라운드</h2>
+          <p>
+            이전 21시 후보가 너무 단순하고 고양이가 진지해 보여 원본 레퍼런스의 치비 비율, 장난스러운 표정,
+            한국 동네 디오라마 밀도를 다시 고정했다. 세 후보 모두 WebGL까지 생성했고,
+            <a href="./qa-2100.html">드래그 QA 페이지</a>에서 PASS/FAIL 후보를 직접 흔들어 볼 수 있다.
+          </p>
+        </div>
+
+        <div class="result-grid">
+          <article class="result-card result-card--pass">
+            <img src="./assets/concept-sprint/2026-06-23/round-2100/2100-a-chibi-alley.png" alt="21시 치비 서울 골목 디오라마 잠금화면 후보" />
+            <div class="result-card__body">
+              <span class="verdict verdict--pass">PASS / release candidate</span>
+              <h3>2100-a. 치비 서울 골목</h3>
+              <p>
+                원본 레퍼런스의 생활감과 고양이 캐릭터성이 가장 잘 살아 있다.
+                subject mask가 고양이 중심으로 안정적으로 잡혀 최종 출시 후보 1순위로 둔다.
+              </p>
+              <a href="./index.html?scene=sprint2100_chibi_alley&amp;qa&amp;fps=60&amp;dpr=1.5">Drag WebGL scene</a>
+            </div>
+          </article>
+
+          <article class="result-card result-card--fail">
+            <img src="./assets/concept-sprint/2026-06-23/round-2100/2100-b-chibi-ondol-room.png" alt="21시 치비 온돌방 디오라마 잠금화면 후보" />
+            <div class="result-card__body">
+              <span class="verdict verdict--fail">FAIL / foreground tear</span>
+              <h3>2100-b. 치비 온돌방</h3>
+              <p>
+                캐릭터는 귀엽지만 전경 테이블과 바닥이 subject mask에 함께 붙었다.
+                WebGL 드래그에서 하단 어두운 찢김이 보여 출시 후보에서는 제외한다.
+              </p>
+              <a href="./index.html?scene=sprint2100_chibi_ondol_room&amp;qa&amp;fps=60&amp;dpr=1.5">Drag WebGL scene</a>
+            </div>
+          </article>
+
+          <article class="result-card result-card--warn">
+            <img src="./assets/concept-sprint/2026-06-23/round-2100/2100-c-chibi-rooftop.png" alt="21시 치비 옥상 장독대 디오라마 잠금화면 후보" />
+            <div class="result-card__body">
+              <span class="verdict verdict--warn">WARN / character keeper</span>
+              <h3>2100-c. 치비 옥상 장독대</h3>
+              <p>
+                표정과 한국 옥상 배경은 좋다. 다만 쿠션/바닥 일부가 전경으로 같이 묶여
+                강한 드래그에서 하단 경계가 약해진다. 다음 라운드의 표정 레퍼런스로만 유지한다.
+              </p>
+              <a href="./index.html?scene=sprint2100_chibi_rooftop&amp;qa&amp;fps=60&amp;dpr=1.5">Drag WebGL scene</a>
+            </div>
+          </article>
+        </div>
+
+        <figure class="qa-sheet">
+          <img src="./assets/concept-sprint/2026-06-23/round-2100/2100-algorithm-sheet.jpg" alt="21시 후보의 원본, depth, subject mask, cliff mask 비교 시트" />
+          <figcaption>각 행은 후보 하나, 각 열은 원본 / depth / subject mask / cliff mask 순서.</figcaption>
+        </figure>
+      </section>
+
       <section class="band band--log" aria-labelledby="log-title">
         <div class="section-head">
           <p class="eyebrow">Build log</p>
@@ -537,6 +595,18 @@ Avoid tiny wires, crowds, many small props, transparent objects, complex signage
             <span role="cell">Algorithm + WebGL QA</span>
             <span role="cell">Ran make_scene.sh for all 3 and captured wallpaper-mode parallax previews.</span>
             <span role="cell">Pass: all 3. Ranking: 2000-b, 2000-a, 2000-c.</span>
+          </div>
+          <div role="row" class="log-row">
+            <span role="cell">21:00</span>
+            <span role="cell">Imagegen</span>
+            <span role="cell">Regenerated 3 reference-locked chibi candidates: Seoul alley, ondol room, rooftop jangdokdae.</span>
+            <span role="cell">Restored original reference emotion: playful chibi cat, Korean miniature density, 9:16.</span>
+          </div>
+          <div role="row" class="log-row">
+            <span role="cell">21:00</span>
+            <span role="cell">Algorithm + interactive WebGL QA</span>
+            <span role="cell">Ran make_scene.sh, captured WebGL previews, and added qa-2100.html for direct drag testing.</span>
+            <span role="cell">Pass: 2100-a. Fail: 2100-b. Warn: 2100-c.</span>
           </div>
         </div>
       </section>

@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#19130e" />
+    <title>21:00 Cat Lock Interactive QA</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #19130e;
+        --panel: #241b14;
+        --line: rgba(255, 239, 214, 0.2);
+        --text: rgba(255, 246, 232, 0.94);
+        --muted: rgba(255, 246, 232, 0.68);
+        --pass: #9be48f;
+        --warn: #ffd079;
+        --fail: #ff9a8d;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Display", Inter, ui-sans-serif,
+          system-ui, "Segoe UI", sans-serif;
+      }
+
+      header,
+      main {
+        width: min(1440px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      header {
+        padding: 28px 0 18px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(26px, 4vw, 44px);
+        line-height: 1.05;
+        letter-spacing: 0;
+      }
+
+      .lede {
+        max-width: 850px;
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(280px, 1fr));
+        gap: 18px;
+        align-items: start;
+        padding: 12px 0 34px;
+      }
+
+      article {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .viewer {
+        position: relative;
+        aspect-ratio: 9 / 16;
+        background: #080604;
+      }
+
+      iframe {
+        width: 100%;
+        height: 100%;
+        display: block;
+        border: 0;
+      }
+
+      .info {
+        padding: 14px 14px 16px;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.25;
+        letter-spacing: 0;
+      }
+
+      .badge {
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0;
+        color: #15100b;
+      }
+
+      .pass {
+        background: var(--pass);
+      }
+
+      .warn {
+        background: var(--warn);
+      }
+
+      .fail {
+        background: var(--fail);
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+
+      a {
+        color: var(--text);
+        text-decoration: none;
+        border-bottom: 1px solid rgba(255, 246, 232, 0.45);
+        font-size: 13px;
+      }
+
+      .sheet {
+        margin: 0 0 40px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--panel);
+      }
+
+      .sheet__head {
+        padding: 14px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .sheet img {
+        width: 100%;
+        display: block;
+      }
+
+      @media (max-width: 1020px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>21:00 인터랙티브 QA</h1>
+      <p class="lede">
+        각 화면 안에서 마우스나 손가락으로 드래그해서 실제 WebGL parallax를 확인한다.
+        UI는 숨겼지만 드래그 입력은 살아 있다. PASS/FAIL은 depth 마스크, cliff 컷, WebGL 캡처 기준이다.
+      </p>
+    </header>
+
+    <main>
+      <section class="grid" aria-label="Interactive QA viewers">
+        <article>
+          <div class="viewer">
+            <iframe
+              title="A chibi alley pass interactive preview"
+              src="./index.html?scene=sprint2100_chibi_alley&amp;qa&amp;fps=60&amp;dpr=1.5"
+            ></iframe>
+          </div>
+          <div class="info">
+            <div class="meta">
+              <span class="badge pass">PASS</span>
+              <h2>A. 치비 서울 골목</h2>
+            </div>
+            <p>
+              원본 레퍼런스 감성이 가장 잘 살아 있고, 고양이 마스크가 독립적으로 잡힌다.
+              큰 레이어가 전경/중경/후경으로 읽혀 출시 후보 1순위다.
+            </p>
+            <div class="actions">
+              <a href="./index.html?scene=sprint2100_chibi_alley&amp;qa&amp;fps=60&amp;dpr=1.5">크게 열기</a>
+              <a href="./assets/concept-sprint/2026-06-23/round-2100/2100-a-webgl.png">WebGL 캡처</a>
+            </div>
+          </div>
+        </article>
+
+        <article>
+          <div class="viewer">
+            <iframe
+              title="B chibi ondol room fail interactive preview"
+              src="./index.html?scene=sprint2100_chibi_ondol_room&amp;qa&amp;fps=60&amp;dpr=1.5"
+            ></iframe>
+          </div>
+          <div class="info">
+            <div class="meta">
+              <span class="badge fail">FAIL</span>
+              <h2>B. 치비 온돌방</h2>
+            </div>
+            <p>
+              캐릭터는 좋지만 전경 테이블/바닥이 subject mask에 같이 붙는다.
+              드래그하면 하단에 어두운 찢김이 보여 출시 후보에서는 제외한다.
+            </p>
+            <div class="actions">
+              <a href="./index.html?scene=sprint2100_chibi_ondol_room&amp;qa&amp;fps=60&amp;dpr=1.5">크게 열기</a>
+              <a href="./assets/concept-sprint/2026-06-23/round-2100/2100-b-webgl.png">WebGL 캡처</a>
+            </div>
+          </div>
+        </article>
+
+        <article>
+          <div class="viewer">
+            <iframe
+              title="C chibi rooftop warning interactive preview"
+              src="./index.html?scene=sprint2100_chibi_rooftop&amp;qa&amp;fps=60&amp;dpr=1.5"
+            ></iframe>
+          </div>
+          <div class="info">
+            <div class="meta">
+              <span class="badge warn">WARN</span>
+              <h2>C. 치비 옥상 장독대</h2>
+            </div>
+            <p>
+              고양이 표정과 한국 옥상 콘셉트는 좋다. 다만 쿠션/바닥 일부가 전경에 함께 묶여
+              큰 드래그에서 하단 경계가 약간 무너진다.
+            </p>
+            <div class="actions">
+              <a href="./index.html?scene=sprint2100_chibi_rooftop&amp;qa&amp;fps=60&amp;dpr=1.5">크게 열기</a>
+              <a href="./assets/concept-sprint/2026-06-23/round-2100/2100-c-webgl.png">WebGL 캡처</a>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="sheet" aria-labelledby="sheet-title">
+        <div class="sheet__head">
+          <h2 id="sheet-title">Algorithm Sheet</h2>
+          <p>행은 A/B/C, 열은 원본, depth, subject mask, cliff 순서다.</p>
+        </div>
+        <img
+          src="./assets/concept-sprint/2026-06-23/round-2100/2100-algorithm-sheet.jpg"
+          alt="21:00 algorithm QA sheet"
+        />
+      </section>
+    </main>
+  </body>
+</html>

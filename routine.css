@@ -325,6 +325,10 @@ p {
   border-top: 5px solid var(--coral);
 }
 
+.result-card--warn {
+  border-top: 5px solid var(--gold);
+}
+
 .result-card img {
   width: 100%;
   aspect-ratio: 9 / 16;
@@ -372,6 +376,10 @@ p {
 
 .verdict--fail {
   background: rgba(198, 93, 66, 0.14);
+}
+
+.verdict--warn {
+  background: rgba(184, 135, 53, 0.18);
 }
 
 .qa-sheet {

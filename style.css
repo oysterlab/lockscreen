@@ -204,7 +204,10 @@ noscript {
 
 .wallpaper-mode .clock,
 .wallpaper-mode .controls,
-.wallpaper-mode .status {
+.wallpaper-mode .status,
+.qa-mode .clock,
+.qa-mode .controls,
+.qa-mode .status {
   display: none;
 }
 

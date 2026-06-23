@@ -18,7 +18,9 @@ import * as THREE from "three";
 const params = new URLSearchParams(location.search);
 const sceneParam = params.get("scene");
 const wallpaperMode = params.has("wallpaper");
+const qaMode = params.has("qa");
 if (wallpaperMode) document.documentElement.classList.add("wallpaper-mode");
+if (qaMode) document.documentElement.classList.add("qa-mode");
 const P3D = sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d/";
 // asset cache-buster: bump on any rebuilt PNG so phones don't serve a stale image
 // (index.html's ?v= only refreshes the code, not these depth/colour PNGs).
