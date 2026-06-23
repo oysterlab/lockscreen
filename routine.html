@@ -339,6 +339,64 @@ Avoid tiny wires, crowds, many small props, transparent objects, complex signage
         </figure>
       </section>
 
+      <section class="band band--results" aria-labelledby="results-1900-title">
+        <div class="section-head">
+          <p class="eyebrow">Generated and verified</p>
+          <h2 id="results-1900-title">19:00 수면 모드 라운드</h2>
+          <p>
+            18시 실패 원인이었던 full-width wall, 잎 많은 식물, 복잡한 배경 경계를 모두 빼고
+            야간 실내 배경만 테스트했다. 세 후보 모두 고양이 윤곽 중심으로 cliff가 잡혀 WebGL
+            월페이퍼 모드에서 통과했다.
+          </p>
+        </div>
+
+        <div class="result-grid">
+          <article class="result-card result-card--pass">
+            <img src="./assets/concept-sprint/2026-06-23/round-1900/1900-a-moon-hanji-wall.png" alt="달 원반 한지 벽 배경 치비 고양이 디오라마 잠금화면 후보" />
+            <div class="result-card__body">
+              <span class="verdict verdict--pass">PASS / mood</span>
+              <h3>1900-a. 달 원반 한지 벽</h3>
+              <p>
+                수면 모드 감성이 가장 강하다. 다만 WebGL 오프셋에서 큰 달이 화면 끝에 걸리므로
+                다음 최종안에서는 원형 오브젝트를 더 안쪽에 둔다.
+              </p>
+              <a href="./index.html?scene=sprint1900_moon_hanji&wallpaper">WebGL scene</a>
+            </div>
+          </article>
+
+          <article class="result-card result-card--pass">
+            <img src="./assets/concept-sprint/2026-06-23/round-1900/1900-b-low-lamp-blanket.png" alt="낮은 램프와 보자기 담요 배경 치비 고양이 디오라마 잠금화면 후보" />
+            <div class="result-card__body">
+              <span class="verdict verdict--pass">PASS / strongest</span>
+              <h3>1900-b. 낮은 램프와 담요</h3>
+              <p>
+                배경이 가장 단순하고 subject mask도 안정적이다. 고양이 중심성, 따뜻한 실내감,
+                depth 안정성이 모두 좋아 현재 19시 최우선 후보로 둔다.
+              </p>
+              <a href="./index.html?scene=sprint1900_lamp_blanket&wallpaper">WebGL scene</a>
+            </div>
+          </article>
+
+          <article class="result-card result-card--pass">
+            <img src="./assets/concept-sprint/2026-06-23/round-1900/1900-c-indigo-fabric-nook.png" alt="남색 보자기 패브릭 배경 치비 고양이 디오라마 잠금화면 후보" />
+            <div class="result-card__body">
+              <span class="verdict verdict--pass">PASS / textile</span>
+              <h3>1900-c. 남색 보자기 패널</h3>
+              <p>
+                패브릭 seam이 예상보다 안정적이었다. 별 자수는 작지만 cliff에 크게 남지 않아 통과,
+                다만 최종안에서는 작은 별 수를 더 줄이는 편이 낫다.
+              </p>
+              <a href="./index.html?scene=sprint1900_indigo_fabric&wallpaper">WebGL scene</a>
+            </div>
+          </article>
+        </div>
+
+        <figure class="qa-sheet">
+          <img src="./assets/concept-sprint/2026-06-23/round-1900/1900-algorithm-sheet.jpg" alt="19시 후보의 원본, depth, subject mask, cliff mask 비교 시트" />
+          <figcaption>각 행은 후보 하나, 각 열은 원본 / depth / subject mask / cliff mask 순서.</figcaption>
+        </figure>
+      </section>
+
       <section class="band band--log" aria-labelledby="log-title">
         <div class="section-head">
           <p class="eyebrow">Build log</p>
@@ -397,6 +455,18 @@ Avoid tiny wires, crowds, many small props, transparent objects, complex signage
             <span role="cell">Algorithm + WebGL QA</span>
             <span role="cell">Ran make_scene.sh for all 3 and captured wallpaper-mode parallax previews.</span>
             <span role="cell">Pass: 1800-a, 1800-b. Fail: 1800-c due full-width wall line and dense leaf cliffs.</span>
+          </div>
+          <div role="row" class="log-row">
+            <span role="cell">19:00</span>
+            <span role="cell">Imagegen</span>
+            <span role="cell">Generated 3 sleep-mode Korean room candidates: moon hanji wall, low lamp blanket, indigo fabric nook.</span>
+            <span role="cell">All kept 9:16 and avoided window grids, plants, smoke, mirrors, and full-width wall lines.</span>
+          </div>
+          <div role="row" class="log-row">
+            <span role="cell">19:00</span>
+            <span role="cell">Algorithm + WebGL QA</span>
+            <span role="cell">Ran make_scene.sh for all 3 and captured wallpaper-mode parallax previews.</span>
+            <span role="cell">Pass: 1900-a, 1900-b, 1900-c. Strongest: 1900-b.</span>
           </div>
         </div>
       </section>
