@@ -257,6 +257,10 @@ p {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.timeline--wide {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
 .slot {
   min-height: 230px;
   padding: 18px;
@@ -272,11 +276,12 @@ p {
 }
 
 .slot h3 {
-  margin-top: 8px;
+  margin: 8px 0 0;
+  font-size: 16px;
 }
 
 .slot p {
-  margin-bottom: 0;
+  margin-bottom: 4px;
   font-size: 14px;
 }
 
@@ -290,6 +295,26 @@ p {
 
 .concept-grid {
   grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+}
+
+.prompt-block {
+  max-width: 960px;
+  margin: 0;
+  padding: 20px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #172018;
+  color: #f4f0e8;
+  box-shadow: var(--shadow);
+  white-space: pre-wrap;
+}
+
+.prompt-block code {
+  font-family:
+    "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.65;
 }
 
 .concept {

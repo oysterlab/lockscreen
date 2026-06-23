@@ -3,317 +3,248 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f3efe7" />
-    <title>Cat Lock Sprint - 2026-06-22</title>
+    <meta name="theme-color" content="#f2f4ef" />
+    <title>Cat Lock Depth-Safe Sprint - 2026-06-23</title>
     <link rel="stylesheet" href="./routine.css" />
   </head>
   <body>
     <header class="hero">
       <div class="hero__inner">
-        <p class="eyebrow">2026.06.22 09:00-21:00 KST</p>
-        <h1>Cat Lock 디자인 리서치 스프린트</h1>
+        <p class="eyebrow">2026.06.23 09:00-21:00 KST</p>
+        <h1>Depth-Safe 디오라마 잠금화면 전략</h1>
         <p class="lede">
-          사용자 고양이 사진을 넣었을 때 생성되는 나만의 인터랙티브 잠금화면과,
-          현재 90년대 서울풍 배경을 넘어선 다양한 배경 무드를 1시간 단위로 번갈아 검증한다.
+          오늘은 이미지를 무작정 많이 만들지 않는다. 원본의 따뜻한 한국 동네 감성, 작은 니트 모자 고양이,
+          손으로 만든 미니어처 질감은 유지하고, depth 추출에 유리한 단순한 3단 레이어 배경만 만든다.
         </p>
         <div class="hero__meta" aria-label="Sprint summary">
-          <span>12 hourly slots</span>
-          <span>Cat personalization x Background lab</span>
-          <span>Galaxy live wallpaper context</span>
+          <span>매시간 2안</span>
+          <span>9:16 fixed</span>
+          <span>no bokeh / no mirror / no smoke</span>
+          <span>not Japanese</span>
         </div>
       </div>
     </header>
 
     <main>
-      <section class="band band--research" aria-labelledby="research-title">
+      <section class="band band--research" aria-labelledby="rules-title">
         <div class="section-head">
-          <p class="eyebrow">Research base</p>
-          <h2 id="research-title">오늘 제작 판단 기준</h2>
+          <p class="eyebrow">Non-negotiables</p>
+          <h2 id="rules-title">생성 전에 고정할 제작 규칙</h2>
           <p>
-            시안은 단순 취향이 아니라 모바일 사용 밀도, 잠금화면 개인화 습관, pet owner 정서,
-            2026 시각 트렌드에서 바로 끌어온 가설로 만든다.
+            아래 규칙을 모든 imagegen 프롬프트에 반복해서 넣는다. 목적은 예쁜 한 장이 아니라
+            고양이 사진 업로드 후 3D-photo/depth/live wallpaper로 안정적으로 변환되는 원본을 얻는 것이다.
           </p>
         </div>
 
         <div class="evidence-grid">
           <article class="evidence">
-            <strong>한국은 잠금화면 실험에 충분히 모바일 중심이다.</strong>
-            <p>
-              DataReportal 2026 기준 한국 인터넷 보급률은 97.9%, 소셜 미디어 user identities는
-              인구의 95.4%, 모바일 연결은 인구 대비 118%다.
-            </p>
-            <a href="https://datareportal.com/reports/digital-2026-south-korea">DataReportal South Korea</a>
+            <strong>3단 레이어만 허용</strong>
+            <p>foreground는 고양이와 쿠션, midground는 큰 소품 1-2개, background는 벽/담장/랜드마크 한 덩어리로 제한한다.</p>
           </article>
-
           <article class="evidence">
-            <strong>Galaxy 사용자는 잠금화면 순환과 갤러리 기반 개인화에 이미 익숙하다.</strong>
-            <p>
-              Samsung은 Dynamic Lock Screen 자동 업데이트와 갤러리의 사진/비디오 최대 15개 선택 흐름을
-              공식 지원한다. 우리 실험은 이 습관 위에 "내 고양이 + 인터랙션"을 얹는다.
-            </p>
-            <a href="https://www.samsung.com/in/support/mobile-devices/set-up-dynamic-lock-screen/">Samsung Dynamic Lock Screen</a>
+            <strong>블러와 보케 금지</strong>
+            <p>depth map이 흐려지지 않도록 shallow depth of field, bokeh, dreamy blur, haze, fog 같은 표현을 쓰지 않는다.</p>
           </article>
-
           <article class="evidence">
-            <strong>고양이는 장식이 아니라 정체성 소재다.</strong>
-            <p>
-              APPA 2025 리포트를 다룬 PetfoodIndustry는 Gen Z pet owner 증가, multi-pet 성향,
-              젊은 남성층의 cat ownership 증가를 핵심 변화로 짚었다.
-            </p>
-            <a href="https://www.petfoodindustry.com/pet-food-market/market-trends-and-reports/news/15741428/report-pet-ownership-expands-as-gen-z-shifts-trends">PetfoodIndustry / APPA</a>
+            <strong>반사/거울/유리 최소화</strong>
+            <p>거울, 유리벽, 물 반사, 크롬 금속, 화면 반사는 depth 추출을 헷갈리게 하므로 금지하거나 아주 작게만 둔다.</p>
           </article>
-
           <article class="evidence">
-            <strong>2026 개인화는 "정돈된 완성도"보다 "내 취향의 세계"가 중요하다.</strong>
-            <p>
-              Pinterest Predicts 2026은 nonconformity, self-preservation, escapism을 큰 축으로 보고,
-              Pen Pals, FunHaus, Afrohemian 같은 감정적이고 이야기 있는 스타일을 제시한다.
-            </p>
-            <a href="https://newsroom.pinterest.com/en-au/news/pinterest-predicts-nonconformity-self-preservation-and-escapism-drive-21-trends-for-2026/">Pinterest Predicts 2026</a>
+            <strong>한국적이되 일본스럽지 않게</strong>
+            <p>tatami, shoji, torii, shrine, kimono, onsen, Japanese tea room 같은 단어를 피하고, 한옥 마당, 보자기, 장독, 궁궐 담장, 서울 성곽을 쓴다.</p>
           </article>
-
           <article class="evidence">
-            <strong>레트로 테크와 lo-fi는 고양이 인터랙션을 설명하지 않고도 느끼게 만든다.</strong>
-            <p>
-              Canva 2026은 Prompt Playground에서 lo-fi, retro-tech, AI experimentation이 감정적 디자인으로
-              이동한다고 분석했다. 이 축은 "사진 업로드 후 살아나는 잠금화면"에 잘 맞는다.
-            </p>
-            <a href="https://www.canva.com/newsroom/news/design-trends-2026/">Canva Design Trends 2026</a>
+            <strong>9:16 잠금화면 고정</strong>
+            <p>모든 산출물은 vertical 9:16 full-bleed wallpaper. UI, 시계, 텍스트, 워터마크, 로고는 넣지 않는다.</p>
           </article>
-
           <article class="evidence">
-            <strong>카테고리 다양성은 기대값이다.</strong>
-            <p>
-              Google Play의 wallpaper/theme 앱들은 pastel, minimal, neon, cute, anime, nature, space 등
-              매우 넓은 카테고리를 내세운다. 하나의 90년대 서울풍만으로는 테스트 폭이 좁다.
-            </p>
-            <a href="https://play.google.com/store/apps/details?hl=en_US&id=com.widget.icon.theme">Themie on Google Play</a>
+            <strong>원본 감성 유지</strong>
+            <p>작은 고양이, 니트 모자, 따뜻한 저녁빛, 손으로 만든 디오라마, 과하지 않은 한국 생활감이 중심이다.</p>
           </article>
         </div>
       </section>
 
-      <section class="band" aria-labelledby="loop-title">
+      <section class="band" aria-labelledby="prompt-title">
         <div class="section-head">
-          <p class="eyebrow">Operating loop</p>
-          <h2 id="loop-title">매시간 실행 루틴</h2>
-          <p>
-            각 슬롯은 조사 10분, 방향 결정 10분, 제작 25분, 페이지 누적 및 QA 15분으로 고정한다.
-            결과물은 아래 로그와 시안 보드에 계속 추가한다.
-          </p>
+          <p class="eyebrow">Base prompt block</p>
+          <h2 id="prompt-title">모든 생성에 붙일 공통 프롬프트</h2>
+          <p>매시간 A/B 안의 배경만 바꾸고, 이 공통 블록은 유지한다.</p>
         </div>
 
-        <ol class="loop">
-          <li><strong>Research check</strong><span>트렌드/타깃/경쟁 앱에서 가설 1개만 뽑는다.</span></li>
-          <li><strong>Design hypothesis</strong><span>누가 왜 잠금화면으로 쓰는지 한 문장으로 쓴다.</span></li>
-          <li><strong>Mock or background</strong><span>시안 1개 또는 배경 실험 1개를 만든다.</span></li>
-          <li><strong>Interaction note</strong><span>자이로/패럴랙스/12fps 영상 중 무엇이 핵심인지 기록한다.</span></li>
-          <li><strong>Log</strong><span>GitHub Pages 페이지에 근거, 이미지, 다음 질문을 누적한다.</span></li>
-        </ol>
+        <pre class="prompt-block"><code>9:16 vertical full-bleed Galaxy live lockscreen wallpaper concept.
+Premium handcrafted miniature Korean diorama, warm original Cat Lock mood.
+One personalized cat hero: small cute cat wearing a soft green knit bonnet, sitting on a simple cushion.
+Depth-safe composition: exactly three clean planes.
+Foreground: cat and cushion, sharp silhouette.
+Midground: one or two large matte props only.
+Background: one simple wall, room surface, courtyard, or landmark silhouette.
+Sharp edges, clear object separation, matte clay/felt/wood/paper textures.
+No phone UI, no clock, no readable text, no logo, no watermark.
+No bokeh, no heavy blur, no haze, no smoke, no mirrors, no reflective glass, no water reflection.
+Not Japanese: avoid tatami, shoji, torii, shrine, kimono, onsen, Japanese tea room.
+Avoid tiny wires, crowds, many small props, transparent objects, complex signage.</code></pre>
       </section>
 
       <section class="band band--schedule" aria-labelledby="schedule-title">
         <div class="section-head">
-          <p class="eyebrow">Hourly plan</p>
-          <h2 id="schedule-title">21:00까지 번갈아 진행할 슬롯</h2>
+          <p class="eyebrow">Hourly strategy</p>
+          <h2 id="schedule-title">오늘 밤 9시까지 매시간 2개씩 만들 전략</h2>
+          <p>
+            각 슬롯은 A/B 두 장만 생성한다. 생성 후에는 1장이라도 depth-safe 기준을 통과하지 못하면
+            그 슬롯은 더 복잡하게 만들지 말고 같은 배경을 단순화해서 재생성한다.
+          </p>
         </div>
 
-        <div class="timeline">
+        <div class="timeline timeline--wide">
           <article class="slot slot--cat">
             <time>09:00</time>
-            <span>Cat personalization</span>
-            <h3>Clean Pet Portrait</h3>
-            <p>실제 고양이 사진의 인식성을 최우선으로 두고, 배경은 절제된 프리미엄 라이프스타일 톤으로 낮춘다.</p>
+            <span>Core reset</span>
+            <h3>A. 한옥 마당 오후빛</h3>
+            <p>낮은 돌마루, 장독 1개, 흙담 한 면. 고양이와 담장 사이 깊이를 명확히 둔다.</p>
+            <h3>B. 한국 아파트 방 창가</h3>
+            <p>무지 커튼, 낮은 러그, 큰 창틀. 실내지만 원본처럼 따뜻하고 조용하게.</p>
           </article>
+
           <article class="slot slot--bg">
             <time>10:00</time>
-            <span>Background lab</span>
-            <h3>Han River Blue Hour</h3>
-            <p>서울 레트로 대신 한강 노을, 다리 조명, 아파트 창빛으로 한국적이지만 넓고 차분한 배경을 테스트한다.</p>
+            <span>Korean landmark</span>
+            <h3>A. 경복궁 근정전 마당</h3>
+            <p>고양이는 전경, 넓은 석조 마당은 중경, 근정전은 단순한 원경 실루엣.</p>
+            <h3>B. 서울 성곽 낮은 담</h3>
+            <p>성곽 돌담 한 줄과 하늘. 랜드마크 느낌은 있지만 선과 소품은 적게.</p>
           </article>
+
           <article class="slot slot--cat">
             <time>11:00</time>
-            <span>Cat personalization</span>
-            <h3>Collectible Shelf</h3>
-            <p>고양이를 피규어로 만들기보다, 사용자의 방 한켠에 놓인 수집품처럼 배치한다. 굿즈 감도를 검증한다.</p>
+            <span>Room pack</span>
+            <h3>A. 책상 위 보자기 천</h3>
+            <p>보자기 패턴은 크게, 소품은 연필꽂이 1개만. 종이/천 질감으로 matte하게.</p>
+            <h3>B. 침대 옆 낮은 조명</h3>
+            <p>램프, 쿠션, 벽면만 사용. 그림자 형태가 분명하게 나오게 한다.</p>
           </article>
+
           <article class="slot slot--bg">
             <time>12:00</time>
-            <span>Background lab</span>
-            <h3>Rainy Convenience Store</h3>
-            <p>젖은 아스팔트, 편의점 빛, 얕은 네온 반사로 한국 일상성과 영상감 있는 잠금화면을 만든다.</p>
+            <span>Daily Korea</span>
+            <h3>A. 옥상 화분 두 개</h3>
+            <p>현재 서울 골목보다 단순하게, 화분 2개와 낮은 난간만 둔다. 먼 도시는 흐리지 않는다.</p>
+            <h3>B. 작은 동네 세탁방</h3>
+            <p>원형 세탁기 문은 거울처럼 쓰지 않고 matte한 큰 원형 오브젝트로만 처리.</p>
           </article>
+
           <article class="slot slot--cat">
             <time>13:00</time>
-            <span>Cat personalization</span>
-            <h3>Pen Pal Scrapbook</h3>
-            <p>Pinterest의 Pen Pals 흐름을 가져와 스티커, 우표, 손글씨 감성을 고양이 사진 주변에 낮게 얹는다.</p>
+            <span>Seasonal simple</span>
+            <h3>A. 장마철 방 안</h3>
+            <p>비는 창밖 평면 패턴으로만. 유리 반사 없이 커튼, 창틀, 고양이만 명확하게.</p>
+            <h3>B. 눈 온 한옥 담장</h3>
+            <p>눈은 큰 면으로 단순화. 안개/입김/연기 없이 담장과 마당의 깊이만 사용.</p>
           </article>
+
           <article class="slot slot--bg">
             <time>14:00</time>
-            <span>Background lab</span>
-            <h3>Rooftop Garden Seoul</h3>
-            <p>옥상 화분, 빨랫줄, 먼 도시 실루엣으로 90년대 골목보다 밝고 생활감 있는 배경으로 확장한다.</p>
+            <span>Quiet landmark</span>
+            <h3>A. 덕수궁 돌담길</h3>
+            <p>돌담 한 면, 낙엽 몇 장, 벤치 하나. 사람과 차량은 넣지 않는다.</p>
+            <h3>B. 남산 팔각정 실루엣</h3>
+            <p>팔각정은 원경 단순 실루엣. 전경은 나무 데크와 고양이만.</p>
           </article>
+
           <article class="slot slot--cat">
             <time>15:00</time>
-            <span>Cat personalization</span>
-            <h3>Neo Deco Cat</h3>
-            <p>아르데코 기하학, 금속 질감, 깊은 색을 써서 성인 취향의 프리미엄 잠금화면으로 테스트한다.</p>
+            <span>Product packs</span>
+            <h3>A. 크래프트룸</h3>
+            <p>가위, 실타래, 천 조각 중 2개만. 고양이 털/모자/천의 tactile 감성 유지.</p>
+            <h3>B. 작은 부엌 아침빛</h3>
+            <p>그릇 하나, 나무 상판, 흰 벽. 음식 디테일은 넣지 않는다.</p>
           </article>
+
           <article class="slot slot--bg">
             <time>16:00</time>
-            <span>Background lab</span>
-            <h3>Quiet Room, Moving Light</h3>
-            <p>침대 옆 램프, 커튼, 노을 빛 먼지 입자로 가장 개인적인 잠금화면 배경을 만든다.</p>
+            <span>Low fatigue</span>
+            <h3>A. 무지 배경 스튜디오</h3>
+            <p>벽, 바닥, 고양이, 쿠션만. 개인 고양이 인식성과 depth 품질 기준점으로 사용.</p>
+            <h3>B. 패브릭 커튼 방</h3>
+            <p>커튼 folds는 크게, 소품은 작은 책 한 권만. 수면 전 잠금화면 후보.</p>
           </article>
+
           <article class="slot slot--cat">
             <time>17:00</time>
-            <span>Cat personalization</span>
-            <h3>Lo-fi Retro Tech</h3>
-            <p>Canva의 retro-tech 흐름을 반영해 픽셀 UI, 카메라 HUD, 낮은 채도의 CRT 질감을 실험한다.</p>
+            <span>Hobby, simplified</span>
+            <h3>A. 레트로 게임방</h3>
+            <p>화면 글자 금지. CRT는 반사 없이 무광 발광 사각형으로만.</p>
+            <h3>B. 음악방</h3>
+            <p>레코드 반사 금지. 큰 스피커 1개, 무광 선반, 고양이만 사용.</p>
           </article>
+
           <article class="slot slot--bg">
             <time>18:00</time>
-            <span>Background lab</span>
-            <h3>Busan Sea Breeze</h3>
-            <p>서울 밖의 정서도 검증한다. 해변 산책로, 유리 난간, 바닷빛으로 시원한 배경 카테고리를 만든다.</p>
+            <span>Nature Korea</span>
+            <h3>A. 제주 돌담과 풀밭</h3>
+            <p>돌담, 풀밭, 하늘 3면. 바다 반사나 복잡한 관광지는 피한다.</p>
+            <h3>B. 소나무 피크닉 매트</h3>
+            <p>나무 한 그루, 매트, 고양이. 솔잎은 뭉치로 단순화한다.</p>
           </article>
+
           <article class="slot slot--cat">
             <time>19:00</time>
-            <span>Cat personalization</span>
-            <h3>Soft Wellness</h3>
-            <p>수면, 휴식, 작은 루틴에 맞춘 조용한 고양이 잠금화면. 움직임은 작고 색은 낮게 둔다.</p>
+            <span>Sleep mode</span>
+            <h3>A. 달빛 창가</h3>
+            <p>창틀과 벽면, 고양이. 달은 큰 원형 배경으로만, 별/구름 과다 금지.</p>
+            <h3>B. 담요 위 낮은 램프</h3>
+            <p>배경은 무지 벽. 담요의 큰 주름과 고양이 silhouette로 깊이를 만든다.</p>
           </article>
+
           <article class="slot slot--bg">
             <time>20:00</time>
-            <span>Background lab</span>
-            <h3>Night Market Future</h3>
-            <p>네온, 전선, 포장마차, 홀로그램 간판을 섞어 과장된 미래 서울을 테스트하고 21:00에 비교한다.</p>
+            <span>Final comparison</span>
+            <h3>A. 경복궁 최종안</h3>
+            <p>10:00의 경복궁을 더 단순화한 최종 후보. depth 품질 우선.</p>
+            <h3>B. 원본 감성 방 안 최종안</h3>
+            <p>원본의 따뜻함을 실내로 옮긴 최종 후보. 최소 소품, 최대 안정성.</p>
           </article>
         </div>
       </section>
 
-      <section class="band" aria-labelledby="board-title">
+      <section class="band" aria-labelledby="qa-title">
         <div class="section-head">
-          <p class="eyebrow">Seed board</p>
-          <h2 id="board-title">첫 누적 시안</h2>
-          <p>
-            오늘 스프린트의 시작점이다. 아래 카드는 실제 구현 파일이 아니라 방향성 검증용 컴포지션 보드이며,
-            매시간 완성본을 같은 형식으로 추가한다.
-          </p>
+          <p class="eyebrow">QA gate</p>
+          <h2 id="qa-title">매시간 산출물 통과 기준</h2>
+          <p>생성 후 이 기준을 통과한 것만 페이지에 누적한다.</p>
         </div>
 
-        <div class="concept-grid">
-          <article class="concept">
-            <div class="phone phone--clean" aria-label="Clean Pet Portrait mock">
-              <div class="phone__screen">
-                <img src="./assets/cherry_source.png" alt="" />
-                <span class="motion-pill">tilt depth</span>
-              </div>
-            </div>
-            <div>
-              <span class="tag">09:00 seed</span>
-              <h3>Clean Pet Portrait</h3>
-              <p>고양이 얼굴 인식성과 프리미엄 사진 느낌을 우선한다. 배경은 얕은 심도, UI는 제거한다.</p>
-            </div>
-          </article>
-
-          <article class="concept">
-            <div class="phone phone--river" aria-label="Han River Blue Hour mock">
-              <div class="phone__screen phone__screen--scene">
-                <img src="./assets/cherry_source.png" alt="" />
-                <span class="motion-pill">blue hour</span>
-              </div>
-            </div>
-            <div>
-              <span class="tag">10:00 seed</span>
-              <h3>Han River Blue Hour</h3>
-              <p>한강, 도시 창빛, 부드러운 파란 시간대. 한국적이지만 과거 회상보다 넓은 감정으로 간다.</p>
-            </div>
-          </article>
-
-          <article class="concept">
-            <div class="phone phone--scrap" aria-label="Pen Pal Scrapbook mock">
-              <div class="phone__screen">
-                <img src="./assets/latte_source.png" alt="" />
-                <span class="stamp">meow mail</span>
-                <span class="motion-pill">paper parallax</span>
-              </div>
-            </div>
-            <div>
-              <span class="tag">13:00 target</span>
-              <h3>Pen Pal Scrapbook</h3>
-              <p>사진을 꾸미는 재미를 잠금화면에 이식한다. 우표, 마스킹테이프, 엽서 질감을 얇게 쓴다.</p>
-            </div>
-          </article>
-
-          <article class="concept">
-            <div class="phone phone--deco" aria-label="Neo Deco Cat mock">
-              <div class="phone__screen">
-                <img src="./assets/nila_source.png" alt="" />
-                <span class="motion-pill">metal glow</span>
-              </div>
-            </div>
-            <div>
-              <span class="tag">15:00 target</span>
-              <h3>Neo Deco Cat</h3>
-              <p>귀여움만으로 가지 않고, 어른스러운 배경과 보석 같은 색감으로 유료감도를 테스트한다.</p>
-            </div>
-          </article>
-
-          <article class="concept">
-            <div class="phone phone--room" aria-label="Quiet Room mock">
-              <div class="phone__screen phone__screen--scene">
-                <img src="./assets/latte_source.png" alt="" />
-                <span class="motion-pill">sleep mode</span>
-              </div>
-            </div>
-            <div>
-              <span class="tag">16:00 target</span>
-              <h3>Quiet Room, Moving Light</h3>
-              <p>가장 자주 보는 잠금화면은 피로도가 낮아야 한다. 저녁 루틴과 수면 전 감정에 맞춘다.</p>
-            </div>
-          </article>
-
-          <article class="concept">
-            <div class="phone phone--tech" aria-label="Lo-fi Retro Tech mock">
-              <div class="phone__screen">
-                <img src="./assets/cherry_source.png" alt="" />
-                <span class="scanline"></span>
-                <span class="motion-pill">camera HUD</span>
-              </div>
-            </div>
-            <div>
-              <span class="tag">17:00 target</span>
-              <h3>Lo-fi Retro Tech</h3>
-              <p>AI 생성물의 차가움을 낮추고, 오래된 카메라/게임기 같은 친숙함으로 인터랙션을 보여준다.</p>
-            </div>
-          </article>
-        </div>
+        <ol class="loop">
+          <li><strong>9:16</strong><span>세로 9:16이고 고양이가 잘리지 않는다.</span></li>
+          <li><strong>Depth</strong><span>전경/중경/배경이 눈으로 분리된다.</span></li>
+          <li><strong>No blur</strong><span>강한 보케, haze, 안개, 반사가 없다.</span></li>
+          <li><strong>Korean</strong><span>일본적 소품/건축 신호가 없다.</span></li>
+          <li><strong>Original mood</strong><span>따뜻한 디오라마 감성과 작은 고양이 중심이 유지된다.</span></li>
+        </ol>
       </section>
 
       <section class="band band--log" aria-labelledby="log-title">
         <div class="section-head">
-          <p class="eyebrow">Accumulated log</p>
-          <h2 id="log-title">결과 누적 로그</h2>
-          <p>매시간 이 영역에 산출물, 근거, 다음 액션을 추가한다.</p>
+          <p class="eyebrow">Build log</p>
+          <h2 id="log-title">진행 방식</h2>
+          <p>
+            이후 매시간 해당 슬롯의 A/B 두 장만 imagegen으로 만들고, 통과한 이미지만 아래 로그에 추가한다.
+            복잡해지는 방향이면 즉시 같은 배경을 더 단순하게 재생성한다.
+          </p>
         </div>
 
-        <div class="log-table" role="table" aria-label="Sprint output log">
+        <div class="log-table" role="table" aria-label="Depth-safe sprint log">
           <div role="row" class="log-row log-row--head">
             <span role="columnheader">Time</span>
-            <span role="columnheader">Track</span>
+            <span role="columnheader">Action</span>
             <span role="columnheader">Output</span>
             <span role="columnheader">Decision</span>
           </div>
-          <!-- SLOT_LOG_START -->
           <div role="row" class="log-row">
-            <span role="cell">08:50</span>
-            <span role="cell">Setup</span>
-            <span role="cell">Research base, 12-slot routine, seed board page</span>
-            <span role="cell">09:00부터 Cat personalization과 Background lab을 교차 진행</span>
+            <span role="cell">09:46</span>
+            <span role="cell">Reset</span>
+            <span role="cell">Generation paused. Strategy rewritten for depth-safe Korean diorama variations.</span>
+            <span role="cell">No more bulk generation; create two images per hour only.</span>
           </div>
-          <!-- SLOT_LOG_END -->
         </div>
       </section>
     </main>
