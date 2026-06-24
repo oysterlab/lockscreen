@@ -28,12 +28,16 @@ SCENE = ROOT / "assets" / "photo3d_nila2dio"
 OUT = SCENE / "anim"
 WORK = Path("/tmp/nila_build"); WORK.mkdir(exist_ok=True)
 DEPTH_MJS = "/tmp/depthtool/depth.mjs"
-CLIPS = {"c1": ROOT / "assets/nila_smell_loop_1.mp4"}   # flower-smell first
+CLIPS = {                                               # played in random rotation
+    "c1": ROOT / "assets/nila_smell_loop_1.mp4",        # flower-smell
+    "m1": ROOT / "assets/nila_motion_1.mp4",            # idle motion 1
+    "m2": ROOT / "assets/nila_motion_2.mp4",            # idle motion 2
+}
 PLATE_W, PLATE_H = 864, 1536
 FPS_OUT = 24        # full source rate -> smooth playback (no dropped frames)
-SCALE = 0.72        # colour sprite size
+SCALE = 0.68        # colour sprite size (smaller -> 3 clips fit in GPU)
 DSCALE = 0.3        # depth sprite is flattened/low-freq -> store it small (cheap memory)
-DEDUP_TH = 0.55     # keep most distinct motion frames (smoothness = unique-frame count)
+DEDUP_TH = 0.62     # keep most distinct motion frames (smoothness = unique-frame count)
 PAD = 18
 NOISE, RAMP = 18.0, 26.0   # tighter matte (less soft halo -> no moving fringe/ghost)
 
