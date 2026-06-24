@@ -30,11 +30,11 @@ WORK = Path("/tmp/nila_build"); WORK.mkdir(exist_ok=True)
 DEPTH_MJS = "/tmp/depthtool/depth.mjs"
 CLIPS = {"c1": ROOT / "assets/nila_smell_loop_1.mp4"}   # flower-smell first
 PLATE_W, PLATE_H = 864, 1536
-FPS_OUT = 8
-SCALE = 0.85
-DEDUP_TH = 1.4
+FPS_OUT = 12        # smoother than 8 (the dropped-frame complaint)
+SCALE = 0.8
+DEDUP_TH = 1.1
 PAD = 18
-NOISE, RAMP = 16.0, 42.0
+NOISE, RAMP = 18.0, 26.0   # tighter matte (less soft halo -> no moving fringe/ghost)
 
 
 def run_depth(src: Path, dst: Path):
@@ -74,8 +74,8 @@ def main():
             dist = np.sqrt(((fr - bg_np) ** 2).sum(2))
             a = np.clip((dist - NOISE) / RAMP, 0, 1) * prior
             am = Image.fromarray((a * 255).astype("uint8"))
-            am = am.filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(5))
-            am = am.filter(ImageFilter.GaussianBlur(2.0))
+            am = am.filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(7))  # close, net-erode the halo
+            am = am.filter(ImageFilter.GaussianBlur(1.2))                               # thin clean feather
             a = np.asarray(am, np.float32) / 255.0
 
             src = WORK / f"{f.stem}_864.png"
@@ -91,6 +91,12 @@ def main():
                 if ref_med is None:
                     ref_med = med
                 dep = np.clip(dep + (ref_med - med), 0, 255)
+                # flatten the cat into a coherent smooth volume: no internal depth
+                # cliffs (which the un-cut sprite mesh would STRETCH into a smear) and
+                # steadier per-frame depth (less shimmer). Keeps ~40% of the relief.
+                sm = np.asarray(Image.fromarray(dep.astype("uint8")).filter(ImageFilter.GaussianBlur(4)), np.float32)
+                cmean = float(sm[m].mean())
+                dep = np.clip(cmean + (sm - cmean) * 0.4, 0, 255)
                 ys, xs = np.where(m)
                 x0 = min(x0, xs.min()); x1 = max(x1, xs.max())
                 y0 = min(y0, ys.min()); y1 = max(y1, ys.max())
