@@ -30,9 +30,10 @@ WORK = Path("/tmp/nila_build"); WORK.mkdir(exist_ok=True)
 DEPTH_MJS = "/tmp/depthtool/depth.mjs"
 CLIPS = {"c1": ROOT / "assets/nila_smell_loop_1.mp4"}   # flower-smell first
 PLATE_W, PLATE_H = 864, 1536
-FPS_OUT = 12        # smoother than 8 (the dropped-frame complaint)
-SCALE = 0.8
-DEDUP_TH = 1.1
+FPS_OUT = 24        # full source rate -> smooth playback (no dropped frames)
+SCALE = 0.72        # colour sprite size
+DSCALE = 0.3        # depth sprite is flattened/low-freq -> store it small (cheap memory)
+DEDUP_TH = 0.55     # keep most distinct motion frames (smoothness = unique-frame count)
 PAD = 18
 NOISE, RAMP = 18.0, 26.0   # tighter matte (less soft halo -> no moving fringe/ghost)
 
@@ -40,7 +41,7 @@ NOISE, RAMP = 18.0, 26.0   # tighter matte (less soft halo -> no moving fringe/g
 def run_depth(src: Path, dst: Path):
     if dst.exists():
         return
-    subprocess.run(["node", DEPTH_MJS, str(src), str(dst), "1024"], cwd="/tmp/depthtool",
+    subprocess.run(["node", DEPTH_MJS, str(src), str(dst), "512"], cwd="/tmp/depthtool",
                    env=dict(os.environ, DTYPE="q8"), check=True,
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
@@ -110,7 +111,8 @@ def main():
     x0 = max(0, x0 - PAD); y0 = max(0, y0 - PAD)
     x1 = min(PLATE_W - 1, x1 + PAD); y1 = min(PLATE_H - 1, y1 + PAD)
     bw, bh = x1 - x0 + 1, y1 - y0 + 1
-    sw, sh = round(bw * SCALE), round(bh * SCALE)
+    sw, sh = round(bw * SCALE), round(bh * SCALE)        # colour sprite
+    dw, dh = round(bw * DSCALE), round(bh * DSCALE)      # depth sprite (small)
     rect = [x0 / PLATE_W, 1 - (y1 + 1) / PLATE_H, (x1 + 1) / PLATE_W, 1 - y0 / PLATE_H]
 
     manifest = {"kind": "sprite3d", "fps": FPS_OUT, "hold": 0,
@@ -120,13 +122,14 @@ def main():
         for i, fr in enumerate(kept):
             rgba = np.dstack([fr["rgb"], fr["a"]])[y0:y1 + 1, x0:x1 + 1]
             dep = fr["d"][y0:y1 + 1, x0:x1 + 1]
-            Image.fromarray(rgba).resize((sw, sh), Image.LANCZOS).save(OUT / f"{tag}_c{i:02d}.png")
-            Image.fromarray(dep).resize((sw, sh), Image.LANCZOS).save(OUT / f"{tag}_d{i:02d}.png")
+            Image.fromarray(rgba).resize((sw, sh), Image.LANCZOS).save(
+                OUT / f"{tag}_c{i:03d}.webp", "WEBP", quality=88, method=6)  # small download
+            Image.fromarray(dep).resize((dw, dh), Image.LANCZOS).save(OUT / f"{tag}_d{i:03d}.png")
         manifest["clips"][tag] = {"count": len(kept), "frames": timeline}
-        kb = sum(p.stat().st_size for p in OUT.glob(f"{tag}_*.png")) // 1024
-        gpu = len(kept) * sw * sh * 4 * 2 // (1024 * 1024)
+        kb = sum(p.stat().st_size for p in OUT.glob(f"{tag}_*")) // 1024
+        gpu = len(kept) * (sw * sh + dw * dh) * 4 // (1024 * 1024)
         total += kb
-        print(f"{tag}: unique={len(kept)} png={kb}KB gpu~{gpu}MB")
+        print(f"{tag}: unique={len(kept)} files={kb}KB gpu~{gpu}MB")
 
     (OUT / "manifest.json").write_text(json.dumps(manifest))
     print(f"bbox=({x0},{y0},{x1},{y1}) sprite={sw}x{sh} rect={manifest['rect']} total={total}KB")

@@ -24,7 +24,7 @@ if (qaMode) document.documentElement.classList.add("qa-mode");
 const P3D = sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d/";
 // asset cache-buster: bump on any rebuilt PNG so phones don't serve a stale image
 // (index.html's ?v= only refreshes the code, not these depth/colour PNGs).
-const AV = location.protocol === "file:" ? "" : "?a=dio7";
+const AV = location.protocol === "file:" ? "" : "?a=dio8";
 // scenes that carry an idle-flick animation (assets/photo3d_<scene>/anim/manifest.json):
 // the foreground plate is swapped through a short clip every ~10s, then held.
 const ANIM_SCENES = new Set(["cherry2dio", "nila2dio"]);
@@ -659,11 +659,12 @@ async function initAnim() {
 
     if (anim.kind === "sprite3d") {
       if (!subjectMesh) return;
+      const pad3 = (i) => String(i).padStart(3, "0");
       for (const [name, c] of Object.entries(m.clips || {})) {
         const color = await Promise.all(Array.from({ length: c.count }, (_, i) =>
-          loadTexture(P3D + `anim/${name}_c${pad2(i)}.png` + AV)));
+          loadTexture(P3D + `anim/${name}_c${pad3(i)}.webp` + AV)));
         const depth = await Promise.all(Array.from({ length: c.count }, (_, i) =>
-          loadTexture(P3D + `anim/${name}_d${pad2(i)}.png` + AV)));
+          loadTexture(P3D + `anim/${name}_d${pad3(i)}.png` + AV)));
         anim.clips[name] = { color, depth, timeline: c.frames };
       }
       anim.clipNames = Object.keys(anim.clips);
