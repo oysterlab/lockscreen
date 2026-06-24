@@ -27,7 +27,7 @@ const P3D = sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d/"
 const AV = location.protocol === "file:" ? "" : "?a=dio6";
 // scenes that carry an idle-flick animation (assets/photo3d_<scene>/anim/manifest.json):
 // the foreground plate is swapped through a short clip every ~10s, then held.
-const ANIM_SCENES = new Set(["cherry2dio"]);
+const ANIM_SCENES = new Set(["cherry2dio", "nila2dio"]);
 // core layers always present; protect.png (v2) / subject.png (v3 soft-LDI) are
 // loaded optionally and decide which front-layer path runs (see below).
 const ASSETS = {
@@ -287,6 +287,47 @@ const FRAG_LAYER = `
     gl_FragColor = c;
   }`;
 
+// sprite3d: an animated cat rendered as a per-frame colour+depth sprite cropped to
+// a bbox (uRect, in plate-UV). The full subject plane is reused; only the rect
+// region draws. Each frame carries its OWN depth so the cat's relief animates and
+// parallax stays correct mid-motion (not a flat depth-frozen sticker). Where the
+// cat moves away the alpha is 0 -> the static back layer (bg_color) shows through.
+const VERT_SPRITE3D = `
+  uniform sampler2D uColorSprite;
+  uniform sampler2D uDepthSprite;
+  uniform float uDepthScale, uFarScale, uFocus, uZBias;
+  uniform float uSubjectBaseDepth, uSubjectDepthContrast;
+  uniform vec2 uCover;
+  uniform vec4 uRect;
+  varying vec2 vSprite;
+  void main() {
+    vec2 tuv = (uv - 0.5) * uCover + 0.5;
+    vec2 sp = (tuv - uRect.xy) / (uRect.zw - uRect.xy);
+    vSprite = sp;
+    vec3 p = position;
+    if (sp.x >= 0.0 && sp.x <= 1.0 && sp.y >= 0.0 && sp.y <= 1.0) {
+      float matte = texture2D(uColorSprite, sp).a;
+      float core = smoothstep(0.18, 0.62, matte);
+      float rawd = texture2D(uDepthSprite, sp).r;
+      float d = mix(uSubjectBaseDepth, rawd, core);
+      d = clamp(uSubjectBaseDepth + (d - uSubjectBaseDepth) * uSubjectDepthContrast, 0.0, 1.0);
+      float rel = d - uFocus;
+      float s = rel < 0.0 ? uFarScale : 1.0;
+      p.z += rel * uDepthScale * s + uZBias;
+    }
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+  }`;
+
+const FRAG_SPRITE3D = `
+  uniform sampler2D uColorSprite;
+  varying vec2 vSprite;
+  void main() {
+    if (vSprite.x < 0.0 || vSprite.x > 1.0 || vSprite.y < 0.0 || vSprite.y > 1.0) discard;
+    vec4 c = texture2D(uColorSprite, vSprite);
+    if (c.a < 0.02) discard;
+    gl_FragColor = vec4(c.rgb, c.a);
+  }`;
+
 const cover = new THREE.Vector2(1, 1);
 let frontMat, backMat, subjectMat, frontMesh, backMesh, subjectMesh, geometry;
 
@@ -540,12 +581,21 @@ function loop() {
 // Holds the foreground plate on a rest frame, then every ~10s (jittered) plays a
 // short clip once — a living "twitch" — by swapping the front + subject layer
 // colour through the deduped frame textures, then returns to the hold frame.
+// Two kinds: "plate" (cherry2dio) swaps the whole foreground plate colour; "sprite3d"
+// (nila2dio) swaps a per-frame cat colour+depth sprite over the static scene, and
+// picks a random clip each play. Both hold a rest frame and play on a jittered timer.
 const anim = {
   enabled: false,
-  textures: [],
-  timeline: [],
+  kind: "plate",
   fps: 8,
   hold: 0,
+  textures: [], // plate
+  timeline: [],
+  clips: {}, // sprite3d: name -> { color:[], depth:[], timeline:[] }
+  clipNames: [],
+  spriteMat: null,
+  curClip: null,
+  curTimeline: [],
   playing: false,
   slot: 0,
   slotTime: 0,
@@ -553,16 +603,48 @@ const anim = {
 };
 let ANIM_BASE = 10000; // ms between plays
 let ANIM_JITTER = 4000; // ± randomness so it never feels mechanical
+const pad2 = (i) => String(i).padStart(2, "0");
 
-function setAnimFrame(uniqueIdx) {
-  const tex = anim.textures[uniqueIdx];
+function setPlateFrame(idx) {
+  const tex = anim.textures[idx];
   if (!tex) return;
   if (frontMat) frontMat.uniforms.uColor.value = tex;
   if (subjectMat) subjectMat.uniforms.uColor.value = tex;
 }
+function setSpriteFrame(clip, idx) {
+  if (!anim.spriteMat || !clip) return;
+  anim.spriteMat.uniforms.uColorSprite.value = clip.color[idx];
+  anim.spriteMat.uniforms.uDepthSprite.value = clip.depth[idx];
+}
+function applySlot(slot) {
+  if (anim.kind === "sprite3d") setSpriteFrame(anim.curClip, anim.curTimeline[slot]);
+  else setPlateFrame(anim.timeline[slot]);
+}
 
 function scheduleNextPlay(now) {
   anim.nextPlayAt = now + ANIM_BASE + (Math.random() * 2 - 1) * ANIM_JITTER;
+}
+
+function setupSprite3D(rect) {
+  anim.spriteMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uColorSprite: { value: BLANK },
+      uDepthSprite: { value: BLANK },
+      uRect: { value: new THREE.Vector4(rect[0], rect[1], rect[2], rect[3]) },
+      uDepthScale: { value: tune.depthScale },
+      uFarScale: { value: tune.farScale },
+      uFocus: { value: tune.focus },
+      uZBias: { value: 0.0 },
+      uSubjectBaseDepth: { value: SUBJECT_BASE_DEPTH },
+      uSubjectDepthContrast: { value: SUBJECT_DEPTH_CONTRAST },
+      uCover: { value: cover },
+    },
+    vertexShader: VERT_SPRITE3D,
+    fragmentShader: FRAG_SPRITE3D,
+    transparent: true,
+    depthWrite: false,
+  });
+  subjectMesh.material = anim.spriteMat; // resize() keeps its geometry current
 }
 
 async function initAnim() {
@@ -570,24 +652,48 @@ async function initAnim() {
     const res = await fetch(P3D + "anim/manifest.json" + AV);
     if (!res.ok) return;
     const m = await res.json();
+    anim.kind = m.kind || "plate";
     anim.fps = m.fps || 8;
-    anim.timeline = m.frames || [];
     anim.hold = m.hold || 0;
-    anim.textures = await Promise.all(
-      Array.from({ length: m.count }, (_, i) =>
-        loadTexture(P3D + `anim/u${String(i).padStart(2, "0")}.jpg` + AV)),
-    );
-    anim.enabled = anim.textures.length > 0 && anim.timeline.length > 0;
-    if (anim.enabled) {
-      // QA: ?flick=N freezes on timeline slot N; ?animfast plays almost immediately
+    const fast = () => { if (params.has("animfast")) { ANIM_BASE = 600; ANIM_JITTER = 200; } };
+
+    if (anim.kind === "sprite3d") {
+      if (!subjectMesh) return;
+      for (const [name, c] of Object.entries(m.clips || {})) {
+        const color = await Promise.all(Array.from({ length: c.count }, (_, i) =>
+          loadTexture(P3D + `anim/${name}_c${pad2(i)}.png` + AV)));
+        const depth = await Promise.all(Array.from({ length: c.count }, (_, i) =>
+          loadTexture(P3D + `anim/${name}_d${pad2(i)}.png` + AV)));
+        anim.clips[name] = { color, depth, timeline: c.frames };
+      }
+      anim.clipNames = Object.keys(anim.clips);
+      if (!anim.clipNames.length) return;
+      setupSprite3D(m.rect);
+      const rest = anim.clips[anim.clipNames[0]];
+      anim.curClip = rest;
+      anim.curTimeline = rest.timeline;
+      if (params.has("flick")) {
+        const s = clamp(parseInt(params.get("flick")) || 0, 0, rest.timeline.length - 1);
+        setSpriteFrame(rest, rest.timeline[s]);
+        return; // frozen for QA
+      }
+      fast();
+      setSpriteFrame(rest, rest.timeline[anim.hold]);
+      anim.enabled = true;
+      scheduleNextPlay(performance.now());
+    } else {
+      anim.timeline = m.frames || [];
+      anim.textures = await Promise.all(Array.from({ length: m.count }, (_, i) =>
+        loadTexture(P3D + `anim/u${pad2(i)}.jpg` + AV)));
+      if (!anim.textures.length || !anim.timeline.length) return;
       if (params.has("flick")) {
         const s = clamp(parseInt(params.get("flick")) || 0, 0, anim.timeline.length - 1);
-        setAnimFrame(anim.timeline[s]);
-        anim.enabled = false;
+        setPlateFrame(anim.timeline[s]);
         return;
       }
-      if (params.has("animfast")) { ANIM_BASE = 600; ANIM_JITTER = 200; }
-      setAnimFrame(anim.timeline[anim.hold]);
+      fast();
+      setPlateFrame(anim.timeline[anim.hold]);
+      anim.enabled = true;
       scheduleNextPlay(performance.now());
     }
   } catch {
@@ -599,25 +705,38 @@ function tickAnim(now, dt) {
   if (!anim.enabled) return;
   if (!anim.playing) {
     if (now >= anim.nextPlayAt) {
+      if (anim.kind === "sprite3d") {
+        const name = anim.clipNames[Math.floor(Math.random() * anim.clipNames.length)];
+        anim.curClip = anim.clips[name];
+        anim.curTimeline = anim.curClip.timeline;
+      }
       anim.playing = true;
       anim.slot = 0;
       anim.slotTime = 0;
-      setAnimFrame(anim.timeline[0]);
+      applySlot(0);
     }
     return;
   }
   anim.slotTime += dt;
   const slotDur = 1 / anim.fps;
+  const tl = anim.kind === "sprite3d" ? anim.curTimeline : anim.timeline;
   while (anim.slotTime >= slotDur) {
     anim.slotTime -= slotDur;
     anim.slot += 1;
-    if (anim.slot >= anim.timeline.length) {
+    if (anim.slot >= tl.length) {
       anim.playing = false;
-      setAnimFrame(anim.timeline[anim.hold]);
+      if (anim.kind === "sprite3d") {
+        const rest = anim.clips[anim.clipNames[0]];
+        anim.curClip = rest;
+        anim.curTimeline = rest.timeline;
+        setSpriteFrame(rest, rest.timeline[anim.hold]);
+      } else {
+        setPlateFrame(anim.timeline[anim.hold]);
+      }
       scheduleNextPlay(now);
       return;
     }
-    setAnimFrame(anim.timeline[anim.slot]);
+    applySlot(anim.slot);
   }
 }
 
