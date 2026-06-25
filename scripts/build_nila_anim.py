@@ -140,8 +140,14 @@ def main():
             d8 = dep.astype("uint8")[y0:y1, x0:x1]
             packed = np.vstack([col, np.dstack([al] * 3), np.dstack([d8] * 3)])
             Image.fromarray(packed).save(fdir / f"{i:04d}.png")
+        # PALINDROME (forward + reverse) so each clip starts AND ends on frame 0 —
+        # the source videos don't loop (their last frame differs from the first by
+        # ~12-18), which made the hold pose jump to the next clip's start. Out-and-back
+        # returns to rest seamlessly (and reads naturally: lean in to smell, lean out).
         subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(FPS_OUT),
-                        "-i", str(fdir / "%04d.png"), "-c:v", "libx264", "-crf", str(CRF),
+                        "-i", str(fdir / "%04d.png"),
+                        "-filter_complex", "[0:v]reverse[r];[0:v][r]concat=n=2:v=1[v]", "-map", "[v]",
+                        "-c:v", "libx264", "-crf", str(CRF),
                         "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(OUT / f"{tag}.mp4")],
                        check=True)
         kb = (OUT / f"{tag}.mp4").stat().st_size // 1024
