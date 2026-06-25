@@ -24,7 +24,7 @@ if (qaMode) document.documentElement.classList.add("qa-mode");
 const P3D = sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d/";
 // asset cache-buster: bump on any rebuilt PNG so phones don't serve a stale image
 // (index.html's ?v= only refreshes the code, not these depth/colour PNGs).
-const AV = location.protocol === "file:" ? "" : "?a=dio9";
+const AV = location.protocol === "file:" ? "" : "?a=dio10";
 // scenes that carry an idle-flick animation (assets/photo3d_<scene>/anim/manifest.json):
 // the foreground plate is swapped through a short clip every ~10s, then held.
 const ANIM_SCENES = new Set(["cherry2dio", "nila2dio"]);
@@ -328,6 +328,52 @@ const FRAG_SPRITE3D = `
     gl_FragColor = vec4(c.rgb, c.a);
   }`;
 
+// video3d: the cat animation is a packed mp4 (flipY=false) whose frame stacks
+// three panels — [colour | alpha | depth] — so the browser decodes one frame at a
+// time (tiny GPU memory) yet colour+matte+depth stay frame-accurate. Panels are
+// equal thirds; panel coordinate for an image-top-down row is (1-spriteUV.y)/3.
+const VID_PANEL = `
+  vec2 panelUV(vec2 sp, float idx) {
+    return vec2(sp.x, (1.0 - sp.y) / 3.0 + idx / 3.0);
+  }`;
+const VERT_VIDEO3D = `
+  uniform sampler2D uVideo;
+  uniform float uDepthScale, uFarScale, uFocus, uZBias;
+  uniform float uSubjectBaseDepth, uSubjectDepthContrast;
+  uniform vec2 uCover;
+  uniform vec4 uRect;
+  varying vec2 vSprite;
+  ${VID_PANEL}
+  void main() {
+    vec2 tuv = (uv - 0.5) * uCover + 0.5;
+    vec2 sp = (tuv - uRect.xy) / (uRect.zw - uRect.xy);
+    vSprite = sp;
+    vec3 p = position;
+    if (sp.x >= 0.0 && sp.x <= 1.0 && sp.y >= 0.0 && sp.y <= 1.0) {
+      float matte = texture2D(uVideo, panelUV(sp, 1.0)).r;
+      float core = smoothstep(0.18, 0.62, matte);
+      float rawd = texture2D(uVideo, panelUV(sp, 2.0)).r;
+      float d = mix(uSubjectBaseDepth, rawd, core);
+      d = clamp(uSubjectBaseDepth + (d - uSubjectBaseDepth) * uSubjectDepthContrast, 0.0, 1.0);
+      float rel = d - uFocus;
+      float s = rel < 0.0 ? uFarScale : 1.0;
+      p.z += rel * uDepthScale * s + uZBias;
+    }
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+  }`;
+const FRAG_VIDEO3D = `
+  uniform sampler2D uVideo;
+  varying vec2 vSprite;
+  ${VID_PANEL}
+  void main() {
+    vec2 sp = vSprite;
+    if (sp.x < 0.0 || sp.x > 1.0 || sp.y < 0.0 || sp.y > 1.0) discard;
+    float a = texture2D(uVideo, panelUV(sp, 1.0)).r;
+    if (a < 0.02) discard;
+    vec3 rgb = texture2D(uVideo, panelUV(sp, 0.0)).rgb;
+    gl_FragColor = vec4(rgb, a);
+  }`;
+
 const cover = new THREE.Vector2(1, 1);
 let frontMat, backMat, subjectMat, frontMesh, backMesh, subjectMesh, geometry;
 
@@ -594,6 +640,9 @@ const anim = {
   clips: {}, // sprite3d: name -> { color:[], depth:[], timeline:[] }
   clipNames: [],
   spriteMat: null,
+  videos: {}, // video3d: name -> { el, tex }
+  videoMat: null,
+  curName: null,
   curClip: null,
   curTimeline: [],
   playing: false,
@@ -647,6 +696,52 @@ function setupSprite3D(rect) {
   subjectMesh.material = anim.spriteMat; // resize() keeps its geometry current
 }
 
+/* ---- video3d: one packed mp4 per clip, decoded a frame at a time ---- */
+function makeVideo(url) {
+  const el = document.createElement("video");
+  el.muted = true;
+  el.loop = false;
+  el.playsInline = true;
+  el.preload = "auto";
+  el.setAttribute("muted", "");
+  el.setAttribute("playsinline", "");
+  el.src = url;
+  const tex = new THREE.VideoTexture(el);
+  tex.minFilter = tex.magFilter = THREE.LinearFilter;
+  tex.generateMipmaps = false;
+  tex.flipY = false; // packed frame is top-down: colour panel sits at v=0
+  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+  return { el, tex };
+}
+
+function setupVideo3D(rect) {
+  anim.videoMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uVideo: { value: null },
+      uRect: { value: new THREE.Vector4(rect[0], rect[1], rect[2], rect[3]) },
+      uDepthScale: { value: tune.depthScale },
+      uFarScale: { value: tune.farScale },
+      uFocus: { value: tune.focus },
+      uZBias: { value: 0.0 },
+      uSubjectBaseDepth: { value: SUBJECT_BASE_DEPTH },
+      uSubjectDepthContrast: { value: SUBJECT_DEPTH_CONTRAST },
+      uCover: { value: cover },
+    },
+    vertexShader: VERT_VIDEO3D,
+    fragmentShader: FRAG_VIDEO3D,
+    transparent: true,
+    depthWrite: false,
+  });
+  subjectMesh.material = anim.videoMat;
+}
+
+function setVideo(name) {
+  const v = anim.videos[name];
+  if (!v || !anim.videoMat) return;
+  anim.curName = name;
+  anim.videoMat.uniforms.uVideo.value = v.tex;
+}
+
 async function initAnim() {
   try {
     const res = await fetch(P3D + "anim/manifest.json" + AV);
@@ -657,7 +752,35 @@ async function initAnim() {
     anim.hold = m.hold || 0;
     const fast = () => { if (params.has("animfast")) { ANIM_BASE = 600; ANIM_JITTER = 200; } };
 
-    if (anim.kind === "sprite3d") {
+    if (anim.kind === "video3d") {
+      if (!subjectMesh) return;
+      for (const name of m.clips || []) {
+        anim.videos[name] = makeVideo(P3D + `anim/${name}.mp4` + AV);
+      }
+      anim.clipNames = m.clips || [];
+      if (!anim.clipNames.length) return;
+      setupVideo3D(m.rect);
+      // prime each decoder (muted autoplay), then hold on frame 0
+      for (const name of anim.clipNames) {
+        const el = anim.videos[name].el;
+        try { await el.play(); el.pause(); el.currentTime = 0; } catch { /* autoplay */ }
+      }
+      const qaName = params.get("clip");
+      const restName = qaName && anim.videos[qaName] ? qaName : anim.clipNames[0];
+      setVideo(restName);
+      const rv = anim.videos[restName];
+      if (params.has("flick")) {
+        rv.el.pause();
+        rv.el.currentTime = (parseInt(params.get("flick")) || 0) / anim.fps;
+        rv.tex.needsUpdate = true;
+        return; // frozen for QA (loop still re-uploads the held frame)
+      }
+      fast();
+      rv.el.pause();
+      rv.el.currentTime = 0;
+      anim.enabled = true;
+      scheduleNextPlay(performance.now());
+    } else if (anim.kind === "sprite3d") {
       if (!subjectMesh) return;
       const pad3 = (i) => String(i).padStart(3, "0");
       for (const [name, c] of Object.entries(m.clips || {})) {
@@ -706,6 +829,29 @@ async function initAnim() {
 }
 
 function tickAnim(now, dt) {
+  // video3d plays the mp4 natively (perfect 24fps); JS only starts/ends a clip
+  if (anim.kind === "video3d") {
+    if (anim.videoMat && anim.curName) anim.videos[anim.curName].tex.needsUpdate = true;
+    if (!anim.enabled) return;
+    if (!anim.playing) {
+      if (now >= anim.nextPlayAt) {
+        const name = anim.clipNames[Math.floor(Math.random() * anim.clipNames.length)];
+        setVideo(name);
+        const el = anim.videos[name].el;
+        el.currentTime = 0;
+        el.play().catch(() => {});
+        anim.playing = true;
+      }
+    } else {
+      const el = anim.videos[anim.curName].el;
+      if (el.ended || (el.duration && el.currentTime >= el.duration - 0.04)) {
+        el.pause();
+        anim.playing = false;
+        scheduleNextPlay(now);
+      }
+    }
+    return;
+  }
   if (!anim.enabled) return;
   if (!anim.playing) {
     if (now >= anim.nextPlayAt) {
