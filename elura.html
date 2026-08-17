@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"
+    />
+    <meta name="theme-color" content="#F0E7DC" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="ELURA" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>ELURA</title>
+    <link rel="stylesheet" href="./elura/tokens.css" />
+    <link rel="stylesheet" href="./elura/screens.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./vendor/three.module.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <!-- data-screen = live screen, data-text-mode = ink colour demanded by the scene.
+         All three screens stay in the DOM; only these attributes decide what is live. -->
+    <div id="app" data-screen="landing" data-text-mode="dark">
+      <canvas id="stage-canvas" aria-hidden="true"></canvas>
+
+      <!-- single full-bleed vignette + warm veil; opacity is driven by --grade -->
+      <div id="grade" class="grade" style="--grade: 0.42" aria-hidden="true"></div>
+
+      <!-- ───────────────────────── LANDING ───────────────────────── -->
+      <!-- data-active ships in the markup: the chrome must be on screen from the
+           first paint, not from whenever the module finishes and the hero's plates
+           finish decoding. It is also the only thing standing between an old
+           WebView with no importmap support and a permanently blank sand page. -->
+      <section id="screen-landing" class="screen screen--landing" aria-label="ELURA" data-active>
+        <header class="topbar" data-chrome="0">
+          <span class="topbar__spacer" aria-hidden="true"></span>
+          <p class="wordmark">ELURA</p>
+          <button class="icon-btn" id="landing-account" type="button" aria-label="Account">
+            <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="9.1" r="3.3" />
+              <path d="M5.6 19.3c1.2-3.1 3.6-4.7 6.4-4.7s5.2 1.6 6.4 4.7" />
+            </svg>
+          </button>
+        </header>
+
+        <!-- No headline, on purpose. A headline + subhead + CTA stacked at the top is
+             the anatomy of a marketing hero, and it made the app's own first screen
+             read as a web page: the product was being DESCRIBED instead of shown, and
+             the type — not the content — was the hero. The first screen is now the
+             thing itself, a lock screen with the pet living in it, so what the app
+             makes is legible in zero words and cannot be mistaken for a website.
+
+             THREE chrome groups: the cascade has to finish inside the camera's
+             1100ms or the move ends on a UI element instead of on the world coming
+             to rest. -->
+        <div class="landing__body">
+          <div class="clock clock--landing" id="landing-clock" data-chrome="1" role="group">
+            <time class="clock__time" id="landing-clock-time">--:--</time>
+            <span class="clock__date" id="landing-clock-date"></span>
+          </div>
+
+          <!-- Two actions of equal weight, so neither is the "real" one and neither
+               is a consolation. Both are ghost pills: two filled slabs side by side
+               would out-shout the photograph they sit on. -->
+          <div class="cta-block" data-chrome="2">
+            <div class="cta-pair">
+              <button class="pill pill--ghost" id="btn-make" type="button">Make it yours</button>
+              <button class="pill pill--ghost" id="btn-try" type="button">Try examples</button>
+            </div>
+            <p class="landing-note" id="landing-note" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────────────────────── GALLERY ───────────────────────── -->
+      <section id="screen-gallery" class="screen screen--gallery" aria-label="Sample wallpapers">
+        <header class="topbar" data-chrome="0">
+          <button class="icon-btn" id="btn-back" type="button" aria-label="Back">
+            <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M18.6 12H6.2" />
+              <path d="M11.4 6.6 6 12l5.4 5.4" />
+            </svg>
+          </button>
+          <p class="wordmark">ELURA</p>
+          <button class="icon-btn" id="gallery-account" type="button" aria-label="Account">
+            <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="9.1" r="3.3" />
+              <path d="M5.6 19.3c1.2-3.1 3.6-4.7 6.4-4.7s5.2 1.6 6.4 4.7" />
+            </svg>
+          </button>
+        </header>
+
+        <div class="gallery__lede" data-chrome="1">
+          <p class="badge"><span class="badge__dot" aria-hidden="true"></span>Live</p>
+          <p class="tagline">Gentle motion. Real depth.</p>
+        </div>
+
+        <div class="gallery__nav" data-chrome="1">
+          <button class="icon-btn nav-btn nav-btn--prev" id="btn-prev" type="button" aria-label="Previous sample">
+            <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M14.4 6.4 8.8 12l5.6 5.6" />
+            </svg>
+          </button>
+          <button class="icon-btn nav-btn nav-btn--next" id="btn-next" type="button" aria-label="Next sample">
+            <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M9.6 6.4 15.2 12l-5.6 5.6" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- The index sat centred, one line above the pill, in the exact place every
+             scene in the catalog puts the cat's face — and it was the loudest small
+             element on the screen. It is now one quiet row, tucked directly above the
+             action, in the bottom band the grade already darkens. -->
+        <div class="gallery__bottom">
+          <div class="gallery__index" data-chrome="2">
+            <p class="counter" id="counter">Sample 01 / 05</p>
+            <div class="dots" id="dots" role="group" aria-label="Sample">
+              <button class="dot is-active" type="button" aria-label="Sample 1"></button>
+              <button class="dot" type="button" aria-label="Sample 2"></button>
+              <button class="dot" type="button" aria-label="Sample 3"></button>
+              <button class="dot" type="button" aria-label="Sample 4"></button>
+              <button class="dot" type="button" aria-label="Sample 5"></button>
+            </div>
+          </div>
+
+          <div class="gallery__actions" data-chrome="2">
+            <button class="pill" id="btn-preview" type="button">Preview live</button>
+            <button class="text-link" id="btn-apply" type="button">Apply sample</button>
+            <p class="note">
+              <svg class="glyph glyph--lock" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <rect x="5.2" y="10.2" width="13.6" height="8.6" rx="2.4" />
+                <path d="M8.6 10.2V7.9a3.4 3.4 0 0 1 6.8 0v2.3" />
+              </svg>
+              Login required to apply wallpaper
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ──────────────────────── PREVIEW LIVE ───────────────────── -->
+      <section id="screen-preview" class="screen screen--preview" aria-label="Live preview">
+        <!-- No aria-live: the clock re-renders every 15s and would read itself out
+             that often, which is the opposite of the calm this screen is selling.
+             The shell keeps aria-label current instead, announced once on arrival. -->
+        <div class="clock" id="clock" data-chrome="0" role="group">
+          <time class="clock__time" id="clock-time">--:--</time>
+          <span class="clock__date" id="clock-date"></span>
+        </div>
+      </section>
+    </div>
+
+    <noscript>JavaScript is required to view ELURA.</noscript>
+    <script type="module" src="./elura/app.js"></script>
+  </body>
+</html>

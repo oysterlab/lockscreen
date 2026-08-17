@@ -1,0 +1,440 @@
+/**
+ * ELURA — design tokens.
+ *
+ * Everything visual reads from here. Two rules that the rest of the system
+ * depends on:
+ *  1. No element hard-codes a text colour. Text reads --fg / --fg-muted /
+ *     --fg-faint, which are re-bound by [data-text-mode] because the scene
+ *     underneath the type changes from a bright cream studio to a saturated
+ *     golden-hour alley and the type has to survive both with no card behind it.
+ *  2. Every duration is a token, so prefers-reduced-motion can collapse the whole
+ *     motion system to 1ms without touching a single component rule.
+ */
+
+:root {
+  /* ---- palette ---- */
+  --sand: #f0e7dc;
+  --cream: #faf4ec;
+  --espresso: #3a2a20;
+  --ink: #2e2119;
+  --muted: #8a7867;
+  --line: rgba(58, 42, 32, 0.14);
+
+  /* ---- typefaces ---- */
+  /* No webfonts: ui-serif is New York on Apple, Noto Serif on Android. Both are
+     already on the device, so the display face costs zero bytes and zero FOUT —
+     which matters because the Android WebView runs fully offline. */
+  --font-display: ui-serif, "New York", "Noto Serif", Georgia, serif;
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* ---- type scale ----
+     Display sizes are fluid so the hero still reads as the hero at 360px and
+     doesn't turn into a poster at 430px.
+     --fs-d1 is sized to the COPY, not to a round number: the brief's break
+     ("Live wallpapers / for the ones you love") is the composition, and the
+     second line measures 380px at 44px. Holding 44px would wrap it to three
+     lines on every phone. The coefficient below is the largest that keeps the
+     couplet intact inside the gutter at 360, 390 and 430 — it reaches the full
+     44px on the widest phone. */
+  --fs-d1: clamp(34px, 10.1vw, 44px); /* headline            39 @390, 44 @430 */
+  --fs-d2: clamp(24px, 7.18vw, 31px); /* secondary display   28 @390 */
+  --fs-d3: clamp(18px, 5.13vw, 22px); /* tertiary display    20 @390 */
+  --fs-clock: clamp(58px, 16.4vw, 78px); /* lock-screen time    64 @390 */
+
+  --fs-u1: clamp(14px, 3.72vw, 15px); /* subline / button    14.5 @390 */
+  --fs-u2: 13px; /* tagline / links */
+  --fs-u3: 11px; /* counter / lock note / wordmark */
+
+  /* Serif at display size needs negative tracking or it reads loose and cheap;
+     UI text at 11px needs positive tracking or it reads cramped. */
+  --ls-d1: -0.026em;
+  --ls-d2: -0.016em;
+  --ls-d3: -0.011em;
+  --ls-clock: -0.024em;
+  --ls-u1: 0.004em;
+  --ls-u2: 0.008em;
+  --ls-u3: 0.02em;
+  --ls-caps: 0.18em; /* small caps-ish labels: counter, badge */
+  --ls-mark: 0.42em; /* wordmark only */
+
+  --lh-d1: 1.08;
+  --lh-d2: 1.14;
+  --lh-d3: 1.2;
+  --lh-clock: 0.94;
+  --lh-ui: 1.45;
+  --lh-tight: 1.3;
+
+  --fw-display: 400;
+  --fw-ui: 450;
+  --fw-strong: 560;
+
+  /* ---- spacing ---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 22px;
+  --sp-6: 30px;
+  --sp-7: 44px;
+  --sp-8: 64px;
+
+  /* Horizontal gutter. Wide enough that centred display type never kisses the
+     bezel on a 360px phone. */
+  --gutter: clamp(22px, 6.4vw, 30px);
+
+  /* ---- radii & sizes ---- */
+  --r-pill: 999px;
+  --r-1: 10px;
+  --r-2: 18px;
+  --r-3: 26px;
+
+  --tap: 44px; /* every interactive target is at least this */
+  --pill-h: 54px;
+  --chip-h: 27px;
+
+  /* ---- motion ---- */
+  --ease: cubic-bezier(0.22, 0.61, 0.16, 1);
+  --t-chrome-out: 420ms; /* chrome leaves first */
+  --t-camera: 1100ms; /* camera settles last */
+  --t-chrome-in: 640ms;
+  --t-dissolve: 900ms; /* scene A -> B */
+  --stagger: 90ms;
+
+  --t-chrome-veil: 320ms; /* the faster exit into PREVIEW LIVE */
+  /* 260, not 380: three chrome groups at 90ms then 640ms of entrance must land
+     inside the camera's 1100ms, or the transition ends on the pill arriving rather
+     than on the world coming to rest. The camera settles last. */
+  --t-enter-delay: 260ms;
+  --t-clock-delay: 700ms; /* the clock arrives after the room is quiet */
+  --t-dot: 520ms; /* page-dot width */
+  --t-tap: 160ms; /* press feedback */
+}
+
+/* ------------------------------------------------------------------ *
+ * TEXT MODES
+ *
+ * Bound on #app by the shell, per scene. `dark` = espresso type over the bright
+ * cream studio scenes (atelier, mochi) — this is the premium reference look.
+ * `light` = cream type over the saturated Korean-alley scenes.
+ *
+ * Each mode also owns its grade tint, because "make the type readable" means the
+ * opposite operation in each: a bright scene has to be lifted *toward* paper so
+ * espresso holds, a saturated scene has to be dropped *away* from it so cream
+ * holds. One veil colour cannot do both.
+ *
+ * NOTE FOR THE OWNER — deliberate deviation from the brief. The brief specifies an
+ * espresso veil for dark-text scenes ("the cream scene dims just enough for
+ * espresso text to hold contrast"). `dark` uses a CREAM veil instead: dimming a
+ * bright studio plate toward espresso greys the very thing that makes it read as
+ * premium, and espresso type gains more from lifting the plate toward paper than
+ * from pushing it toward the ink. To compare, swap --grade-veil / --grade-band-*
+ * under [data-text-mode="dark"] for low-alpha espresso and look at
+ * atelier_parallax at the landing's 0.42.
+ *
+ * Each mode ALSO owns --grade-scale, and that is not cosmetic. One shared opacity
+ * was tuned for one mode only: at the gallery's 0.22 the top band landed ~0.16 of
+ * near-black over a golden sky and barely touched it, so the wordmark measured
+ * 2.5:1 and the tagline 1.84:1 on the brightest scenes — against 5.8-7.6:1 for the
+ * same elements on the cream ones. Light mode therefore resolves to a much higher
+ * effective opacity with much lower per-layer alphas, so only the legibility bands
+ * get stronger and the scene's own key is left where it was.
+ * ------------------------------------------------------------------ */
+
+[data-text-mode="dark"] {
+  --fg: var(--espresso);
+  /* Alphas of the ink, not --muted itself. Over the cream studio plate --muted
+     (#8A7867) measures ~3.4:1 and dissolves into the lit pedestal at 11-13px;
+     an ink alpha composites correctly over both the bright wall and whatever
+     the parallax slides underneath it. */
+  --fg-muted: rgba(58, 42, 32, 0.72);
+  --fg-faint: rgba(58, 42, 32, 0.6);
+
+  --btn-bg: var(--espresso);
+  --btn-fg: var(--cream);
+  --btn-shadow: 0 14px 34px rgba(58, 42, 32, 0.22);
+
+  --chip-bg: rgba(58, 42, 32, 0.06);
+  --chip-line: var(--line);
+  --chip-ring: rgba(58, 42, 32, 0.08);
+  --dot-off: rgba(58, 42, 32, 0.34);
+
+  /* Ghost pill — its own set, NOT the chip's. A chip is wayfinding and is allowed
+     to nearly disappear; a ghost pill is a core action and has to read as a
+     control. At chip strength (0.06 fill / 0.14 hairline) over the bright atelier
+     plate the pair vanished and the labels read as text floating on the wall.
+     The fill goes CREAM, not ink: on a bright plate a paper inset plus a real
+     espresso hairline reads as a control, while more ink just makes a grey smudge —
+     the same reasoning as this mode's grade veil. */
+  --ghost-bg: rgba(250, 244, 236, 0.34);
+  --ghost-line: rgba(58, 42, 32, 0.26);
+  --ghost-ring: rgba(250, 244, 236, 0.5);
+  --ghost-shadow: 0 2px 12px rgba(58, 42, 32, 0.1);
+
+  /* vignette tint (the frame) */
+  --grade-color: rgba(58, 42, 32, 0.34);
+  /* flat veil + the two legibility bands, cream-side so espresso gains contrast */
+  --grade-veil: rgba(250, 244, 236, 0.34);
+  --grade-band-top: rgba(250, 244, 236, 0.62);
+  --grade-band-bottom: rgba(250, 244, 236, 0.74);
+  --grade-scale: 1;
+  /* band geometry: hold at full strength to --band-*-hold, gone by --band-*-stop */
+  --band-top-hold: 0%;
+  --band-top-stop: 30%;
+  --band-bottom-hold: 0%;
+  --band-bottom-stop: 44%;
+
+  /* Legibility insurance, not a scrim: a whisper of paper directly behind the
+     glyphs so type survives a dark branch or a shadow passing under it.
+     Both modes declare the SAME NUMBER OF SHADOWS on purpose — text-shadow only
+     interpolates between equal-length lists, and the halo has to ride the same
+     900ms clock as the ink. It used to snap in one frame while the colour eased,
+     so for most of a second espresso type wore a dark halo over a darkening scene. */
+  --halo: 0 1px 1px rgba(250, 244, 236, 0.6), 0 2px 20px rgba(250, 244, 236, 0.5);
+  --halo-soft: 0 1px 1px rgba(250, 244, 236, 0.42), 0 1px 14px rgba(250, 244, 236, 0.55);
+}
+
+[data-text-mode="light"] {
+  --fg: var(--cream);
+  --fg-muted: rgba(250, 244, 236, 0.72);
+  --fg-faint: rgba(250, 244, 236, 0.58);
+
+  /* An espresso pill sinks into a golden-hour alley — it stops reading as THE
+     action. Inverting to a cream pill keeps the single core action loudest while
+     staying inside the palette. It is held just off opaque, and its shadow is
+     short and low, so it sits ON the photograph instead of floating above it as
+     the one boxed-card element in a design that rules cards out. */
+  --btn-bg: rgba(250, 244, 236, 0.92);
+  --btn-fg: var(--espresso);
+  --btn-shadow: 0 6px 18px rgba(20, 12, 8, 0.26);
+
+  /* 0.22, not 0.14: the pair of chevrons is one control, and at 0.14 the right one
+     dissolved into cherry's lit awning (1.64:1) while its twin over the dark gate
+     stayed perfectly readable — which reads as a rendering fault, not a design. */
+  --chip-bg: rgba(250, 244, 236, 0.22);
+  --chip-line: rgba(250, 244, 236, 0.3);
+  --chip-ring: rgba(16, 10, 6, 0.26);
+  --dot-off: rgba(250, 244, 236, 0.44);
+
+  /* Same structure as dark mode, inverted key: the alley scenes are busy and dark,
+     so the pair is defined by its rim rather than by a paper fill — a cream fill
+     strong enough to read over a lit awning would be the boxed card this design
+     rules out. */
+  --ghost-bg: rgba(250, 244, 236, 0.13);
+  --ghost-line: rgba(250, 244, 236, 0.44);
+  --ghost-ring: rgba(255, 255, 255, 0.1);
+  --ghost-shadow: 0 2px 14px rgba(16, 10, 6, 0.24);
+
+  /* Alphas are LOW and --grade-scale is high: only the bands gain strength, the
+     scene's own key stays where it was. See the note above the mode blocks. */
+  --grade-scale: 3;
+  --grade-color: rgba(16, 10, 6, 0.26);
+  --grade-veil: rgba(20, 13, 9, 0.13);
+  --grade-band-top: rgba(18, 11, 7, 0.94);
+  --grade-band-bottom: rgba(18, 11, 7, 0.8);
+  /* the alley chrome sits low in the top band, so the band holds before it falls */
+  --band-top-hold: 25%;
+  --band-top-stop: 46%;
+  --band-bottom-hold: 6%;
+  --band-bottom-stop: 46%;
+
+  --halo: 0 1px 2px rgba(24, 15, 9, 0.5), 0 2px 26px rgba(20, 12, 7, 0.56);
+  --halo-soft: 0 1px 2px rgba(24, 15, 9, 0.34), 0 1px 18px rgba(20, 12, 7, 0.48);
+}
+
+/* ------------------------------------------------------------------ *
+ * COMPONENTS
+ * Appearance only. Placement lives in screens.css.
+ * ------------------------------------------------------------------ */
+
+/* Primary pill — the ONE core action on every screen it appears on. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  width: 100%;
+  max-width: 318px;
+  min-height: var(--pill-h);
+  padding: 0 var(--sp-6);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-family: var(--font-ui);
+  font-size: var(--fs-u1);
+  font-weight: var(--fw-strong);
+  letter-spacing: var(--ls-u1);
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  box-shadow: var(--btn-shadow);
+  /* The fill and the label are complementary, so easing both across the same 900ms
+     puts them on the same grey at the midpoint — measured background rgb(156,145,136)
+     against label rgb(152,141,132), a contrast ratio of 1.00:1, and under 3:1 for
+     ~300ms either side. The ONE core action became an unreadable lozenge on every
+     crossing between a cream scene and an alley scene.
+     So they do not interpolate at all: both snap, together, at the bottom of the
+     short opacity dip that #app[data-flip] runs below — the only frame in which a
+     costume change is invisible. */
+  transition:
+    background-color 1ms linear var(--pill-swap-at, 0ms),
+    color 1ms linear var(--pill-swap-at, 0ms),
+    box-shadow 1ms linear var(--pill-swap-at, 0ms),
+    transform var(--t-tap) var(--ease),
+    opacity var(--t-tap) var(--ease);
+}
+
+/* Ghost pill — used when a screen has TWO actions of equal weight. Two filled
+   slabs side by side would out-shout the photograph and turn the composition into
+   a form; two hairline chips read as choices offered by the image rather than
+   buttons parked on top of it. Same height, same type, same tap target as .pill,
+   so "equal weight" is literal.
+   Declared after .pill: same specificity (0,1,0), later wins. */
+.pill--ghost {
+  border: 1px solid var(--ghost-line);
+  background: var(--ghost-bg);
+  color: var(--fg);
+  text-shadow: var(--halo-soft);
+  box-shadow: var(--ghost-shadow), inset 0 1px 0 var(--ghost-ring);
+  /* A ghost pill's fill is a translucent tint of the ink, not its complement, so
+     it never crosses the mid-grey that forces the filled pill to snap. It can ease
+     across the ink flip like the rest of the chrome. */
+  transition:
+    background-color var(--t-dissolve) var(--ease),
+    border-color var(--t-dissolve) var(--ease),
+    box-shadow var(--t-dissolve) var(--ease),
+    color var(--t-dissolve) var(--ease),
+    transform var(--t-tap) var(--ease),
+    opacity var(--t-tap) var(--ease);
+}
+
+/* The shell holds data-flip for one beat around the ink flip. 210ms of a 480ms dip
+   lands inside the trough (182-250ms), so the swap is never presented at strength.
+   Ghost pills are excluded: they have nothing to hide, and dipping them would make
+   the landing blink for no reason on the way back from a light scene. */
+#app[data-flip] .pill:not(.pill--ghost) {
+  --pill-swap-at: 210ms;
+  animation: elura-pill-flip 480ms var(--ease);
+}
+
+@keyframes elura-pill-flip {
+  0% {
+    opacity: 1;
+  }
+  38%,
+  52% {
+    opacity: 0.14;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.pill:active {
+  transform: scale(0.982);
+  opacity: 0.94;
+}
+
+/* Circular icon button — profile, back, chevrons. Translucent, never solid, so it
+   sits on the photograph instead of on top of it.
+   NO backdrop-filter. Over a live 60fps canvas a backdrop blur cannot be cached:
+   the compositor re-reads and re-blurs its region every frame the canvas changes,
+   which is every frame — and up to three of these are on screen at once, over a
+   half-million-triangle depth mesh, during a dissolve. The tuned --chip-bg alphas
+   plus a hairline and a faint inner ring read as glass over a photograph anyway,
+   and the ring is what gives the pair an edge on a bright backdrop as well as a
+   dark one. Only .badge keeps real glass: one small chip, one region. */
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: var(--tap);
+  height: var(--tap);
+  padding: 0;
+  border: 1px solid var(--chip-line);
+  border-radius: 50%;
+  background: var(--chip-bg);
+  color: var(--fg);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  box-shadow: inset 0 0 0 1px var(--chip-ring);
+  transition:
+    background-color var(--t-dissolve) var(--ease),
+    border-color var(--t-dissolve) var(--ease),
+    box-shadow var(--t-dissolve) var(--ease),
+    color var(--t-dissolve) var(--ease),
+    transform var(--t-tap) var(--ease),
+    opacity var(--t-tap) var(--ease);
+}
+
+.icon-btn:active {
+  transform: scale(0.94);
+  opacity: 0.86;
+}
+
+.icon-btn svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Secondary action. Never competes with .pill — no fill, no border. */
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--tap);
+  padding: 0 var(--sp-3);
+  border: 0;
+  background: none;
+  color: var(--fg-muted);
+  font-family: var(--font-ui);
+  font-size: var(--fs-u2);
+  font-weight: var(--fw-ui);
+  letter-spacing: var(--ls-u2);
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  text-shadow: var(--halo-soft);
+  transition:
+    color var(--t-dissolve) var(--ease),
+    text-shadow var(--t-dissolve) var(--ease),
+    opacity var(--t-tap) var(--ease);
+}
+
+.text-link:active {
+  opacity: 0.6;
+}
+
+/* Reduced motion: collapse the whole system from one place. Declared here rather
+   than in screens.css so it cannot lose a cascade race on stylesheet order. */
+@media (prefers-reduced-motion: reduce) {
+  /* the pill's costume change loses its dip, so the colours swap immediately */
+  #app[data-flip] .pill:not(.pill--ghost) {
+    --pill-swap-at: 0ms;
+    animation: none;
+  }
+
+  :root {
+    --t-chrome-out: 1ms;
+    --t-camera: 1ms;
+    --t-chrome-in: 1ms;
+    --t-dissolve: 1ms;
+    --stagger: 0ms;
+    --t-chrome-veil: 1ms;
+    --t-enter-delay: 0ms;
+    --t-clock-delay: 0ms;
+    --t-dot: 1ms;
+    --t-tap: 1ms;
+  }
+}

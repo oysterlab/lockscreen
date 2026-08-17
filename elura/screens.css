@@ -1,0 +1,759 @@
+/**
+ * ELURA — screens & motion.
+ *
+ * Three screens live in the DOM at once over one persistent WebGL canvas.
+ * Navigation is a camera move, so nothing here ever slides a page: the canvas is
+ * fixed and untransformed (all parallax is the GL camera), the grade veil
+ * re-keys the frame, and only the chrome translates a few pixels as it leaves or
+ * arrives.
+ *
+ * Timing contract (landing -> gallery), all var(--ease):
+ *   t=0     chrome out    420ms   translateY(-18px) [+ blur on the landing clock]
+ *   t=0     camera        1100ms  (stage.js)
+ *   t=0     grade         1100ms  0.42 -> 0.22
+ *   t=260   chrome in     640ms   translateY(14px) -> 0, staggered 90ms
+ * Nothing moves at the same speed as anything else, and the last chrome group
+ * lands at 1080ms so the camera — 1100ms — is genuinely the last thing to settle.
+ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  /* Warm ground behind the canvas: the hero scene is a cream studio, so a black
+     or white pre-paint would read as a flash. */
+  background: var(--sand);
+  color: var(--fg, var(--espresso));
+  font-family: var(--font-ui);
+  font-weight: var(--fw-ui);
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 3px;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  color: var(--fg);
+  isolation: isolate;
+}
+
+/* ------------------------------------------------------------------ *
+ * LAYER 0 — the stage
+ * The canvas NEVER moves. A CSS transform here would double up on the GL camera
+ * and break the one thing this product sells.
+ * ------------------------------------------------------------------ */
+
+#stage-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  /* The chrome paints on the first frame; the hero's plates take seconds on a real
+     phone over cellular. The canvas clears to a dark brown, so it fades up under the
+     type once the scene is actually there instead of flashing in behind it. */
+  opacity: 0;
+  transition: opacity var(--t-dissolve) var(--ease);
+}
+
+#stage-canvas[data-ready] {
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------------ *
+ * LAYER 1 — the grade
+ * One element doing three jobs: a lens vignette that frames the composition, two
+ * soft bands under the chrome zones, and a flat veil that sets the key of the
+ * whole frame. Together they are what lets type sit directly on the photograph
+ * with no card, no box, no scrim rectangle. Overall opacity is --grade, set
+ * inline by the shell and eased on the same clock as the camera.
+ * ------------------------------------------------------------------ */
+
+/* --grade is the SCREEN's depth (landing 0.42 / gallery 0.22 / preview 0.06);
+   --grade-scale is the MODE's, because one shared opacity was tuned for the cream
+   scenes and left cream chrome at 1.84:1 over a golden sky. The cap keeps the
+   scaled light mode from going fully opaque if the landing is ever shown over an
+   alley scene. Every stop is a token so both modes declare the same gradient
+   STRUCTURE — background-image only interpolates between matching shapes. */
+.grade {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: min(0.72, calc(var(--grade, 0.42) * var(--grade-scale, 1)));
+  background-image:
+    radial-gradient(118% 78% at 50% 40%, transparent 0%, transparent 44%, var(--grade-color) 100%),
+    linear-gradient(
+      to bottom,
+      var(--grade-band-top) 0%,
+      var(--grade-band-top) var(--band-top-hold, 0%),
+      transparent var(--band-top-stop, 30%)
+    ),
+    linear-gradient(
+      to top,
+      var(--grade-band-bottom) 0%,
+      var(--grade-band-bottom) var(--band-bottom-hold, 0%),
+      transparent var(--band-bottom-stop, 44%)
+    ),
+    linear-gradient(var(--grade-veil), var(--grade-veil));
+  transition:
+    opacity var(--t-camera) var(--ease),
+    background-image var(--t-dissolve) var(--ease);
+}
+
+/* Fallbacks if the shell has not written --grade yet — the resting value each
+   screen expects. An inline --grade on #app wins over all of these. */
+/* 0.30, not 0.42: 0.42 was sized to carry a two-line display headline plus a
+   subline. With the headline gone the landing's whole text budget is a clock in the
+   top band — which the grade's own top legibility band already covers — so the
+   extra veil was only greying the photograph the brief wants to be the hero. */
+#app[data-screen="landing"] .grade {
+  opacity: min(0.72, calc(var(--grade, 0.3) * var(--grade-scale, 1)));
+}
+
+#app[data-screen="gallery"] .grade {
+  opacity: min(0.72, calc(var(--grade, 0.22) * var(--grade-scale, 1)));
+}
+
+#app[data-screen="preview"] .grade {
+  opacity: min(0.72, calc(var(--grade, 0.06) * var(--grade-scale, 1)));
+}
+
+/* ------------------------------------------------------------------ *
+ * LAYER 2 — screens
+ * Screens are pointer-transparent so drag and tilt always reach the canvas;
+ * interactive children opt back in. PREVIEW's "tap anywhere to return" must be
+ * bound on #app, not on the screen, for the same reason.
+ * ------------------------------------------------------------------ */
+
+.screen {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* The shell keeps the outgoing screen mounted for exactly its exit, so both
+   states are "on screen". No visibility transition: the shell writes inline
+   transition-delay/duration on this element to time the chrome, and a
+   transitioned visibility would inherit those and flicker. */
+.screen[data-active],
+.screen[data-leaving] {
+  visibility: visible;
+}
+
+.pill,
+.text-link,
+.icon-btn,
+.dot {
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+/* A leaving screen is transparent but still hit-testable, and its buttons would
+   sit on top of the screen that replaced it. Nothing outside the live screen
+   takes a tap. */
+.screen:not([data-active]) * {
+  pointer-events: none;
+}
+
+.screen--landing {
+  padding: calc(env(safe-area-inset-top) + 78px) var(--gutter)
+    calc(env(safe-area-inset-bottom) + 34px);
+}
+
+/* 34px, not 24: the lock note is the last line on the screen and 24px put it inside
+   the home-indicator zone on an iPhone 14. */
+.screen--gallery {
+  padding: calc(env(safe-area-inset-top) + 88px) var(--gutter)
+    calc(env(safe-area-inset-bottom) + 34px);
+}
+
+.screen--preview {
+  padding: calc(env(safe-area-inset-top) + clamp(52px, 11vh, 96px)) var(--gutter)
+    calc(env(safe-area-inset-bottom) + 24px);
+}
+
+/* ------------------------------------------------------------------ *
+ * CHROME UNITS — the entrance/exit contract
+ * A unit is any element carrying data-chrome; its value IS the stagger index,
+ * so the markup declares reading order once and both the stylesheet and the
+ * shell's inline timing read the same number. --enter-delay holds the whole
+ * group back until the camera has committed. Units are never nested, so
+ * opacity and translate never compound.
+ * ------------------------------------------------------------------ */
+
+.screen [data-chrome] {
+  --i: 0;
+  --d: calc(var(--enter-delay, var(--t-enter-delay)) + var(--i) * var(--stagger));
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity var(--t-chrome-in) var(--ease) var(--d),
+    transform var(--t-chrome-in) var(--ease) var(--d),
+    filter var(--t-chrome-in) var(--ease) var(--d),
+    color var(--t-dissolve) var(--ease);
+}
+
+/* will-change promotes to a compositor layer for as long as it is DECLARED, not
+   for as long as something moves. Unconditionally that was a dozen permanent
+   layers, most of them on screens that are visibility:hidden and will not animate
+   for minutes. Scoped to the two screens that are actually in motion. */
+.screen[data-active] [data-chrome],
+.screen[data-leaving] [data-chrome] {
+  will-change: opacity, transform;
+}
+
+.screen[data-active] [data-chrome] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Exit: faster than the camera, and upward — the text gets out of the way of a
+   world that is moving toward you. Delays are dropped so the chrome clears as
+   one gesture instead of un-staggering backwards. */
+.screen[data-leaving] [data-chrome] {
+  opacity: 0;
+  transform: translateY(-18px);
+  transition-duration: var(--t-chrome-out);
+  transition-delay: 0ms;
+}
+
+/* Only the landing clock defocuses. Blur is the expensive property — it forces
+   its own raster layer for as long as it is declared — so exactly one element
+   opts in, and only for 420ms. It used to be the headline; the clock inherits
+   the beat because it now holds the same position in the composition. */
+.clock--landing {
+  filter: blur(0px);
+}
+
+.screen[data-leaving] .clock--landing {
+  filter: blur(6px);
+}
+
+/* Into PREVIEW LIVE the chrome does not flee — it settles down and out, 320ms,
+   so the room is left undisturbed for the clock. */
+#app[data-screen="preview"] .screen[data-leaving] [data-chrome] {
+  transform: translateY(10px);
+  transition-duration: var(--t-chrome-veil);
+}
+
+/* Reading order, straight off the markup: data-chrome IS the index. Kept in CSS
+   as well as in the shell's inline timing so the entrance is still staggered if
+   the script never gets to run. Exactly three groups per screen — top chrome,
+   lede, bottom block — so the cascade ends inside the camera's move. */
+[data-chrome="1"] {
+  --i: 1;
+}
+[data-chrome="2"] {
+  --i: 2;
+}
+
+/* ------------------------------------------------------------------ *
+ * TOP CHROME
+ * ------------------------------------------------------------------ */
+
+.topbar {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + var(--sp-3));
+  left: max(env(safe-area-inset-left), var(--gutter));
+  right: max(env(safe-area-inset-right), var(--gutter));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--tap);
+}
+
+/* Absolutely centred so the wordmark holds the axis whether the bar carries one
+   button or two. The 0.42em tracking leaves a trailing space on the last glyph;
+   half of it is given back so the mark is optically centred, not box-centred. */
+.wordmark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(calc(-50% + 0.21em), -50%);
+  font-size: var(--fs-u3);
+  font-weight: var(--fw-strong);
+  letter-spacing: var(--ls-mark);
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--fg);
+  text-shadow: var(--halo);
+  transition:
+    color var(--t-dissolve) var(--ease),
+    text-shadow var(--t-dissolve) var(--ease);
+}
+
+/* Landing has one button, gallery has two. space-between holds both ends; the
+   lone landing button still needs pushing right on its own. */
+.topbar > .icon-btn:only-of-type {
+  margin-left: auto;
+}
+
+/* ------------------------------------------------------------------ *
+ * 1. LANDING
+ * ------------------------------------------------------------------ */
+
+/* The landing is a lock screen with a thin layer of app chrome on it. The clock
+   sits in the upper band exactly where a phone puts it, the scene owns the whole
+   middle, and the two actions live in the thumb zone. Nothing occupies the centre,
+   which is the point: every scene in the catalog puts its subject bottom-centre,
+   and the empty upper band is where the composition always wanted its type. */
+.landing__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  text-align: center;
+}
+
+/* Lock-screen height, not "under the wordmark". iOS puts the time around a fifth
+   of the way down; pinning it flush to the topbar makes it read as a page title. */
+.clock--landing {
+  /* .clock ships PREVIEW's 700ms hold; on the landing the clock is a chrome group
+     like any other and arrives on the normal cascade. */
+  --enter-delay: var(--t-enter-delay);
+  padding-top: clamp(4px, 3.4vh, 30px);
+}
+
+.cta-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: auto;
+  padding-top: clamp(30px, 0.95em + 4vh, 52px);
+}
+
+/* Two equal actions. Side by side rather than stacked so equality is stated by the
+   layout itself — a stack always implies a first and a second. */
+.cta-pair {
+  display: flex;
+  align-items: stretch;
+  gap: var(--sp-2);
+  width: 100%;
+  max-width: 360px;
+}
+
+.cta-pair .pill {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  padding: 0 var(--sp-3);
+  white-space: nowrap;
+}
+
+/* 330, not 344. 344 is a real device width — the Galaxy Z Fold's COVER display is
+   904px at density 420, i.e. exactly 344 CSS px — and at 344 the pair still fits
+   comfortably side by side (22px gutters leave 300px, so 146px per pill against
+   ~124px of label plus padding). Stacking there meant the one device this was
+   being judged on saw the fallback instead of the design. Below 330 the labels
+   genuinely collide and stacking is the only graceful failure. */
+@media (max-width: 330px) {
+  .cta-pair {
+    flex-direction: column;
+  }
+}
+
+/* "Make it yours" is inert in this prototype (upload is not built). It gets a
+   quiet, transient line rather than a dead tap — and it is absent from the resting
+   composition, so the text budget is unchanged. */
+.landing-note {
+  margin: 0;
+  min-height: 15px;
+  font-size: var(--fs-u3);
+  font-weight: var(--fw-ui);
+  letter-spacing: var(--ls-u3);
+  line-height: 15px;
+  color: var(--fg-faint);
+  text-shadow: var(--halo-soft);
+  opacity: 0;
+  transition: opacity var(--t-chrome-in) var(--ease);
+}
+
+.landing-note.is-on {
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------------ *
+ * 2. GALLERY
+ * ------------------------------------------------------------------ */
+
+.gallery__lede {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: var(--chip-h);
+  /* right padding is short by the trailing letter-spacing so the chip is
+     optically, not mathematically, symmetric */
+  padding: 0 9px 0 11px;
+  border: 1px solid var(--chip-line);
+  border-radius: var(--r-pill);
+  background: var(--chip-bg);
+  color: var(--fg);
+  font-size: 10px;
+  font-weight: var(--fw-strong);
+  letter-spacing: var(--ls-caps);
+  line-height: 1;
+  text-transform: uppercase;
+  backdrop-filter: blur(16px) saturate(1.25);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+}
+
+.badge__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: elura-breathe 3.2s var(--ease) infinite;
+}
+
+@keyframes elura-breathe {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.42;
+    transform: scale(0.82);
+  }
+}
+
+.tagline {
+  margin: var(--sp-3) 0 0;
+  max-width: 30ch;
+  font-size: var(--fs-u2);
+  font-weight: var(--fw-ui);
+  letter-spacing: var(--ls-u2);
+  line-height: var(--lh-tight);
+  text-align: center;
+  color: var(--fg-muted);
+  text-shadow: var(--halo-soft);
+  transition:
+    color var(--t-dissolve) var(--ease),
+    text-shadow var(--t-dissolve) var(--ease);
+}
+
+.gallery__bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  margin-top: auto;
+}
+
+/* Counter and dots on ONE line, immediately above the action. Stacked and centred
+   they sat exactly where every scene in the catalog puts the cat's face — on the
+   cheek in atelier and mochi, between the eyes in cherry, on the muzzle in latte,
+   across the face in nila. One row is also half the height, which is what lets the
+   whole bottom block sit inside the band the grade already darkens. */
+.gallery__index {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  width: 100%;
+}
+
+/* Above the dots' invisible hit strip: the dots come first in the DOM but their
+   ::after is positioned, so without this it would paint over the pill's top edge. */
+.gallery__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* Quiet, not loud. At --fw-strong / --ls-caps / uppercase it carried the same
+   visual weight as the wordmark and pulled the eye straight to the one place the
+   composition cannot afford it. */
+.counter {
+  margin: 0; /* it is a <p>: the UA's 1em block margins made the row 3x its ink */
+  font-size: var(--fs-u3);
+  font-weight: var(--fw-ui);
+  letter-spacing: var(--ls-u3);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-faint);
+  text-shadow: var(--halo-soft);
+  /* Opacity belongs to the shell's WAAPI crossfade (90ms out / 260ms in, fired on
+     the frame the dissolve actually passes 50%), never to a CSS rule — two opacity
+     mechanisms on one element would fight at exactly the moment it matters. */
+  transition:
+    color var(--t-dissolve) var(--ease),
+    text-shadow var(--t-dissolve) var(--ease);
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 6px;
+}
+
+/* Width, not opacity: the active dot grows into a bar, which reads as travel
+   along a row of rooms rather than a slideshow indicator blinking. */
+.dot {
+  position: relative;
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--dot-off);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition:
+    width var(--t-dot) var(--ease),
+    background-color var(--t-dot) var(--ease);
+}
+
+.dot.is-active,
+.dot[data-on] {
+  width: 20px;
+  background: var(--fg);
+}
+
+/* 6px is not a tap target; the hit area is invisible. Kept to 32px rather than the
+   full 44px because this strip runs the width of the frame directly above the pill:
+   any taller and it starts eating the action's own top edge and swallowing swipes
+   that were meant for the stage. */
+.dot::after {
+  content: "";
+  position: absolute;
+  inset: -13px -5px;
+}
+
+/* Optical intervals, measured from the text and not from the 44px tap box the link
+   carries. The negative margin pulled this flush into that box, so the two quietest
+   lines on the screen were also the tightest pair on it. */
+.note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: var(--fs-u3);
+  font-weight: var(--fw-ui);
+  letter-spacing: var(--ls-u3);
+  line-height: 1;
+  color: var(--fg-faint);
+  text-shadow: var(--halo-soft);
+  transition:
+    color var(--t-dissolve) var(--ease),
+    text-shadow var(--t-dissolve) var(--ease);
+}
+
+/* pill -> "Apply sample" ~14px and link -> note ~10px, measured optically: the link
+   already carries 15px of tap box above and below its 13px text. */
+.gallery__actions .text-link {
+  margin-top: -1px;
+}
+
+.gallery__actions .note {
+  margin-top: -5px;
+}
+
+.note .glyph--lock {
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Chevrons ride the vertical midpoint. The pair is one chrome unit (a strip
+   across the middle of the frame, pointer-transparent except for the buttons)
+   so both arrive together instead of racing each other in from the edges. */
+.gallery__nav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: var(--tap);
+  margin-top: calc(var(--tap) / -2);
+}
+
+.nav-btn {
+  position: absolute;
+  top: 0;
+}
+
+.nav-btn--prev {
+  left: max(env(safe-area-inset-left), 10px);
+}
+
+.nav-btn--next {
+  right: max(env(safe-area-inset-right), 10px);
+}
+
+/* They are wayfinding, not actions — they must never out-shout the pill. This
+   sits after the unit rule on purpose: same specificity, later wins. */
+.screen[data-active] .gallery__nav {
+  opacity: 0.88;
+}
+
+/* ------------------------------------------------------------------ *
+ * 3. PREVIEW LIVE
+ * ------------------------------------------------------------------ */
+
+.clock {
+  --enter-delay: var(--t-clock-delay);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+  text-align: center;
+  pointer-events: none;
+}
+
+.clock__time {
+  font-family: var(--font-display);
+  font-size: var(--fs-clock);
+  font-weight: var(--fw-display);
+  line-height: var(--lh-clock);
+  letter-spacing: var(--ls-clock);
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--fg);
+  text-shadow: var(--halo);
+  transition:
+    color var(--t-dissolve) var(--ease),
+    text-shadow var(--t-dissolve) var(--ease);
+}
+
+.clock__date {
+  font-size: var(--fs-u1);
+  font-weight: var(--fw-ui);
+  letter-spacing: var(--ls-u1);
+  line-height: 1;
+  color: var(--fg-muted);
+  text-shadow: var(--halo-soft);
+  transition:
+    color var(--t-dissolve) var(--ease),
+    text-shadow var(--t-dissolve) var(--ease);
+}
+
+/* ------------------------------------------------------------------ *
+ * DEVICE RANGE
+ * Design target 390x844. These only correct what clamp() cannot: vertical
+ * breathing room on short phones and over-spread on tall ones.
+ * ------------------------------------------------------------------ */
+
+@media (max-height: 815px) {
+  .screen--landing {
+    padding-top: calc(env(safe-area-inset-top) + 68px);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 26px);
+  }
+
+  .gallery__bottom {
+    gap: var(--sp-4);
+  }
+}
+
+@media (min-height: 900px) {
+  .screen--landing,
+  .screen--gallery {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 44px);
+  }
+}
+
+/* Landscape is not a supported composition (the wallpaper is portrait); keep it
+   merely legible rather than letting the display type eat the frame. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .clock--landing {
+    padding-top: 0;
+  }
+
+  .clock__time {
+    font-size: clamp(44px, 9vh, 64px);
+  }
+
+  .screen--landing,
+  .screen--gallery,
+  .screen--preview {
+    padding-top: calc(env(safe-area-inset-top) + 56px);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * REDUCED MOTION
+ * The duration tokens are collapsed in tokens.css; this kills what is not
+ * token-driven. The state machine is untouched — screens still change, the
+ * camera still moves, everything simply arrives at once.
+ * ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  .badge__dot {
+    animation: none;
+  }
+
+  .screen[data-leaving] .clock--landing {
+    filter: blur(0px);
+  }
+
+  #stage-canvas,
+  .grade,
+  .counter,
+  .dot,
+  .pill,
+  .icon-btn,
+  .text-link,
+  .wordmark,
+  .landing-note,
+  .tagline,
+  .clock__time,
+  .clock__date,
+  .note {
+    transition-duration: 1ms;
+  }
+}

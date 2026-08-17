@@ -1,0 +1,9 @@
+{
+  "focus": 0.5,
+  "depthScale": 1.9,
+  "_subjectDepth": 0.576,
+  "_note": "auto-seated convergence(focus)/gain(depthScale) from depth+subject; orbit/orbitYScale hand-set 2026-08-17: X halved (smear), Y raised to match X",
+  "farScale": 0.7,
+  "orbit": 0.31,
+  "orbitYScale": 1.0
+}

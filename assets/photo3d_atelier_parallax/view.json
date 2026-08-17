@@ -1,0 +1,18 @@
+{
+  "renderMode": "coherent-depth",
+  "focus": 0.6157,
+  "depthScale": 3.2,
+  "farScale": 0.72,
+  "orbit": 1.0,
+  "orbitYScale": 0.42,
+  "subjectBaseDepth": 0.6471,
+  "_contactDepth": 0.6157,
+  "_subjectDepth": 0.6471,
+  "_subjectShift": 4.0,
+  "_bgCalibration": {
+    "slope": 0.98866,
+    "offset": -3.4096,
+    "correlation": 0.99466
+  },
+  "_note": "single original depth; scale-calibrated background-hole inpaint; contact-seated subject"
+}
