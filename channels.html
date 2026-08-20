@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Channel Mixer — 독립 채널 실시간 합성</title>
+<style>
+:root{
+  --bg:#131519; --panel:#1A1D22; --line:#2C313A; --ink:#E6E7E2;
+  --muted:#969C9B; --accent:#C9AE72; --off:#5A6068;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Apple SD Gothic Neo","Noto Sans KR",monospace;
+  --ui:ui-sans-serif,system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);
+     display:flex;gap:26px;padding:24px;align-items:flex-start;flex-wrap:wrap}
+#stage{position:relative;flex:0 0 auto}
+canvas{display:block;width:378px;height:672px;border:1px solid var(--line);border-radius:3px;background:#000}
+@media(max-width:820px){canvas{width:min(88vw,340px);height:auto;aspect-ratio:9/16}}
+.panel{flex:1 1 340px;min-width:300px;max-width:520px}
+h1{font-size:19px;letter-spacing:-.02em;margin:0 0 4px;font-weight:640}
+.sub{color:var(--muted);font-size:13px;margin:0 0 22px;line-height:1.6}
+.ch{border:1px solid var(--line);border-radius:3px;padding:14px 16px;margin-bottom:12px;background:var(--panel)}
+.ch.off{opacity:.45}
+.chhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.chhead b{font-size:14px;font-weight:620;flex:1}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+label.sw{position:relative;display:inline-block;width:38px;height:21px;flex:0 0 auto}
+label.sw input{opacity:0;width:0;height:0}
+label.sw span{position:absolute;inset:0;background:var(--off);border-radius:11px;cursor:pointer;transition:background .18s}
+label.sw span:before{content:"";position:absolute;width:15px;height:15px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .18s}
+label.sw input:checked+span{background:var(--accent)}
+label.sw input:checked+span:before{transform:translateX(17px)}
+label.sw input:focus-visible+span{box-shadow:0 0 0 3px rgba(201,174,114,.45)}
+.row{display:flex;align-items:center;gap:12px;margin-top:9px}
+.row .lab{font-family:var(--mono);font-size:10.5px;color:var(--muted);width:52px;flex:0 0 auto}
+.row .val{font-family:var(--mono);font-size:11.5px;color:var(--accent);width:62px;text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:3px;background:var(--line);border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--accent);cursor:pointer;border:3px solid var(--panel)}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--accent);cursor:pointer;border:3px solid var(--panel)}
+input[type=range]:focus-visible{box-shadow:0 0 0 3px rgba(201,174,114,.4)}
+button{font-family:var(--ui);font-size:12.5px;background:transparent;color:var(--ink);
+       border:1px solid var(--line);border-radius:3px;padding:7px 13px;cursor:pointer}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.on{border-color:var(--accent);color:var(--accent)}
+.pets{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.readout{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.85;
+         border-top:1px solid var(--line);margin-top:18px;padding-top:14px;font-variant-numeric:tabular-nums}
+.readout b{color:var(--accent);font-weight:500}
+.note{font-size:12.5px;color:var(--muted);line-height:1.65;margin-top:14px}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c" width="540" height="960"></canvas></div>
+
+<div class="panel">
+  <h1>Channel Mixer</h1>
+  <p class="sub">기준 스틸 한 장에 독립 채널을 <b>곱해서</b> 실시간 합성합니다.<br>
+     각 채널을 껐다 켜보면 서로 간섭하지 않는 걸 확인할 수 있습니다.</p>
+
+  <div class="ch" id="chSun">
+    <div class="chhead"><b>해 — 하루 조명</b><span class="tag">96 slots</span>
+      <label class="sw"><input type="checkbox" id="sunOn" checked><span></span></label></div>
+    <div class="row"><span class="lab">시각</span><input type="range" id="sunT" min="0" max="1439" value="750"><span class="val" id="sunV">12:30</span></div>
+    <div class="row"><span class="lab">속도</span><input type="range" id="sunS" min="0" max="240" value="60"><span class="val" id="sunSV">60&times;</span></div>
+  </div>
+
+  <div class="ch" id="chBr">
+    <div class="chhead"><b>나뭇가지 — 그림자 흔들림</b><span class="tag">48 frames</span>
+      <label class="sw"><input type="checkbox" id="brOn" checked><span></span></label></div>
+    <div class="row"><span class="lab">위상</span><input type="range" id="brT" min="0" max="479" value="0"><span class="val" id="brV">0.0</span></div>
+    <div class="row"><span class="lab">속도</span><input type="range" id="brS" min="0" max="60" value="14"><span class="val" id="brSV">14</span></div>
+  </div>
+
+  <button id="rand">위상 랜덤화</button>
+  <button id="pause">일시정지</button>
+
+  <div style="margin-top:18px">
+    <div class="tag" style="color:var(--muted)">기준 스틸 — 같은 채널, 다른 고양이</div>
+    <div class="pets" id="pets"></div>
+  </div>
+
+  <div class="readout" id="ro"></div>
+  <p class="note" id="err" style="color:#C2705F"></p>
+</div>
+
+<script>
+const CV = document.getElementById('c'), gl = CV.getContext("webgl",{antialias:false,alpha:false,preserveDrawingBuffer:true});
+const err = document.getElementById('err');
+if(!gl){ err.textContent = 'WebGL을 사용할 수 없습니다.'; }
+
+const VS = `attribute vec2 p; varying vec2 vUv;
+void main(){ vUv = vec2((p.x+1.0)*0.5, 1.0-(p.y+1.0)*0.5); gl_Position = vec4(p,0.0,1.0); }`;
+
+// Light is MULTIPLICATIVE, so independent channels simply multiply. Each channel
+// is normalised to 1.0 where its element is at rest, which is what keeps them
+// from fighting: switching one off leaves every other channel's effect intact.
+const FS = `precision highp float;
+varying vec2 vUv;
+uniform sampler2D uRef,uRefL,uSun,uBr;
+uniform vec2 uSunG,uBrG;
+uniform float uSunA,uSunB,uSunM,uSunOn;
+uniform float uBrA,uBrB,uBrM,uBrOn,uBrLo,uBrSp;
+vec3 cell(sampler2D t, vec2 g, float i, vec2 uv){
+  float c=mod(i,g.x), r=floor(i/g.x);
+  vec2 sz=1.0/g, ins=sz*0.004;            // inset: LINEAR filtering must not bleed across cells
+  return texture2D(t,(vec2(c,r)*sz)+ins+uv*(sz-2.0*ins)).rgb;
+}
+void main(){
+  vec3 base = texture2D(uRef,vUv).rgb;
+  vec3 lr = texture2D(uRefL,vUv).rgb;
+  vec3 la = mix(cell(uSun,uSunG,uSunA,vUv), cell(uSun,uSunG,uSunB,vUv), uSunM);
+  vec3 sun = mix(vec3(1.0), (la+0.004)/(lr+0.004), uSunOn);
+  vec3 bv = mix(cell(uBr,uBrG,uBrA,vUv), cell(uBr,uBrG,uBrB,vUv), uBrM);
+  vec3 br = mix(vec3(1.0), bv*uBrSp+uBrLo, uBrOn);
+  gl_FragColor = vec4(clamp(base*sun*br,0.0,1.0),1.0);
+}`;
+
+function sh(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);
+  if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o}
+let prog, U={};
+function initGL(){
+  prog=gl.createProgram();
+  gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));
+  gl.linkProgram(prog);
+  if(!gl.getProgramParameter(prog,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(prog));
+  gl.useProgram(prog);
+  const b=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,b);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const l=gl.getAttribLocation(prog,'p');
+  gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l,2,gl.FLOAT,false,0,0);
+  ['uRef','uRefL','uSun','uBr','uSunG','uBrG','uSunA','uSunB','uSunM','uSunOn',
+   'uBrA','uBrB','uBrM','uBrOn','uBrLo','uBrSp'].forEach(n=>U[n]=gl.getUniformLocation(prog,n));
+}
+function tex(img,unit){
+  const t=gl.createTexture();
+  gl.activeTexture(gl.TEXTURE0+unit); gl.bindTexture(gl.TEXTURE_2D,t);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
+  return t;
+}
+const load=src=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(new Error(src));i.src=src});
+
+let META,scene='sage',texRef,texRefL,S={sun:750,br:0,playing:true};
+
+async function setScene(name){
+  scene=name;
+  const [r,rl]=await Promise.all([load(`channels/ref_${name}.jpg`),load(`channels/reflight_${name}.jpg`)]);
+  texRef=tex(r,0); texRefL=tex(rl,1);
+  gl.uniform1i(U.uRef,0); gl.uniform1i(U.uRefL,1);
+  [...document.querySelectorAll('#pets button')].forEach(b=>b.classList.toggle('on',b.dataset.s===name));
+}
+
+// the scene's own timeToSlot table (10-min steps, unwrapped) maps clock time to
+// a fractional slot; the renderer only interpolates.
+function sunSlot(minutes){
+  const m=META.scenes[scene], t=m.timeToSlot, n=m.slots;
+  const idx=minutes/10, i=Math.min(t.length-2,Math.floor(idx)), f=idx-i;
+  const s=(t[i]*(1-f)+t[i+1]*f);
+  return ((s%n)+n)%n;
+}
+const pad=v=>String(v).padStart(2,'0');
+
+function frame(dt){
+  if(S.playing){
+    S.sun=(S.sun + (+sunS.value)*dt/60) % 1440;
+    S.br =(S.br  + (+brS.value)*dt) % META.branch.count;
+  }
+  sunT.value=Math.round(S.sun); brT.value=Math.round(S.br*10);
+  const mm=Math.floor(S.sun);
+  sunV.textContent=`${pad(Math.floor(mm/60))}:${pad(mm%60)}`;
+  brV.textContent=S.br.toFixed(1);
+  sunSV.textContent=(+sunS.value)+'×'; brSV.textContent=(+brS.value);
+
+  const ss=sunSlot(S.sun), sa=Math.floor(ss), sb=(sa+1)%META.sun.count;
+  const ba=Math.floor(S.br), bb=(ba+1)%META.branch.count;
+  gl.uniform2f(U.uSunG,META.sun.cols,META.sun.rows);
+  gl.uniform2f(U.uBrG,META.branch.cols,META.branch.rows);
+  gl.uniform1f(U.uSunA,sa); gl.uniform1f(U.uSunB,sb); gl.uniform1f(U.uSunM,ss-sa);
+  gl.uniform1f(U.uBrA,ba);  gl.uniform1f(U.uBrB,bb);  gl.uniform1f(U.uBrM,S.br-ba);
+  gl.uniform1f(U.uSunOn,sunOn.checked?1:0); gl.uniform1f(U.uBrOn,brOn.checked?1:0);
+  gl.uniform1f(U.uBrLo,META.branch.lo); gl.uniform1f(U.uBrSp,META.branch.span);
+  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+
+  chSun.classList.toggle('off',!sunOn.checked);
+  chBr.classList.toggle('off',!brOn.checked);
+  const lcm=(a,b)=>{const g=(x,y)=>y?g(y,x%y):x; return a*b/g(a,b)};
+  const brSec=(+brS.value)?META.branch.count/(+brS.value):0;
+  const sunSec=(+sunS.value)?1440*60/(+sunS.value):0;
+  ro.innerHTML =
+    `해     slot <b>${ss.toFixed(2)}</b> / ${META.sun.count}   주기 <b>${sunSec?sunSec.toFixed(0)+'초':'정지'}</b><br>`+
+    `가지   frame <b>${S.br.toFixed(2)}</b> / ${META.branch.count}   주기 <b>${brSec?brSec.toFixed(1)+'초':'정지'}</b><br>`+
+    `합성   두 채널의 최소공배수 &rarr; 사실상 반복 없음<br>`+
+    `기준   ref_${scene}.jpg &middot; 채널은 <b>${META.scenes[scene].lightFrom}</b> 공유`;
+}
+
+(async function(){
+ try{
+  initGL();
+  META=await (await fetch('channels/channels.json')).json();
+  const petbox=document.getElementById('pets');
+  Object.keys(META.scenes).forEach(n=>{
+    const b=document.createElement('button'); b.textContent=n; b.dataset.s=n;
+    b.onclick=()=>setScene(n); petbox.appendChild(b);
+  });
+  const [sun,br]=await Promise.all([load('channels/atlas_sun.jpg'),load('channels/atlas_branch.jpg')]);
+  tex(sun,2); tex(br,3); gl.uniform1i(U.uSun,2); gl.uniform1i(U.uBr,3);
+  await setScene('sage');
+  gl.viewport(0,0,CV.width,CV.height);
+
+  sunT.oninput=()=>S.sun=+sunT.value;
+  brT.oninput =()=>S.br=(+brT.value)/10;
+  document.getElementById('rand').onclick=()=>{
+    S.sun=Math.random()*1440; S.br=Math.random()*META.branch.count;
+  };
+  const pb=document.getElementById('pause');
+  pb.onclick=()=>{S.playing=!S.playing; pb.textContent=S.playing?'일시정지':'재생'};
+
+  let last=performance.now();
+  (function loop(now){
+    const dt=Math.min((now-last)/1000,0.1); last=now;
+    frame(dt); requestAnimationFrame(loop);
+  })(last);
+ }catch(e){ err.textContent='오류: '+e.message; console.error(e); }
+})();
+</script>
+</body>
+</html>

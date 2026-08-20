@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Plan A — 결정론적 2.5D 패럴랙스</title>
+<style>
+:root{
+  --bg:#131519; --panel:#1A1D22; --line:#2C313A; --ink:#E6E7E2; --muted:#969C9B;
+  --accent:#C9AE72; --dim:#8A7748; --bad:#C2705F;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Apple SD Gothic Neo","Noto Sans KR",monospace;
+  --ui:ui-sans-serif,system-ui,-apple-system,"Helvetica Neue","Apple SD Gothic Neo","Pretendard","Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --bg:#EFEEE8; --panel:#F8F7F2; --line:#D4D2C7; --ink:#1C1F24; --muted:#656A68;
+  --accent:#8A6D28; --dim:#B29A5E; --bad:#A44B39;}}
+:root[data-theme="light"]{--bg:#EFEEE8;--panel:#F8F7F2;--line:#D4D2C7;--ink:#1C1F24;
+  --muted:#656A68;--accent:#8A6D28;--dim:#B29A5E;--bad:#A44B39;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.7}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px 110px}
+.col{max-width:68ch;margin-inline:auto}
+header{padding:72px 0 8px}
+.slug{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+h1{font-size:clamp(32px,6vw,54px);line-height:1.02;letter-spacing:-.03em;font-weight:670;margin:.25em 0 .3em;text-wrap:balance}
+.thesis{font-size:clamp(17px,2.2vw,20px);line-height:1.55;max-width:34ch;text-wrap:balance}
+.thesis em{font-style:normal;color:var(--accent);font-weight:600}
+section{padding-top:64px}
+h2{font-size:clamp(21px,2.6vw,27px);letter-spacing:-.022em;font-weight:650;margin:0 0 .5em}
+.lede{color:var(--muted);font-size:16px;margin:0 0 1.6em}
+p{margin:0 0 1.05em} strong{font-weight:650}
+code{font-family:var(--mono);font-size:.87em}
+a{color:var(--accent)}
+figure{margin:30px 0 0}
+.strip{display:grid;gap:9px;grid-template-columns:repeat(5,1fr)}
+.strip.n4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:760px){.strip,.strip.n4{grid-template-columns:repeat(2,1fr)}}
+.cell img{display:block;width:100%;border:1px solid var(--line);border-radius:2px}
+.cap{font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;color:var(--muted);margin-top:7px}
+.cap i{font-style:normal;color:var(--dim)}
+figcaption{margin-top:16px;font-size:14px;color:var(--muted);max-width:64ch}
+.player{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap;margin-top:26px}
+.player video{width:300px;max-width:78vw;border:1px solid var(--line);border-radius:3px;display:block;background:#000}
+.pctl{flex:1 1 260px;min-width:240px}
+button{font-family:var(--ui);font-size:13px;background:transparent;color:var(--ink);border:1px solid var(--line);
+       border-radius:3px;padding:8px 14px;cursor:pointer;margin:0 6px 8px 0}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button.on{border-color:var(--accent);color:var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+table{border-collapse:collapse;width:100%;margin:20px 0 0;font-size:14px}
+th,td{text-align:left;padding:9px 14px 9px 0;border-bottom:1px solid var(--line)}
+th{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:500;border-bottom-color:var(--dim)}
+td.n{font-family:var(--mono);text-align:right;padding-right:0;font-variant-numeric:tabular-nums}
+tr.hi td{color:var(--accent);font-weight:600}
+tr.no td{color:var(--bad)}
+.tbl{overflow-x:auto}
+.note{border-left:2px solid var(--accent);padding:2px 0 2px 17px;margin:24px 0;color:var(--muted);font-size:14.5px}
+.note.bad{border-color:var(--bad)}
+.note b{color:var(--ink)}
+hr{border:0;border-top:1px solid var(--line);margin:58px 0 0}
+footer{padding-top:46px;color:var(--muted);font-size:13px}
+footer code{color:var(--dim)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="col">
+  <div class="slug">experiment_2 / planA · 2026-08-21</div>
+  <h1>Plan A</h1>
+  <p class="thesis">AI는 AI만 할 수 있는 일을 하고 <em>거기서 멈춘다</em>.<br>카메라 이동은 산술이라 고양이 얼굴이 흔들릴 수 없다.</p>
+</header>
+
+<section class="col">
+  <h2>결과</h2>
+  <p class="lede">720×1280 · 24fps · 8초 루프. 사양값은 의도적으로 <strong>거의 안 보일 만큼</strong> 작습니다 — 월페이퍼에서는 그게 고급스럽습니다. 확인용으로 ×6 과장본을 같이 뒀습니다.</p>
+</section>
+
+<div class="player col">
+  <video id="v" src="web/parallax/planA.mp4" autoplay loop muted playsinline></video>
+  <div class="pctl">
+    <button id="bSpec" class="on">사양 ±1.0%</button>
+    <button id="bExag">×6 과장</button>
+    <div class="tbl"><table>
+      <tr><th>카메라</th><th class="n">값</th></tr>
+      <tr><td>수평 진폭</td><td class="n">±1.0% (±10.8px)</td></tr>
+      <tr><td>수직 진폭</td><td class="n">±0.18% (±3.5px)</td></tr>
+      <tr><td>전후 이동 · 회전</td><td class="n">0</td></tr>
+      <tr><td>오버스캔</td><td class="n">7%</td></tr>
+      <tr><td>한 사이클</td><td class="n">8초 · 사인 · 루프</td></tr>
+    </table></div>
+  </div>
+</div>
+
+<section class="col">
+  <h2>1. AI가 만든 레이어</h2>
+  <p class="lede">여기까지만 AI입니다. 피사체를 떼고, 단상 뒤 벽을 상상하고, 반투명 커튼을 매트로 뽑는 것 — 사람이 손으로 하기 어려운 일들.</p>
+</section>
+
+<figure>
+  <div class="strip">
+    <div class="cell"><img src="web/parallax/l0_target.jpg" alt="원본"><div class="cap"><i>0</i> 원본</div></div>
+    <div class="cell"><img src="web/parallax/l1_base.jpg" alt="빈 플레이트"><div class="cap"><i>1</i> 빈 플레이트</div></div>
+    <div class="cell"><img src="web/parallax/l2_backplate.jpg" alt="LaMa backplate"><div class="cap"><i>2</i> LaMa — 단상 제거</div></div>
+    <div class="cell"><img src="web/parallax/l3_curtain.jpg" alt="커튼 알파"><div class="cap"><i>3</i> 커튼 소프트 알파</div></div>
+    <div class="cell"><img src="web/parallax/l4_group.jpg" alt="고양이+단상 그룹"><div class="cap"><i>4</i> rembg 그룹</div></div>
+  </div>
+  <figcaption class="col">
+    <strong>커튼(3)은 이진 컷이 아닙니다.</strong> 반투명 천을 딱 잘라내면 가장자리가 오려낸 종이처럼 보입니다. 밝기가 벽을 넘는 정도를 그대로 알파로 써서 주름과 비침을 남겼습니다.<br><br>
+    <strong>rembg가 고양이와 단상을 한 덩어리로(4) 잡은 것은 실패가 아닙니다.</strong> 브리프가 정확히 그렇게 묶으라고 지시합니다 — 따로 움직이면 고양이가 자기가 앉은 단상 위에서 미끄러집니다.
+  </figcaption>
+</figure>
+
+<section class="col">
+  <h2>2. 카메라는 산술이다</h2>
+  <p class="lede">깊이맵을 그대로 쓰면 평평한 벽이 고무판처럼 출렁입니다. 벽·바닥·단상은 깊이맵 대신 <strong>명시적 평면</strong>으로 바꾸고, 순수 수평 이동에서는 그 평면이 이동계수 하나로 줄어듭니다.</p>
+</section>
+
+<figure>
+  <div class="strip n4">
+    <div class="cell"><img src="web/parallax/r_left.jpg" alt="카메라 좌"><div class="cap"><i>L</i> 카메라 −10.8px</div></div>
+    <div class="cell"><img src="web/parallax/r_right.jpg" alt="카메라 우"><div class="cap"><i>R</i> 카메라 +10.8px</div></div>
+    <div class="cell"><img src="web/parallax/r_diff.jpg" alt="차이"><div class="cap"><i>Δ</i> 차이 ×10</div></div>
+    <div class="cell"><img src="web/parallax/l0_target.jpg" alt="원본 비교"><div class="cap"><i>0</i> 원본 (비교용)</div></div>
+  </div>
+  <figcaption class="col">차이 맵(Δ)에서 커튼 주름과 고양이 실루엣만 밝고 벽은 거의 검습니다. 레이어별 시차가 실제로 분리돼 있다는 뜻입니다.</figcaption>
+</figure>
+
+<section class="col">
+  <h2>3. 검증 — 지정값 대로 움직이는가</h2>
+  <p class="lede">픽셀 차이는 변위의 대리 지표가 못 됩니다. 선명한 커튼 엣지는 조금만 움직여도 차이가 크고, 밋밋한 벽은 많이 움직여도 차이가 작습니다. 그래서 서브픽셀 NCC로 <strong>실제 변위</strong>를 쟀습니다.</p>
+  <div class="tbl"><table>
+    <tr><th>레이어</th><th class="n">지정 이동률</th><th class="n">예상 변위</th><th class="n">실측 변위</th><th class="n">NCC</th></tr>
+    <tr><td>커튼</td><td class="n">0.95</td><td class="n">13.7 px</td><td class="n">−14.73</td><td class="n">0.991</td></tr>
+    <tr><td>그룹 (고양이+단상)</td><td class="n">0.60</td><td class="n">8.6 px</td><td class="n">−9.18</td><td class="n">0.9999</td></tr>
+    <tr><td>벽</td><td class="n">0.25</td><td class="n">3.6 px</td><td class="n">−3.85</td><td class="n">0.998</td></tr>
+  </table></div>
+  <p style="margin-top:1.5em">카메라 진폭 14.4px 기준 셋 다 <strong>7% 이내</strong>로 일치합니다.</p>
+</section>
+
+<section class="col">
+  <h2>4. 만들면서 잡은 버그 둘</h2>
+  <div class="note bad">
+    <b>루프에 한 프레임 팝.</b> 위상이 <code>i/N</code>이면 frame 0에서 수평 오프셋이 정확히 0이 되고, <code>warpAffine</code>이 항등으로 단락되어 <b>그 프레임만 Lanczos 리샘플링을 건너뜁니다.</b> 혼자 더 선명해져서 루프마다 튑니다 — 이음새가 프레임 간 중앙값의 <b>2.88배</b>였습니다. 위상을 반 스텝 밀어 <code>(i+0.5)/N</code>로 하면 어떤 프레임도 항등이 되지 않고, 이음새가 <b>1.77배</b>로 떨어집니다. 남은 1.77배는 결함이 아니라 이음새가 수평 속도 최대 지점에 놓여서입니다.
+  </div>
+  <div class="note bad">
+    <b>프레임 디렉터리 충돌.</b> 사양본과 과장본이 같은 <code>frames/</code>에 써서 첫 측정이 오염됐습니다. 과장본이 사양본 프레임을 덮어쓴 상태에서 잰 수치였습니다. 출력 디렉터리를 분리하고 전부 재측정했습니다.
+  </div>
+</section>
+
+<section class="col">
+  <h2>5. B안 · C안은 실행하지 못했습니다</h2>
+  <div class="tbl"><table>
+    <tr><th>안</th><th>상태</th><th>이유</th></tr>
+    <tr class="hi"><td>A — 결정론적 2.5D</td><td>완료</td><td>rembg · LaMa · Depth Anything · cv2 전부 로컬에 있음</td></tr>
+    <tr class="no"><td>B — SHARP</td><td>막힘</td><td>미설치 · HF 캐시 없음. 공식 렌더러가 CUDA 중심이라 Mac에선 <code>.ply</code>를 뽑아도 렌더할 3DGS 렌더러가 없음</td></tr>
+    <tr class="no"><td>C — ViewCrafter / GEN3C</td><td>막힘</td><td>둘 다 미설치, CUDA급 GPU 필요. 캐시의 <code>zero123plus</code>는 오브젝트 중심(빈 배경 6뷰)이라 방 안 카메라 이동의 대체 불가</td></tr>
+  </table></div>
+  <div class="note">
+    모델 없이 <b>구조만 근사</b>하는 것은 가능합니다. B는 배경에 깊이 기반 실제 메시를 주고 피사체는 카드로 고정, C는 SD-inpainting으로 좌·우 끝점 뷰를 만들고 고양이를 뺀 배경만 재구성. 둘 다 <b>원본 논문 구현이 아니라 구조적 근사</b>이며, 아직 만들지 않았습니다.
+  </div>
+</section>
+
+<section class="col">
+  <h2>6. 다음 한 수</h2>
+  <p>지금 벽과 바닥이 <strong>단일 평면</strong>이라 아치 안쪽 리세스가 따로 움직이지 않습니다. 브리프의 레이어 표는 「아치 뒤쪽 10~20%」와 「메인 벽·바닥 20~30%」를 나누라고 되어 있는데, 현재는 둘을 25% 하나로 합쳐 놨습니다. 그 레이어를 쪼개면 깊이감이 눈에 띄게 늘어납니다.</p>
+</section>
+
+<hr>
+<footer class="col">
+  스크립트 <code>samples/experiment_2/planA/render_planA.py</code> · 원본 에셋 <code>samples/experiment_2/planA/</code><br>
+  같은 프로젝트의 다른 페이지 — <a href="light-transplant.html">Light Transplant</a> · <a href="channels.html">Channel Mixer</a>
+</footer>
+</div>
+
+<script>
+(function(){
+  var v=document.getElementById('v'), a=document.getElementById('bSpec'), b=document.getElementById('bExag');
+  function pick(src,on,off){ v.src=src; v.play().catch(function(){}); on.classList.add('on'); off.classList.remove('on'); }
+  a.onclick=function(){pick('web/parallax/planA.mp4',a,b)};
+  b.onclick=function(){pick('web/parallax/planA_x6.mp4',b,a)};
+})();
+</script>
+</body>
+</html>
