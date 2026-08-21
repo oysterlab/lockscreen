@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#E8DCCB">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Plan A Live</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:#E8DCCB;
+  -webkit-tap-highlight-color:transparent;overscroll-behavior:none;touch-action:none;
+  font-family:ui-sans-serif,system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+#hint{
+  position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 42px);
+  text-align:center;color:#3A2A20;font-size:13px;letter-spacing:.01em;
+  text-shadow:0 1px 2px rgba(250,244,236,.7),0 1px 14px rgba(250,244,236,.6);
+  transition:opacity .8s cubic-bezier(.22,.61,.16,1);pointer-events:none;z-index:2}
+#hint.gone{opacity:0}
+#tap{position:fixed;inset:0;z-index:3;background:transparent;border:0;cursor:pointer}
+#tap.gone{display:none}
+#err{position:fixed;left:16px;right:16px;top:40%;text-align:center;color:#8a3a2a;font-size:14px;z-index:4}
+@media (prefers-reduced-motion:reduce){#hint{transition:none}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<p id="hint">기울여 보세요</p>
+<button id="tap" aria-label="움직임 켜기"></button>
+<p id="err"></p>
+<script>
+(function(){
+var CV=document.getElementById('c'), HINT=document.getElementById('hint'),
+    TAP=document.getElementById('tap'), ERR=document.getElementById('err');
+var gl=CV.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true});
+if(!gl){ERR.textContent='WebGL을 사용할 수 없습니다.';return}
+
+// Layer travel, back -> front. The cat and the podium are ONE layer on purpose:
+// give them different travel and the cat slides across the podium it sits on.
+var TRAVEL=[0.25,0.60,0.95];
+var AMP_X=0.022, AMP_Y=0.006;      // fraction of the plate at full tilt
+var SRC_W=1080, SRC_H=1920, OVERSCAN=1.06;
+
+var VS='attribute vec2 p;varying vec2 v;void main(){v=vec2((p.x+1.)*.5,1.-(p.y+1.)*.5);gl_Position=vec4(p,0.,1.);}';
+var FS=[
+'precision highp float;varying vec2 v;',
+'uniform sampler2D t0,t1,t2;uniform vec2 uCov,uOff;',
+// cover-fit with overscan, then each layer slides by its own travel
+'vec2 uv(float k){vec2 q=(v-.5)*uCov+.5+uOff*k;return q;}',
+'vec4 samp(sampler2D t,float k){vec2 q=uv(k);',
+'  q=clamp(q,vec2(0.0),vec2(1.0));return texture2D(t,q);}',
+'void main(){',
+'  vec3 c=samp(t0,'+'TRAVEL0'+').rgb;',
+'  vec4 g=samp(t1,'+'TRAVEL1'+');c=mix(c,g.rgb,g.a);',
+'  vec4 k=samp(t2,'+'TRAVEL2'+');c=mix(c,k.rgb,k.a);',
+'  gl_FragColor=vec4(c,1.);}'
+].join('\n').replace('TRAVEL0',TRAVEL[0].toFixed(3))
+             .replace('TRAVEL1',TRAVEL[1].toFixed(3))
+             .replace('TRAVEL2',TRAVEL[2].toFixed(3));
+
+function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);
+  if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o}
+var pr=gl.createProgram();
+gl.attachShader(pr,sh(gl.VERTEX_SHADER,VS));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FS));
+gl.linkProgram(pr);
+if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){ERR.textContent=gl.getProgramInfoLog(pr);return}
+gl.useProgram(pr);
+var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+var loc=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(loc);
+gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+var U={cov:gl.getUniformLocation(pr,'uCov'),off:gl.getUniformLocation(pr,'uOff')};
+
+function tex(img,unit,name){
+  var t=gl.createTexture();gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,t);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
+  gl.uniform1i(gl.getUniformLocation(pr,name),unit);
+}
+function load(src){return new Promise(function(res,rej){
+  var i=new Image();i.onload=function(){res(i)};i.onerror=function(){rej(new Error(src))};i.src=src;});}
+
+var cov=[1,1];
+function resize(){
+  var d=Math.min(window.devicePixelRatio||1,2);
+  var w=Math.round(CV.clientWidth*d), h=Math.round(CV.clientHeight*d);
+  if(CV.width!==w||CV.height!==h){CV.width=w;CV.height=h;}
+  gl.viewport(0,0,w,h);
+  // cover: match the limiting axis, crop the other, then pull in by the overscan
+  var sa=w/h, ia=SRC_W/SRC_H, k=1/OVERSCAN;
+  cov = sa<ia ? [k*sa/ia, k] : [k, k*ia/sa];
+}
+addEventListener('resize',resize);
+if(window.visualViewport)visualViewport.addEventListener('resize',resize);
+
+// critically-damped spring: gives the move weight instead of a flat lerp
+var tgt={x:0,y:0}, cur={x:0,y:0}, vel={x:0,y:0}, last=0, moved=false, idle=true, t0=performance.now();
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function clamp(v,a,b){return v<a?a:v>b?b:v}
+function set(x,y){tgt.x=clamp(x,-1,1);tgt.y=clamp(y,-1,1);
+  if(!moved){moved=true;idle=false;HINT.classList.add('gone');}}
+
+function loop(now){
+  var dt=Math.min((now-last)/1000,0.05);last=now;
+  var f=13.0, ax=(tgt.x-cur.x)*f*f-vel.x*2*f, ay=(tgt.y-cur.y)*f*f-vel.y*2*f;
+  vel.x+=ax*dt;vel.y+=ay*dt;cur.x+=vel.x*dt;cur.y+=vel.y*dt;
+  var ox=cur.x, oy=cur.y;
+  if(idle&&!reduce){ var t=(now-t0)*0.0004; ox+=Math.sin(t)*0.30; oy+=Math.cos(t*0.8)*0.14; }
+  gl.uniform2f(U.cov,cov[0],cov[1]);
+  gl.uniform2f(U.off,-ox*AMP_X,-oy*AMP_Y);
+  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  requestAnimationFrame(loop);
+}
+
+// pointer / touch
+var drag=null;
+function down(e){var t=e.touches?e.touches[0]:e;drag={x:t.clientX,y:t.clientY};}
+function move(e){ if(!drag)return; if(e.cancelable)e.preventDefault();
+  var t=e.touches?e.touches[0]:e;
+  set((t.clientX-drag.x)/CV.clientWidth*3.2, -(t.clientY-drag.y)/CV.clientHeight*3.2); }
+function up(){drag=null}
+addEventListener('pointerdown',down);addEventListener('pointermove',move,{passive:false});
+addEventListener('pointerup',up);addEventListener('pointercancel',up);
+addEventListener('touchstart',down,{passive:true});
+addEventListener('touchmove',move,{passive:false});
+addEventListener('touchend',up);
+
+// gyro
+var base=null;
+function orient(e){
+  if(e.beta==null||e.gamma==null)return;
+  if(!base)base={b:e.beta,g:e.gamma};
+  set(clamp((e.gamma-base.g)/8,-1,1), clamp(-(e.beta-base.b)/8,-1,1));
+}
+function startMotion(){
+  addEventListener('deviceorientation',orient,{passive:true});
+  addEventListener('deviceorientationabsolute',orient,{passive:true});
+}
+function armTap(){
+  var needs = typeof DeviceOrientationEvent!=='undefined' &&
+              typeof DeviceOrientationEvent.requestPermission==='function';
+  if(!needs){ startMotion(); TAP.classList.add('gone'); return; }
+  // iOS: requestPermission must be called synchronously inside a user gesture
+  TAP.addEventListener('click',function(){
+    try{ DeviceOrientationEvent.requestPermission().then(function(r){
+      if(r==='granted')startMotion();
+    }).catch(function(){}); }catch(e){}
+    TAP.classList.add('gone');
+  },{once:true});
+}
+
+Promise.all([load('web/live/wall.webp'),load('web/live/curtain.webp'),load('web/live/group.webp')])
+.then(function(im){
+  tex(im[0],0,'t0'); tex(im[2],1,'t1'); tex(im[1],2,'t2');   // wall, group, curtain
+  resize(); armTap(); last=performance.now(); requestAnimationFrame(loop);
+  setTimeout(function(){ if(!moved) HINT.classList.remove('gone'); },1200);
+})
+.catch(function(e){ ERR.textContent='레이어를 불러오지 못했습니다: '+e.message; });
+})();
+</script>
+</body>
+</html>
