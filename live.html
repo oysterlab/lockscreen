@@ -37,28 +37,40 @@ var CV=document.getElementById('c'), HINT=document.getElementById('hint'),
 var gl=CV.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true});
 if(!gl){ERR.textContent='WebGL을 사용할 수 없습니다.';return}
 
-// Layer travel, back -> front. The cat and the podium are ONE layer on purpose:
-// give them different travel and the cat slides across the podium it sits on.
-var TRAVEL=[0.25,0.60,0.95];
-var AMP_X=0.022, AMP_Y=0.006;      // fraction of the plate at full tilt
+// Travel is carried by the depth maps now (room 0.00-0.41, group 0.60-0.77,
+// curtain 0.88-1.00), which keeps the brief's layer ordering while letting each
+// layer move differently WITHIN itself. The cat and the podium stay one layer:
+// split them and the cat slides across the podium it is sitting on.
+var AMP_X=0.030, AMP_Y=0.009;      // fraction of the plate at full tilt
 var SRC_W=1080, SRC_H=1920, OVERSCAN=1.06;
 
 var VS='attribute vec2 p;varying vec2 v;void main(){v=vec2((p.x+1.)*.5,1.-(p.y+1.)*.5);gl_Position=vec4(p,0.,1.);}';
 var FS=[
 'precision highp float;varying vec2 v;',
-'uniform sampler2D t0,t1,t2;uniform vec2 uCov,uOff;',
-// cover-fit with overscan, then each layer slides by its own travel
-'vec2 uv(float k){vec2 q=(v-.5)*uCov+.5+uOff*k;return q;}',
-'vec4 samp(sampler2D t,float k){vec2 q=uv(k);',
-'  q=clamp(q,vec2(0.0),vec2(1.0));return texture2D(t,q);}',
+'uniform sampler2D tRoom,tRoomD,tGrp,tGrpD,tCur,tCurD;',
+'uniform vec2 uCov,uOff;',
+// Per-PIXEL depth offset, not one offset per layer. Flat cards sliding at three
+// speeds give relative motion but no volume - the cat stays a sticker and the
+// arch stays a circle painted on a wall. Offsetting by the pixel's own depth is
+// what makes the cat's face travel further than its flank and the alcove read
+// as a recess.
+'vec2 base(){return (v-.5)*uCov+.5;}',
+'vec2 warp(vec2 q,float d){return clamp(q+uOff*d,vec2(0.0),vec2(1.0));}',
+'float depth(sampler2D t,vec2 q){return texture2D(t,q).r;}',
+// two taps: read depth at the unshifted point, then shift by it. One iteration
+// of relief mapping - enough for these gentle slopes, and cheap.
+'vec4 layer(sampler2D c,sampler2D dm,vec2 q){',
+'  float d=depth(dm,q);',
+'  vec2 w=warp(q,d);',
+'  d=mix(d,depth(dm,w),0.5);',
+'  return texture2D(c,warp(q,d));}',
 'void main(){',
-'  vec3 c=samp(t0,'+'TRAVEL0'+').rgb;',
-'  vec4 g=samp(t1,'+'TRAVEL1'+');c=mix(c,g.rgb,g.a);',
-'  vec4 k=samp(t2,'+'TRAVEL2'+');c=mix(c,k.rgb,k.a);',
-'  gl_FragColor=vec4(c,1.);}'
-].join('\n').replace('TRAVEL0',TRAVEL[0].toFixed(3))
-             .replace('TRAVEL1',TRAVEL[1].toFixed(3))
-             .replace('TRAVEL2',TRAVEL[2].toFixed(3));
+'  vec2 q=base();',
+'  vec3 col=layer(tRoom,tRoomD,q).rgb;',
+'  vec4 g=layer(tGrp,tGrpD,q);   col=mix(col,g.rgb,g.a);',
+'  vec4 k=layer(tCur,tCurD,q);   col=mix(col,k.rgb,k.a);',
+'  gl_FragColor=vec4(col,1.);}'
+].join('\n');
 
 function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);
   if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o}
@@ -155,9 +167,13 @@ function armTap(){
   },{once:true});
 }
 
-Promise.all([load('web/live/wall.webp'),load('web/live/curtain.webp'),load('web/live/group.webp')])
+Promise.all([
+  load('web/live/room.webp'),    load('web/live/room_d.webp'),
+  load('web/live/group.webp'),   load('web/live/group_d.webp'),
+  load('web/live/curtain.webp'), load('web/live/curtain_d.webp')])
 .then(function(im){
-  tex(im[0],0,'t0'); tex(im[2],1,'t1'); tex(im[1],2,'t2');   // wall, group, curtain
+  var names=['tRoom','tRoomD','tGrp','tGrpD','tCur','tCurD'];
+  for(var i=0;i<6;i++) tex(im[i],i,names[i]);
   resize(); armTap(); last=performance.now(); requestAnimationFrame(loop);
   setTimeout(function(){ if(!moved) HINT.classList.remove('gone'); },1200);
 })
