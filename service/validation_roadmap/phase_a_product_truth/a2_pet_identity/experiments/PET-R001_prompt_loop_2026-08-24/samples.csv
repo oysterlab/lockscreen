@@ -1,0 +1,17 @@
+order,test_id,pet_identity_id,source_file,coverage_reason,pair_group
+1,RC-CAT-001,ig:nala_cat,RC-CAT-001__nala_cat__CsrIIw5pmF8.jpg,front;indoor;costume_occlusion,nala_pose_pair
+2,RC-CAT-005,ig:white_coffee_cat,RC-CAT-005__white_coffee_cat__DCxyFWtpq75.jpg,white;blue_eyes;collar,
+3,RC-CAT-018,ig:venustwofacecat,RC-CAT-018__venustwofacecat__DPwi7S0iVNQ.jpg,split_face;heterochromia;asymmetry,
+4,RC-CAT-028,ig:hello_luna_rose,RC-CAT-028__hello_luna_rose__DY0YBwXgcrA.jpg,folded_ears;fabric_occlusion;multicolour,
+5,RC-CAT-036,ig:cobythecat,RC-CAT-036__cobythecat__DGjejrJMosd.jpg,white;blue_eyes;clothing,
+6,RC-CAT-049,ig:smoothiethecat,RC-CAT-049__smoothiethecat__CPGl_dKnRc4.jpg,long_fur;golden_shaded;green_eyes,
+7,RC-CAT-065,ig:pudgethecat,RC-CAT-065__pudgethecat__DAXYvHDp7kX.jpg,calico;flat_face;small_body,
+8,RC-CAT-066,ig:hamilton_the_hipster_cat,RC-CAT-066__hamilton_the_hipster_cat__CP_sMPPF-IJ.jpg,grey_white;mustache_marking;close_crop,
+9,RC-CAT-081,ig:iambronsoncat,RC-CAT-081__iambronsoncat__CpnmAnopeB0.jpg,large_body;orange_tabby;harsh_sun,
+10,RC-CAT-092,ig:rexiecat,RC-CAT-092__rexiecat__Br942E0nVtb.jpg,brown_white_tabby;smile_expression;close_crop,
+11,RC-CAT-105,ig:sukiicat,RC-CAT-105__sukiicat__C897ix-JowR.jpg,spotted_tabby;large_ears;outdoor_accessory,
+12,CZ-CAT-006,ig:curiouszelda,CZ-CAT-006__curiouszelda__C1FsVAqrCCs.jpg,black_white;slender_body;low_contrast,
+13,RC-CAT-117,ig:coleandmarmalade,RC-CAT-117__coleandmarmalade__DZIJ4c4DjF2.jpg,orange_white;crossed_paws;dark_background,
+14,RC-CAT-126,ig:thecatphotographer:post:DZdjtwIGUUs,RC-CAT-126__thecatphotographer__DZdjtwIGUUs.jpg,orange;wide_angle_closeup;wet_fur,
+15,RC-CAT-003,ig:nala_cat,RC-CAT-003__nala_cat__DZf6EOXSgBV.jpg,three_quarter;natural_light;full_body,nala_pose_pair
+

@@ -1,0 +1,16 @@
+test_id,identity_35,coat_markings_15,face_structure_15,anatomy_10,background_lock_10,world_integration_10,reproducibility_5,total_100,background_top_ssim,hard_fail,failure_tags,review_note
+RC-CAT-001,14,7,8,10,6,9,3,57,0.956193,yes,reference_identity_leak;identity_collapse;background_repaint;resolution_mismatch,Silver tabby color returned but the large round eyes and individual Nala face still collapsed toward the layout cat.
+RC-CAT-005,31,14,13,10,7,9,4,88,0.967934,no,background_repaint;resolution_mismatch,White coat vivid blue eyes and compact round face remained strongly recognizable.
+RC-CAT-018,34,15,14,10,7,9,4,93,0.970127,no,background_repaint;resolution_mismatch,Split facial colors and heterochromia were preserved with excellent identity fidelity.
+RC-CAT-028,29,12,13,10,7,9,4,84,0.963727,no,minor_marking_simplification;background_repaint;resolution_mismatch,Folded ears and multicolour face survived while fine coat topology was simplified.
+RC-CAT-036,30,14,13,10,6,9,4,86,0.941563,no,background_repaint;resolution_mismatch,White coat blue eyes and compact face remained recognizable.
+RC-CAT-049,31,13,13,10,6,9,4,86,0.951596,no,minor_coat_simplification;background_repaint;resolution_mismatch,Long golden fur and green-eyed expression remained strong.
+RC-CAT-065,31,14,14,10,7,9,4,89,0.968457,no,background_repaint;resolution_mismatch,Flat face calico distribution and small build were preserved.
+RC-CAT-066,30,14,13,10,6,9,4,86,0.954495,no,body_shape_flattening;background_repaint;resolution_mismatch,Mustache marking and head angle survived but body build remained reference-like.
+RC-CAT-081,29,13,13,10,7,9,4,85,0.968317,no,background_repaint;resolution_mismatch,Large reclining body and squint improved relative to Round 01.
+RC-CAT-092,32,14,14,10,6,9,4,89,0.957366,no,background_repaint;resolution_mismatch,Distinct smile teeth and brown-white tabby expression were preserved strongly.
+RC-CAT-105,25,12,10,10,6,9,4,76,0.959045,no,face_genericization;reference_style_leak;background_repaint;resolution_mismatch,Bengal markings survived but the individual face became a generic upright Bengal.
+CZ-CAT-006,29,14,13,10,7,9,4,86,0.964732,no,body_shape_flattening;background_repaint;resolution_mismatch,Tuxedo mask wide eyes and white chest survived with a more faithful slender build.
+RC-CAT-117,26,12,11,10,7,9,4,79,0.960281,no,body_pose_loss;background_repaint;resolution_mismatch,Orange-white identity survived but distinctive long crossed forelegs were lost.
+RC-CAT-126,19,9,8,10,7,9,4,66,0.968181,yes,identity_genericization;face_shape_loss;background_repaint;resolution_mismatch,Extreme wide-angle eyes wet-fur cues and muzzle geometry again collapsed into a generic orange cat.
+RC-CAT-003,17,10,9,10,7,9,3,65,0.962746,yes,reference_identity_leak;face_genericization;background_repaint;resolution_mismatch,Silver coat matched broadly but Nala's round face huge eyes and source expression still collapsed toward the layout cat.

@@ -1,0 +1,50 @@
+{
+  "experiment_id": "PET-R001_prompt_loop_2026-08-24",
+  "timezone": "Asia/Seoul",
+  "generator": {
+    "surface": "Codex built-in ImageGen",
+    "quality": "auto",
+    "api_used": false,
+    "requested_aspect_ratio": "9:16",
+    "observed_round_01_resolution": "941x1672"
+  },
+  "publication_authorization": {
+    "confirmed_by_user": true,
+    "confirmed_at_kst": "2026-08-24",
+    "scope": "source accounts, uploaded source photos, generated outputs, and public GitHub Pages archive"
+  },
+  "fixed_references": [
+    {
+      "role": "image_1_locked_background",
+      "path": "service/validation_roadmap/phase_a_product_truth/a1_signature_world/assets/base/SM-S001_base_1080x1920.png",
+      "sha256": "8878a6f01cdc0e32087286d2879d64b5fe149aea8f0eaebf4d2e24c390d9b854"
+    },
+    {
+      "role": "image_2_spatial_cat_reference",
+      "path": "service/validation_roadmap/phase_a_product_truth/a1_signature_world/evidence/reference_composites/SM-S001_cat_tabby.png",
+      "sha256": "05ac328584683a9215a9fb81675e63d5d5bd5d8827b4c3e40f0983ca9c2ce77a"
+    }
+  ],
+  "rounds": [
+    {"round": 1, "scheduled_start_kst": "2026-08-24 00:57:00", "actual_start_kst": "2026-08-24 00:57", "completed_kst": "2026-08-24 01:08", "prompt": "prompts/round-01.md", "status": "complete"},
+    {"round": 2, "scheduled_start_kst": "2026-08-24 02:57:00", "actual_start_kst": "2026-08-24 02:57:00", "completed_kst": "2026-08-24 03:07", "prompt": "prompts/round-02.md", "status": "complete"},
+    {"round": 3, "scheduled_start_kst": "2026-08-24 04:57:00", "actual_start_kst": null, "completed_kst": null, "prompt": "prompts/round-03.md", "status": "scheduled"}
+  ],
+  "samples": [
+    {"order": 1, "test_id": "RC-CAT-001", "sha256": "4194b0fa88d12b1382f188a59c4ece5ba36f0b3241946c4fae48125f0b017b00"},
+    {"order": 2, "test_id": "RC-CAT-005", "sha256": "893d770e7ded7e2e2d59c7efa6cd61157ce4c9e0cf3eca42da5119a79c186cf6"},
+    {"order": 3, "test_id": "RC-CAT-018", "sha256": "0b9c4a06f2e8973867235b5addbbc8d01d97063c9cd62d1919c62f10eeae7018"},
+    {"order": 4, "test_id": "RC-CAT-028", "sha256": "f3c37b0fc690c832afda696bae0f4fea1350323af3666790623983f7c9cb4fdc"},
+    {"order": 5, "test_id": "RC-CAT-036", "sha256": "79e9a6b2d862790e64ea083e8c03a52484666e427d5f43119431f50be8f1be7c"},
+    {"order": 6, "test_id": "RC-CAT-049", "sha256": "a96ddc0f479662fe3cf256eedb916cfd750fcdf90234bcc58b227c6651214430"},
+    {"order": 7, "test_id": "RC-CAT-065", "sha256": "75a1b51291d1e95ae7ded57f993f9e5ac3d015a9e849b753f879dd7f4b45c74e"},
+    {"order": 8, "test_id": "RC-CAT-066", "sha256": "1473f381c2e7e5e08d0560eedce8aeafeea116c9bce1881c13c22dcb98c41284"},
+    {"order": 9, "test_id": "RC-CAT-081", "sha256": "d1d94ed86f4eea1904e1bcce83ed2852fe3dc6c5e755e1ffea415fa052874e25"},
+    {"order": 10, "test_id": "RC-CAT-092", "sha256": "afca1b6605ce7769507b8b1faff6b1952f3c3b89fc4d4cb95583fd1f1ef39388"},
+    {"order": 11, "test_id": "RC-CAT-105", "sha256": "7cbb84094435243c6ffcfdc45701143d9f6a94fb04591912f19bd059ed992d08"},
+    {"order": 12, "test_id": "CZ-CAT-006", "sha256": "5086562dccea5833bf988e4ebccbcd6d761b7600bc42a2657bcb379a2c0a9fed"},
+    {"order": 13, "test_id": "RC-CAT-117", "sha256": "0569cf784504229289696214220eeee780205e2621d5048c041b98c91fba040a"},
+    {"order": 14, "test_id": "RC-CAT-126", "sha256": "8ef905abf7f7bb4bfb8fd4d68eab261bf00dc2b55213bd5c572c6bde3384f0d9"},
+    {"order": 15, "test_id": "RC-CAT-003", "sha256": "19c30c7d75d4cb0b318865c859b5fbdf545a61d44c337a7472aa0890ebd803a2"}
+  ]
+}
