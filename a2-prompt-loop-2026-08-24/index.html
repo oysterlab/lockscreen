@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ELURA PET-R001 ImageGen prompt improvement loop — 15 cats, 3 rounds, fixed references.">
+  <title>ELURA · PET-R001 Prompt Loop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero">
+    <nav>
+      <span class="wordmark">ELURA / LAB</span>
+      <span class="mono">PET-R001 · 2026.08.24 KST</span>
+    </nav>
+    <div class="hero-grid">
+      <div>
+        <p class="eyebrow">A2 PET IDENTITY / PROMPT EVALUATION</p>
+        <h1>한 장의 고양이를<br><em>그 고양이답게.</em></h1>
+      </div>
+      <div class="hero-copy">
+        <p>15개 고정 입력을 2시간 간격으로 세 번 생성한다. 매 회차 가장 큰 실패 원인 하나만 프롬프트에 반영해, 개선인지 우연인지 비교한다.</p>
+        <div class="run-status" id="runStatus"></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section metrics-section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">LIVE SCOREBOARD</p>
+          <h2>회차별 품질 변화</h2>
+        </div>
+        <p class="section-note">가중치 100점 · Identity 35 · Markings 15 · Face 15 · Anatomy 10 · Background 10 · Integration 10 · Reproducibility 5</p>
+      </div>
+      <div class="metrics-grid" id="metricsGrid"></div>
+    </section>
+
+    <section class="section contract-section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">FIXED INPUT CONTRACT</p>
+          <h2>바뀌지 않는 세 입력</h2>
+        </div>
+        <p class="section-note">Image 1과 2는 전 회차 공통. Image 3만 각 샘플의 사용자 사진으로 교체한다.</p>
+      </div>
+      <div class="contract-grid">
+        <article class="contract-card">
+          <img src="assets/reference/background.jpg" alt="SM-S001 locked background">
+          <div><span class="step">01</span><h3>Locked background</h3><p>원본 배경. 구도·빛·받침대·상단 여백 변경 금지.</p></div>
+        </article>
+        <article class="contract-card">
+          <img src="assets/reference/spatial-cat.jpg" alt="Cat placement reference">
+          <div><span class="step">02</span><h3>Spatial reference</h3><p>고양이의 위치·스케일·접지·조명만 참고. 정체성은 폐기.</p></div>
+        </article>
+        <article class="contract-card identity-card">
+          <div class="identity-stack">
+            <img src="assets/source/RC-CAT-018.jpg" alt="User cat example">
+            <img src="assets/source/CZ-CAT-006.jpg" alt="User cat example">
+            <img src="assets/source/RC-CAT-049.jpg" alt="User cat example">
+          </div>
+          <div><span class="step">03</span><h3>Identity source</h3><p>얼굴·눈·귀·털·무늬·체형을 결정하는 유일한 입력.</p></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section evolution-section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">CONTROLLED ITERATION</p>
+          <h2>프롬프트가 바뀐 이유</h2>
+        </div>
+        <p class="section-note">회차마다 실패 빈도가 가장 높은 원인 하나만 수정한다.</p>
+      </div>
+      <div class="timeline" id="timeline"></div>
+    </section>
+
+    <section class="section samples-section">
+      <div class="section-head sticky-head">
+        <div>
+          <p class="eyebrow">15 FIXED SAMPLES</p>
+          <h2>원본과 회차별 결과</h2>
+        </div>
+        <div class="legend"><span class="dot pass"></span>Pass <span class="dot fail"></span>Hard fail</div>
+      </div>
+      <div class="sample-list" id="sampleList"></div>
+    </section>
+
+    <section class="section method-section">
+      <div>
+        <p class="eyebrow">INTERPRETATION</p>
+        <h2>예쁜 것과 통과한 것은 다르다.</h2>
+      </div>
+      <div class="method-copy">
+        <p>배경이 비슷해 보여도 원본 1080×1920과 픽셀·해상도가 달라지면 엄격한 Background Lock은 실패다. Identity가 25/35 미만이거나 다중 동물·심각한 해부 오류·텍스트가 생기면 총점과 관계없이 Hard Fail로 처리한다.</p>
+        <p class="mono disclosure">Generator: Codex built-in ImageGen · quality: auto · public posting authorized by owner on 2026-08-24 KST</p>
+      </div>
+    </section>
+  </main>
+
+  <footer><span>ELURA PET IDENTITY LAB</span><span class="mono">SM-S001 / PET-R001</span></footer>
+
+  <dialog id="lightbox"><button aria-label="닫기">×</button><img alt="확대 이미지"><p></p></dialog>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+
