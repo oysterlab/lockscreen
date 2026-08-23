@@ -1,0 +1,16 @@
+test_id,identity_35,coat_markings_15,face_structure_15,anatomy_10,background_lock_10,world_integration_10,reproducibility_5,total_100,background_top_ssim,hard_fail,failure_tags,review_note
+RC-CAT-001,23,11,11,10,7,9,3,74,0.966396,yes,reference_identity_leak;face_shape_loss;background_repaint;resolution_mismatch,The capsule enlarged the eyes and improved Nala cues but the layout cat face and body structure still dominated.
+RC-CAT-005,32,15,14,10,6,9,4,90,0.954693,no,background_repaint;resolution_mismatch,Vivid blue eyes pure white coat and compact round face were strongly preserved.
+RC-CAT-018,34,15,15,10,7,9,4,94,0.969833,no,background_repaint;resolution_mismatch,Exact split face heterochromia and tortoiseshell distribution were preserved exceptionally.
+RC-CAT-028,31,13,14,10,6,9,4,87,0.954327,no,minor_marking_simplification;background_repaint;resolution_mismatch,Folded ears round face and multicolour plush coat were clearer than earlier rounds.
+RC-CAT-036,31,14,14,10,8,9,4,90,0.974165,no,background_repaint;resolution_mismatch,Blue eyes pure white coat and compact proportions remained recognizable.
+RC-CAT-049,33,14,14,10,7,9,4,91,0.962147,no,background_repaint;resolution_mismatch,Long golden coat green eyes cheek ruff and feathery texture all survived.
+RC-CAT-065,33,15,14,10,7,9,4,92,0.966925,no,background_repaint;resolution_mismatch,Flat muzzle tiny build and black-orange-white facial patches were strongly preserved.
+RC-CAT-066,32,15,14,10,6,9,4,90,0.959775,no,background_repaint;resolution_mismatch,The black moustache white chest and grey round face were explicit and stable.
+RC-CAT-081,33,14,14,10,7,9,4,91,0.965265,no,background_repaint;resolution_mismatch,Heavy broad body reclining pose and small squinting eyes were recovered strongly.
+RC-CAT-092,33,15,14,10,6,9,4,91,0.957033,no,background_repaint;resolution_mismatch,Open grin visible teeth and broad white muzzle produced a strong individual match.
+RC-CAT-105,30,14,13,10,6,9,4,86,0.950967,no,background_repaint;resolution_mismatch,Large ears lean build pale eyes and Bengal rosettes reduced genericization.
+CZ-CAT-006,32,14,14,10,8,9,4,91,0.973513,no,background_repaint;resolution_mismatch,Wide eyes tuxedo mask narrow blaze white chest and slender body were preserved.
+RC-CAT-117,31,13,13,10,7,9,4,87,0.961206,no,background_repaint;resolution_mismatch,The capsule restored a long forward crossed paw and lean orange-white identity.
+RC-CAT-126,29,13,12,10,7,9,4,84,0.968083,no,face_perspective_softened;background_repaint;resolution_mismatch,Large eyes broad forward muzzle and wet-fur droplets recovered enough to escape Hard Fail though extreme perspective softened.
+RC-CAT-003,23,12,11,10,6,9,3,74,0.957547,yes,reference_identity_leak;face_genericization;background_repaint;resolution_mismatch,Round eyes and plush build improved but Nala still resembled the layout cat more than the uploaded individual.

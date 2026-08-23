@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="verdict.css">
 </head>
 <body>
   <header class="hero">
@@ -79,6 +80,22 @@
       <div class="timeline" id="timeline"></div>
     </section>
 
+    <section class="section verdict-section">
+      <div class="verdict-kicker">
+        <p class="eyebrow">FINAL DECISION</p>
+        <span class="verdict-badge">PROMPT-ONLY · HOLD</span>
+      </div>
+      <div class="verdict-copy">
+        <h2>정체성은 좋아졌지만,<br>한 번에 합성하면 아직 부족하다.</h2>
+        <p>외부 Identity Capsule은 Round 1 대비 Identity를 <strong>+4.0점</strong> 높이고 Hard Fail을 3건에서 2건으로 줄였다. 그러나 Nala 두 입력은 여전히 공간 참고 고양이의 얼굴 골격을 따라갔고, 배경은 45/45 모두 다시 그려져 941×1672로 출력됐다.</p>
+        <div class="decision-grid">
+          <article><span>KEEP</span><h3>Identity Capsule</h3><p>사용자 사진에서 얼굴·눈·무늬·체형을 한 줄 구조로 추출해 생성 조건으로 사용.</p></article>
+          <article><span>CHANGE</span><h3>Pet-only generation</h3><p>공간 참고 고양이를 빼고 투명 배경의 고양이 자산만 생성해 정체성 간섭 제거.</p></article>
+          <article><span>LOCK</span><h3>Deterministic composite</h3><p>원본 1080×1920 배경에 좌표·스케일·그림자를 코드로 합성해 픽셀 잠금 보장.</p></article>
+        </div>
+      </div>
+    </section>
+
     <section class="section samples-section">
       <div class="section-head sticky-head">
         <div>
@@ -109,4 +126,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-

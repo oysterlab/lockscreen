@@ -42,3 +42,6 @@
 4. 회차별 프롬프트 원문과 변경 이유를 `prompts/`에 보존한다.
 5. 결과와 점수는 공개 비교 페이지에 원본과 나란히 표시한다.
 
+## 최종 결과
+
+Round 03의 외부 Identity Capsule이 평균 총점 87.5, Identity 30.7/35, Hard Pass 86.7%로 가장 좋았다. 세부 결론과 생산 구조 권고는 [FINAL-REPORT.md](FINAL-REPORT.md)에 기록했다.
