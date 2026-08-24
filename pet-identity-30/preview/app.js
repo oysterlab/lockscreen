@@ -28,7 +28,7 @@ const P3D = scenePathParam
   : (sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d_cherry2dio/");
 // asset cache-buster: bump on any rebuilt PNG so phones don't serve a stale image
 // (index.html's ?v= only refreshes the code, not these depth/colour PNGs).
-const AV = location.protocol === "file:" ? "" : "?a=pet-r005-depth-normal-1";
+const AV = location.protocol === "file:" ? "" : "?a=pet-r006-curtain-motion-matte-1";
 // scenes that carry an idle-flick animation (assets/photo3d_<scene>/anim/manifest.json):
 // the foreground plate is swapped through a short clip every ~10s, then held.
 const ANIM_SCENES = new Set(["cherry2dio", "nila2dio"]);
@@ -553,7 +553,8 @@ const FRAG_FULLDAY = `
   // the folds against one another and reads as cloth settling. The same trick fails on leaf
   // shadows, where the pattern has no grain and a warp just makes the whole mass swim.
   //
-  // uCurtain = (x0, x1, feather, amplitude-in-uv). Zero amplitude disables it entirely.
+  // uCurtain = (maximum scene x, edge feather, source strip width, enabled).
+  // uCurtainMatte holds motion-difference and foreground-depth thresholds.
   // Curtain strip. The drape is an object, not a shadow: multiplying the clip's curtain onto
   // the still's curtain paints a translucent double (the "ghost curtain"). So the strip it
   // lives in is REPLACED with the clip's pixels instead. That also removes the need for a
@@ -563,10 +564,12 @@ const FRAG_FULLDAY = `
   // shot at noon sits correctly in a dusk room.
   uniform sampler2D uCurA;
   uniform sampler2D uCurB;
+  uniform sampler2D uCurRest;
   uniform sampler2D uCurLight;
   uniform sampler2D uCurSubject;   // the curtain passes BEHIND the subject
   uniform float uCurMix;
-  uniform vec4 uCurtain;      // x1, feather, stripWidth, enabled
+  uniform vec4 uCurtain;      // maxX, edgeFeather, stripWidth, enabled
+  uniform vec4 uCurtainMatte; // motionLow, motionHigh, foregroundLow, foregroundHigh
   varying vec2 vUv;
 
   void main() {
@@ -616,18 +619,34 @@ const FRAG_FULLDAY = `
       ratio *= 1.0 + (ov - 1.0) * uOvGain;
     }
     vec3 col = ref * ratio;
-    if (uCurtain.w > 0.0 && vUv.x < uCurtain.z) {
+    if (uCurtain.w > 0.0 && vUv.x < min(uCurtain.x, uCurtain.z)) {
       vec2 sUv = vec2(vUv.x / uCurtain.z, vUv.y);
       vec3 cur = mix(texture2D(uCurA, sUv).rgb, texture2D(uCurB, sUv).rgb, uCurMix);
+      vec3 curRest = texture2D(uCurRest, sUv).rgb;
       vec3 curLo = texture2D(uCurLight, sUv).rgb;
       // the hour's light, with the clip's own divided out — same ratio the room uses
       vec3 lit = cur * clamp(lo / max(curLo, vec3(0.02)), vec3(0.0), vec3(4.0));
-      // The clip's curtain sweeps across the middle of the room, which is where the subject
-      // stands — and the subject is in the still, not in the clip, so replacing that strip
-      // wholesale erases it. The drape hangs at the window and the subject sits on a plinth
-      // in front of it, so the strip is simply held back by the subject's own matte.
-      float m = smoothstep(uCurtain.x + uCurtain.y, uCurtain.x, vUv.x);
-      m *= 1.0 - texture2D(uCurSubject, vUv).r;
+      // A fixed x cutoff visibly sliced the drape when a strong gust carried its hem past
+      // the old safe zone. Instead, compare the live clip with its own rest frame and open
+      // only pixels that actually changed. This is a motion matte, not colour keying, so
+      // white walls and highlights do not become part of the curtain.
+      vec3 curDelta = abs(cur - curRest);
+      float motionDelta = max(curDelta.r, max(curDelta.g, curDelta.b));
+      float motionMatte = smoothstep(
+        uCurtainMatte.x, uCurtainMatte.y, motionDelta
+      );
+      float edge = 1.0 - smoothstep(
+        uCurtain.x - uCurtain.y, uCurtain.x, vUv.x
+      );
+      // The native generated plate is still a single immutable image. Its dense scene
+      // depth is used only as an occlusion test here: near pet/accessory/plinth pixels
+      // remain in front while the moving drape passes behind them. No pet alpha matte,
+      // cutout, reference-pixel warp, or replacement layer is introduced.
+      float background = 1.0 - smoothstep(
+        uCurtainMatte.z, uCurtainMatte.w, rawDepth
+      );
+      background = mix(1.0, background, uHasRelief);
+      float m = motionMatte * edge * background;
       col = mix(col, lit, m * uCurtain.w);
     }
     // A dark-furred subject and the plinth cannot separate from a midnight wall by
@@ -1071,10 +1090,12 @@ loadJsonOpt(P3D + "view.json" + AV)
           ).normalize() },
           uCurA: { value: BLANK },
           uCurB: { value: BLANK },
+          uCurRest: { value: BLANK },
           uCurLight: { value: BLANK },
           uCurSubject: { value: subjTex || BLANK },
           uCurMix: { value: 0 },
-          uCurtain: { value: new THREE.Vector4(0, 0.06, 1, 0) },
+          uCurtain: { value: new THREE.Vector4(0, 0.03, 1, 0) },
+          uCurtainMatte: { value: new THREE.Vector4(0.035, 0.12, 0.24, 0.36) },
           uOvA: { value: BLANK },
           uOvB: { value: BLANK },
           uOvMix: { value: 0 },
@@ -1091,22 +1112,28 @@ loadJsonOpt(P3D + "view.json" + AV)
       mesh.renderOrder = 0;
       scene.add(mesh);
       backMesh = frontMesh = mesh;
-      if (curVideo && curLight && curRest) {
+      if (curLight && curRest) {
         mat.uniforms.uCurLight.value = curLight;
         mat.uniforms.uCurA.value = curRest;
         mat.uniforms.uCurB.value = curRest;
+        mat.uniforms.uCurRest.value = curRest;
         mat.uniforms.uCurMix.value = 0;
         mat.uniforms.uCurtain.value.set(
-          curMeta.x1, curMeta.feather, curMeta.stripWidth,
+          curMeta.maxX, curMeta.edgeFeather, curMeta.stripWidth,
           params.has("cur") ? parseFloat(params.get("cur")) : 1);
-        curVideo.bindVideo = () => {
-          mat.uniforms.uCurA.value = curVideo.tex;
-          mat.uniforms.uCurB.value = curVideo.tex;
-        };
-        curVideo.bindRest = () => {
-          mat.uniforms.uCurA.value = curRest;
-          mat.uniforms.uCurB.value = curRest;
-        };
+        mat.uniforms.uCurtainMatte.value.set(
+          curMeta.motionDeltaLow, curMeta.motionDeltaHigh,
+          curMeta.foregroundDepthLow, curMeta.foregroundDepthHigh);
+        if (curVideo) {
+          curVideo.bindVideo = () => {
+            mat.uniforms.uCurA.value = curVideo.tex;
+            mat.uniforms.uCurB.value = curVideo.tex;
+          };
+          curVideo.bindRest = () => {
+            mat.uniforms.uCurA.value = curRest;
+            mat.uniforms.uCurB.value = curRest;
+          };
+        }
       }
 
       // ── environment overlay ────────────────────────────────────────────────────────
@@ -1375,8 +1402,11 @@ loadJsonOpt(P3D + "view.json" + AV)
               mat.uniforms.uCurB.value = curTex.ready.get(j1);
               mat.uniforms.uCurMix.value = pos - Math.floor(pos);
               mat.uniforms.uCurtain.value.set(
-                curMeta.x1, curMeta.feather, curMeta.stripWidth,
+                curMeta.maxX, curMeta.edgeFeather, curMeta.stripWidth,
                 params.has("cur") ? parseFloat(params.get("cur")) : 1);
+              mat.uniforms.uCurtainMatte.value.set(
+                curMeta.motionDeltaLow, curMeta.motionDeltaHigh,
+                curMeta.foregroundDepthLow, curMeta.foregroundDepthHigh);
             }
           }
         }

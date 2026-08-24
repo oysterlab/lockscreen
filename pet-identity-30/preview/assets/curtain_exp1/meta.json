@@ -6,11 +6,15 @@
   "videoFrames": 193,
   "videoDuration": 8.041667,
   "light": "light.webp",
-  "x1": 0.285,
-  "feather": 0.035,
+  "maxX": 0.58,
+  "edgeFeather": 0.035,
+  "motionDeltaLow": 0.035,
+  "motionDeltaHigh": 0.12,
+  "foregroundDepthLow": 0.24,
+  "foregroundDepthHigh": 0.36,
   "stripWidth": 0.6592592592592592,
   "restIndex": 6,
   "sourceFps": 24.0,
   "_note": "motion.mp4 is the original 712x1920 24fps sequence packed for continuous hardware decode and returns exactly to rest; WebP frames remain as a compatibility fallback. The curtain's own lighting is divided out and the current hour's light map is applied at runtime.",
-  "_safeZone": "Flat-safe PET-R004: motion is fully applied only left of x=0.285 and fades to zero by x=0.320. stripWidth stays unchanged so the curtain is cropped, not squeezed."
+  "_safeZone": "PET-R006: current-vs-rest motion delta opens only genuinely moving curtain pixels through x=0.580, with a 0.035 outer feather. Full-frame dense depth occludes pet, accessory, and plinth foreground pixels; no pet mask or cutout is used."
 }

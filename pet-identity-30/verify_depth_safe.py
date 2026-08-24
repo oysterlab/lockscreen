@@ -11,7 +11,8 @@ from pathlib import Path
 
 PAGE = Path(__file__).resolve().parent
 PREVIEW = PAGE / "preview"
-VERSION = "pet-r005-depth-normal-1"
+SURFACE_VERSION = "pet-r005-depth-normal-1"
+RUNTIME_VERSION = "pet-r006-curtain-motion-matte-1"
 MAP_SIZE = (941, 1672)
 
 
@@ -71,7 +72,7 @@ def main() -> None:
         normal_hashes.add(digest(normal))
 
         metadata = json.loads(meta.read_text(encoding="utf-8"))
-        assert metadata["pipeline"] == VERSION, meta
+        assert metadata["pipeline"] == SURFACE_VERSION, meta
         assert metadata["depthConvention"] == "near=1, far=0", meta
         assert "no pet mask or alpha matte" in metadata["invariants"], meta
 
@@ -86,21 +87,27 @@ def main() -> None:
     curtain = json.loads(
         (PREVIEW / "assets/curtain_exp1/meta.json").read_text(encoding="utf-8")
     )
-    assert curtain["x1"] + curtain["feather"] <= 0.3200001, curtain
+    assert 0.45 <= curtain["maxX"] <= curtain["stripWidth"], curtain
+    assert 0.02 <= curtain["edgeFeather"] <= 0.05, curtain
+    assert 0.0 < curtain["motionDeltaLow"] < curtain["motionDeltaHigh"] < 0.2, curtain
+    assert 0.0 < curtain["foregroundDepthLow"] < curtain["foregroundDepthHigh"] < 0.5, curtain
 
     app = (PREVIEW / "app.js").read_text(encoding="utf-8")
     assert "vec3 ref = texture2D(uRef, vUv).rgb;" in app
     assert "max(rawDepth - uDepthPivot, 0.0)" in app
     assert "surfaceConfidence = smoothstep" in app
     assert "ratio *= clamp(shape, 0.88, 1.12);" in app
-    assert VERSION in app
-    assert f"app.js?v={VERSION}" in (PREVIEW / "viewer.html").read_text(encoding="utf-8")
-    assert f"build={VERSION}" in (PAGE / "index.html").read_text(encoding="utf-8")
+    assert "motionDelta = max" in app
+    assert "background = mix(1.0, background, uHasRelief);" in app
+    assert RUNTIME_VERSION in app
+    assert f"app.js?v={RUNTIME_VERSION}" in (PREVIEW / "viewer.html").read_text(encoding="utf-8")
+    assert f"build={RUNTIME_VERSION}" in (PAGE / "index.html").read_text(encoding="utf-8")
     assert (PREVIEW / "surface-contact-sheet.jpg").stat().st_size > 100_000
 
     print(
         "PASS: 30 dense depth + normal scenes; native reference UV immutable; "
-        "zero pet masks/relief; normal shading clamped to 0.88..1.12"
+        "zero pet masks/relief; unclipped depth-occluded curtain motion; "
+        "normal shading clamped to 0.88..1.12"
     )
 
 

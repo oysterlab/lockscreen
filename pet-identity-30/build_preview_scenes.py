@@ -20,7 +20,7 @@ PREVIEW = PAGE / "preview"
 NATIVE_OUTPUT = PAGE / "assets/output-native"
 TEMPLATE = PREVIEW / "assets/photo3d_pet_r004_cz_cat_006/view.json"
 SHARED = PREVIEW / "assets/photo3d_pet_r004_shared"
-ASSET_VERSION = "pet-r005-depth-normal-1"
+ASSET_VERSION = "pet-r006-curtain-motion-matte-1"
 
 
 def slug(pet_id: str) -> str:
@@ -117,13 +117,19 @@ def main() -> None:
         raise RuntimeError(f"committed curtain assets are incomplete: {missing_curtain}")
     curtain_meta_path = curtain_target / "meta.json"
     curtain_meta = json.loads(curtain_meta_path.read_text(encoding="utf-8"))
-    # Keep the clip's original source mapping, but fade its replacement out before the
-    # arch/podium area. Every pet and accessory remains outside this room-only zone.
-    curtain_meta["x1"] = 0.285
-    curtain_meta["feather"] = 0.035
+    # A large gust can carry the curtain beyond the former x=0.320 hard cutoff. Let the
+    # motion reach its measured extent, but admit only pixels that differ from the rest
+    # frame and use dense scene depth to keep the pet, accessories, and plinth in front.
+    curtain_meta["maxX"] = 0.58
+    curtain_meta["edgeFeather"] = 0.035
+    curtain_meta["motionDeltaLow"] = 0.035
+    curtain_meta["motionDeltaHigh"] = 0.12
+    curtain_meta["foregroundDepthLow"] = 0.24
+    curtain_meta["foregroundDepthHigh"] = 0.36
     curtain_meta["_safeZone"] = (
-        "Flat-safe PET-R004: motion is fully applied only left of x=0.285 and fades to "
-        "zero by x=0.320. stripWidth stays unchanged so the curtain is cropped, not squeezed."
+        "PET-R006: current-vs-rest motion delta opens only genuinely moving curtain pixels "
+        "through x=0.580, with a 0.035 outer feather. Full-frame dense depth occludes pet, "
+        "accessory, and plinth foreground pixels; no pet mask or cutout is used."
     )
     curtain_meta_path.write_text(
         json.dumps(curtain_meta, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
