@@ -17,7 +17,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 MANIFEST = ROOT / "manifest.json"
 PREVIOUS = ROOT.parent / "generation-r007" / "manifest.json"
-PREVIOUS_INPUT = ROOT.parent / "assets" / "input"
 OUTPUT = ROOT / "input"
 
 
@@ -56,7 +55,12 @@ def main() -> None:
 
     hashes = [sha256(path) for _, path in matches]
     assert len(set(hashes)) == 30, "duplicate source contents detected by SHA-256"
-    previous_hashes = {sha256(path) for path in PREVIOUS_INPUT.glob("*.jpg")}
+    previous_sources = []
+    for item in previous:
+        found = list(args.pool.rglob(f"{item['id']}__*.jpg"))
+        assert len(found) == 1, f"expected one PET-R007 source for {item['id']}, got {found}"
+        previous_sources.append(found[0])
+    previous_hashes = {sha256(path) for path in previous_sources}
     hash_overlap = sorted(set(hashes) & previous_hashes)
     assert not hash_overlap, f"PET-R007 source hash overlap: {hash_overlap}"
 

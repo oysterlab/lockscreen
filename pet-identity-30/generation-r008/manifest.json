@@ -1,7 +1,7 @@
 {
   "experiment": "PET-R008-disjoint-input-30",
   "generator": "Codex built-in ImageGen",
-  "status": "ready-for-promotion",
+  "status": "promoted-to-production",
   "previousSetManifest": "../generation-r007/manifest.json",
   "selectionPolicy": {
     "catCount": 15,
@@ -22,13 +22,15 @@
     "nativeSize": "941x1672",
     "distinctOutputHashes": 30,
     "acceptedTargetedRegenerations": [
-      "RC-CAT-039"
+      "RC-CAT-039",
+      "RC-CAT-090",
+      "RC-CAT-102"
     ],
     "discardedTargetedRegenerations": [
       "RC-CAT-090",
       "RC-CAT-102"
     ],
-    "note": "Owner-review candidates; no automatic aesthetic PASS claim. The two discarded move edits enlarged the subjects, so their smaller first-generation outputs were restored."
+    "note": "Owner-review candidates; no automatic aesthetic PASS claim. Move edits for RC-CAT-090 and RC-CAT-102 enlarged the subjects and were discarded; fresh base-scene regenerations with compact props were accepted instead."
   },
   "items": [
     {

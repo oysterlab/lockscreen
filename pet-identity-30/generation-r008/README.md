@@ -20,7 +20,7 @@ The command refuses to continue unless all of these hold:
 - exactly 15 cats and 15 dogs;
 - 30 distinct IDs and source filenames;
 - zero ID overlap with `generation-r007/manifest.json`;
-- zero exact source-file hash overlap with the current PET-R007 production inputs;
+- zero exact source-file hash overlap with PET-R007 sources in the supplied pool;
 - 30 distinct SHA-256 source hashes.
 
 ## Built-in ImageGen prompt template
@@ -71,7 +71,18 @@ one targeted correction and archive that regeneration in the manifest.
 
 - 30 native outputs are present at `941x1672`, with 30 distinct SHA-256 hashes.
 - `RC-CAT-039` accepted a targeted smaller/rightward regeneration for its wide
-  clownfish ring.
+  clownfish ring. `RC-CAT-090` and `RC-CAT-102` accepted fresh base-scene
+  regenerations with compact scythe and maple-leaf props.
 - Move edits for `RC-CAT-090` and `RC-CAT-102` were rejected because the model
-  enlarged the subject; their smaller first-generation outputs were restored.
+  enlarged the subjects; those intermediate variants were discarded.
 - The contact sheet is an owner-review set, not an automatic aesthetic PASS.
+
+## Promote reviewed candidates
+
+```bash
+uv run pet-identity-30/generation-r008/promote.py
+```
+
+This replaces only the public gallery's pet input/output files, writes the
+844x1500 JPEG previews, and copies the reviewed contact sheet. Previous assets
+remain recoverable through Git history.
