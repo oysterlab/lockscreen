@@ -162,6 +162,15 @@ def main() -> None:
         ),
         encoding="utf-8",
     )
+    # Version the module URL as well as its nested assets. Otherwise a browser can keep
+    # an older app.js whose asset key still points at the previous scene metadata.
+    preview_viewer = PREVIEW / "viewer.html"
+    preview_viewer.write_text(
+        preview_viewer.read_text(encoding="utf-8").replace(
+            './app.js?v=mesh-89', './app.js?v=pet-r004-nohalo-2'
+        ),
+        encoding="utf-8",
+    )
 
     curtain_target = PREVIEW / "assets/curtain_exp1"
     curtain_target.mkdir(parents=True, exist_ok=True)
