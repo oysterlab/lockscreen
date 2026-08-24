@@ -293,5 +293,17 @@
     "driftPx": 26,
     "driftSec": 97,
     "driftSec2": 149
+  },
+  "surfaceLighting": {
+    "depth": "surface-depth.png",
+    "normal": "surface-normal.png",
+    "depthPivot": 0.34,
+    "projectionGain": 0.55,
+    "normalGain": 0.55,
+    "lightDirection": [
+      -0.52,
+      0.28,
+      0.806
+    ]
   }
 }

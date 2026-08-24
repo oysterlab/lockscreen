@@ -1,0 +1,17 @@
+{
+  "pipeline": "pet-r005-depth-normal-1",
+  "model": "depth-anything/Depth-Anything-V2-Small-hf",
+  "depthConvention": "near=1, far=0",
+  "source": "../../../assets/output-native/RC-CAT-066.png",
+  "normalSlope": 32.0,
+  "normalGradientClip": 0.012,
+  "modelPercentileRange": [
+    0.671694757938385,
+    5.131473174095154
+  ],
+  "invariants": [
+    "full-frame dense maps only",
+    "no pet mask or alpha matte",
+    "no reference pixel displacement or replacement"
+  ]
+}

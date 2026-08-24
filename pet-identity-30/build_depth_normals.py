@@ -29,7 +29,7 @@ from pathlib import Path
 import numpy as np
 import torch
 import torch.nn.functional as functional
-from PIL import Image
+from PIL import Image, ImageDraw
 from transformers import AutoImageProcessor, AutoModelForDepthEstimation
 
 
@@ -40,6 +40,7 @@ MODEL_ID = "depth-anything/Depth-Anything-V2-Small-hf"
 PIPELINE_VERSION = "pet-r005-depth-normal-1"
 NORMAL_SLOPE = 32.0
 NORMAL_GRADIENT_CLIP = 0.012
+CONTACT_SHEET = PAGE / "preview/surface-contact-sheet.jpg"
 
 
 def parse_args() -> argparse.Namespace:
@@ -157,6 +158,37 @@ def save_maps(pet_id: str, depth: np.ndarray, model_range: tuple[float, float]) 
     )
 
 
+def build_contact_sheet(images: list[Path]) -> None:
+    columns = 5
+    map_width = 158
+    map_height = round(map_width * 1672 / 941)
+    gutter = 10
+    label_height = 28
+    cell_width = map_width * 2 + gutter
+    cell_height = map_height + label_height
+    rows = int(np.ceil(len(images) / columns))
+    sheet = Image.new("RGB", (cell_width * columns, cell_height * rows), "#16130f")
+    draw = ImageDraw.Draw(sheet)
+
+    for index, image_path in enumerate(images):
+        pet_id = image_path.stem
+        target = scene_dir(pet_id)
+        depth = Image.open(target / "surface-depth.png").convert("RGB")
+        normal = Image.open(target / "surface-normal.png").convert("RGB")
+        depth.thumbnail((map_width, map_height), Image.Resampling.LANCZOS)
+        normal.thumbnail((map_width, map_height), Image.Resampling.LANCZOS)
+        col, row = index % columns, index // columns
+        x = col * cell_width
+        y = row * cell_height
+        sheet.paste(depth, (x, y))
+        sheet.paste(normal, (x + map_width + gutter, y))
+        draw.text((x + 6, y + map_height + 7), f"{pet_id}  DEPTH | NORMAL", fill="#f0e4d6")
+
+    CONTACT_SHEET.parent.mkdir(parents=True, exist_ok=True)
+    sheet.save(CONTACT_SHEET, quality=90, optimize=True, progressive=True)
+    print(f"Contact sheet: {CONTACT_SHEET.relative_to(PAGE)}")
+
+
 def main() -> None:
     args = parse_args()
     requested = set(args.ids or [])
@@ -199,6 +231,15 @@ def main() -> None:
             f"[{index:02d}/{len(images):02d}] {image_path.stem}: "
             f"{image.width}x{image.height}, model range {low:.4f}..{high:.4f}"
         )
+
+    all_images = sorted(SOURCE.glob("*.png"))
+    if len(all_images) == 30 and all(
+        all((scene_dir(path.stem) / name).exists() for name in (
+            "surface-depth.png", "surface-normal.png"
+        ))
+        for path in all_images
+    ):
+        build_contact_sheet(all_images)
 
 
 if __name__ == "__main__":
