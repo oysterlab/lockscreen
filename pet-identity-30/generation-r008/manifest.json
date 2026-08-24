@@ -1,0 +1,232 @@
+{
+  "experiment": "PET-R008-disjoint-input-30",
+  "generator": "Codex built-in ImageGen",
+  "status": "selected-for-generation",
+  "previousSetManifest": "../generation-r007/manifest.json",
+  "selectionPolicy": {
+    "catCount": 15,
+    "dogCount": 15,
+    "requiredPreviousIdIntersection": 0,
+    "requiredPreviousSourceHashIntersection": 0,
+    "requiredDistinctSourceHashes": 30,
+    "note": "A different source-photo ID is required for every slot. Same-account photos may depict the same influencer pet because the supplied pool contains repeated posts per account; visual traits and accessories were selected to differ from PET-R007."
+  },
+  "compositionBox": {
+    "xMin": 0.474,
+    "xMax": 0.829,
+    "yMin": 0.65,
+    "yMax": 0.875
+  },
+  "items": [
+    {
+      "id": "CZ-CAT-012",
+      "species": "cat",
+      "source": "CZ-CAT-012__curiouszelda__CyCJMNaqnUt.jpg",
+      "identity": "slender black-and-white tuxedo cat, black facial mask, narrow white muzzle blaze, white chest and paws, very wide yellow-green eyes",
+      "required": "no accessory"
+    },
+    {
+      "id": "RC-CAT-002",
+      "species": "cat",
+      "source": "RC-CAT-002__nala_cat__CHyVcrApLE0.jpg",
+      "identity": "round silver-beige tabby, pale green eyes, distinct forehead M marking",
+      "required": "blue award ribbon and round gold medal worn at the neck; omit the certificate"
+    },
+    {
+      "id": "RC-CAT-006",
+      "species": "cat",
+      "source": "RC-CAT-006__white_coffee_cat__C1N_JowJwt4.jpg",
+      "identity": "pure white round-faced cat, dark blue-grey eyes, small pink nose",
+      "required": "red plush Santa body costume with white trim, black belt, gold buckle, and stuffed arms"
+    },
+    {
+      "id": "RC-CAT-016",
+      "species": "cat",
+      "source": "RC-CAT-016__venustwofacecat__DWreJu8CRcd.jpg",
+      "identity": "split black-left and orange-right tortoiseshell face, one green eye and one blue eye",
+      "required": "turquoise collar and pink heart-shaped tag without readable text"
+    },
+    {
+      "id": "RC-CAT-039",
+      "species": "cat",
+      "source": "RC-CAT-039__cobythecat__C_a0b3TRnwX.jpg",
+      "identity": "white silver-shaded round cat, pale blue eyes and small pink nose",
+      "required": "oversized orange clownfish plush ring wrapped closely around the body"
+    },
+    {
+      "id": "RC-CAT-045",
+      "species": "cat",
+      "source": "RC-CAT-045__cobythecat__C424sYoLUCr.jpg",
+      "identity": "pure white round cat, pale blue eyes and mildly serious expression",
+      "required": "red football jersey without readable lettering and a small brown football tucked against one paw"
+    },
+    {
+      "id": "RC-CAT-048",
+      "species": "cat",
+      "source": "RC-CAT-048__smoothiethecat__CY_qcsqKhzo.jpg",
+      "identity": "long golden shaded coat, huge emerald-green eyes, cream muzzle and darker front paws",
+      "required": "no accessory"
+    },
+    {
+      "id": "RC-CAT-064",
+      "species": "cat",
+      "source": "RC-CAT-064__pudgethecat__DNBjRG0SFw9.jpg",
+      "identity": "small flat-faced black-orange-white calico, amber-green eyes and dark nose",
+      "required": "tiny pale-blue cone party hat with pink pom-poms and a sheer pink neck ribbon"
+    },
+    {
+      "id": "RC-CAT-074",
+      "species": "cat",
+      "source": "RC-CAT-074__hamilton_the_hipster_cat__CJCEAxKFt6q.jpg",
+      "identity": "grey-and-white long-haired cat, bright green eyes, distinct white moustache marking and white paws",
+      "required": "no accessory"
+    },
+    {
+      "id": "RC-CAT-089",
+      "species": "cat",
+      "source": "RC-CAT-089__iambronsoncat__CVtkQCPJl0V.jpg",
+      "identity": "cream-orange tabby, green eyes and broad cheeks",
+      "required": "green turtle-shell costume fitted closely over the back"
+    },
+    {
+      "id": "RC-CAT-090",
+      "species": "cat",
+      "source": "RC-CAT-090__rexiecat__DBq4oHII3te.jpg",
+      "identity": "brown-and-white tabby, green eyes, smiling expression with visible fangs",
+      "required": "black hooded costume and a short miniature silver-bladed scythe held across the mouth"
+    },
+    {
+      "id": "RC-CAT-099",
+      "species": "cat",
+      "source": "RC-CAT-099__rexiecat__DGDKMxMqRtb.jpg",
+      "identity": "brown-and-white tabby, green eyes, joyful open mouth with visible fangs",
+      "required": "black tuxedo bib with white buttons, red bow tie, and one red rose held in the mouth"
+    },
+    {
+      "id": "RC-CAT-102",
+      "species": "cat",
+      "source": "RC-CAT-102__sukiicat__DUQ1y8GD8Pv.jpg",
+      "identity": "warm brown Bengal with dark rosettes, large ears and vivid teal-green eyes",
+      "required": "two large autumn maple leaves arranged like compact wings directly behind the shoulders"
+    },
+    {
+      "id": "RC-CAT-109",
+      "species": "cat",
+      "source": "RC-CAT-109__sukiicat__CmmSsA8J02H.jpg",
+      "identity": "warm brown Bengal with dark rosettes, large ears and vivid green eyes",
+      "required": "red-and-black diamond-pattern neck scarf"
+    },
+    {
+      "id": "RC-CAT-123",
+      "species": "cat",
+      "source": "RC-CAT-123__coleandmarmalade__DX9hp0EgznJ.jpg",
+      "identity": "orange-and-white tabby, green eyes, white muzzle and chest",
+      "required": "small straw sombrero with a multicolor woven band"
+    },
+    {
+      "id": "RC-DOG-137",
+      "species": "dog",
+      "source": "RC-DOG-137__mayapolarbear__CgPTVX4ISbM.jpg",
+      "identity": "fluffy pure-white Samoyed-type spitz, black eyes and nose, smiling mouth with pink tongue",
+      "required": "no accessory"
+    },
+    {
+      "id": "RC-DOG-142",
+      "species": "dog",
+      "source": "RC-DOG-142__itsdougthepug__DYj91O1FrKD.jpg",
+      "identity": "tan pug with dark muzzle, round brown eyes and tongue out",
+      "required": "blue cone birthday hat, aqua check button shirt, and white bow tie"
+    },
+    {
+      "id": "RC-DOG-151",
+      "species": "dog",
+      "source": "RC-DOG-151__marutaro__DQwUcLvgW-u.jpg",
+      "identity": "red Shiba Inu with cream cheeks, narrow smiling eyes and compact upright ears",
+      "required": "chunky grey knitted neck scarf"
+    },
+    {
+      "id": "RC-DOG-161",
+      "species": "dog",
+      "source": "RC-DOG-161__tunameltsmyheart__DZd-bsUju_1.jpg",
+      "identity": "tiny reddish-brown Chihuahua mix, long narrow muzzle, very large side ears and round dark eyes",
+      "required": "large multicolor geometric-pattern bow tie"
+    },
+    {
+      "id": "RC-DOG-175",
+      "species": "dog",
+      "source": "RC-DOG-175__thiswildidea__DW-JbV2mGvj.jpg",
+      "identity": "slender white-and-orange wire-haired Podenco-type dog, extremely tall upright ears, amber eyes and pink-brown nose",
+      "required": "no accessory"
+    },
+    {
+      "id": "RC-DOG-196",
+      "species": "dog",
+      "source": "RC-DOG-196__mensweardog__DQHXYrajYl9.jpg",
+      "identity": "cream-white terrier mix with upright ears, dark eyes and black nose",
+      "required": "white powdered judge wig, black robe, and white neck tabs"
+    },
+    {
+      "id": "RC-DOG-210",
+      "species": "dog",
+      "source": "RC-DOG-210__remixthedog__C_DrqGuxiVD.jpg",
+      "identity": "salt-and-pepper Schnauzer, dark eyes, grey eyebrows and white beard",
+      "required": "round tortoiseshell glasses and a white bathrobe; omit the laptop"
+    },
+    {
+      "id": "RC-DOG-216",
+      "species": "dog",
+      "source": "RC-DOG-216__remixthedog__CzCrG9Ax8cF.jpg",
+      "identity": "salt-and-pepper Schnauzer, dark eyes, grey eyebrows and white beard",
+      "required": "dark olive-green hooded raincoat"
+    },
+    {
+      "id": "RC-DOG-217",
+      "species": "dog",
+      "source": "RC-DOG-217__remixthedog__CyWeKihxieu.jpg",
+      "identity": "small salt-and-pepper Schnauzer, dark eyes, grey eyebrows and white beard",
+      "required": "small white-and-pink soccer ball hugged tightly against the chest"
+    },
+    {
+      "id": "RC-DOG-222",
+      "species": "dog",
+      "source": "RC-DOG-222__loki__DUd5T5rgVWL.jpg",
+      "identity": "large grey-and-white wolfdog, broad face, upright ears, pale eyes and heavy chest ruff",
+      "required": "no accessory"
+    },
+    {
+      "id": "RC-DOG-230",
+      "species": "dog",
+      "source": "RC-DOG-230__jiffpom__DTxyWQIjihu.jpg",
+      "identity": "tiny orange Pomeranian with round teddy-bear trim, dark eyes and pink tongue",
+      "required": "light grey sweater and tan faux-suede booties"
+    },
+    {
+      "id": "RC-DOG-235",
+      "species": "dog",
+      "source": "RC-DOG-235__jiffpom__DQfQWiAkYKi.jpg",
+      "identity": "tiny orange Pomeranian with round teddy-bear trim, dark eyes and tiny pink tongue",
+      "required": "black-and-white panda bodysuit and an orange jack-o-lantern candy bucket tucked close to one side"
+    },
+    {
+      "id": "RC-DOG-241",
+      "species": "dog",
+      "source": "RC-DOG-241__crusoe_dachshund__DYFNj2qjUw0.jpg",
+      "identity": "cream long-haired Dachshund, long ears, long muzzle and round dark eyes",
+      "required": "blue-and-pink patterned bandana"
+    },
+    {
+      "id": "RC-DOG-245",
+      "species": "dog",
+      "source": "RC-DOG-245__crusoe_dachshund__DXu1jdDjYCL.jpg",
+      "identity": "black-and-tan Dachshund, long muzzle and body, drooping ears and dark eyes",
+      "required": "close-fitting red walking harness"
+    },
+    {
+      "id": "RC-DOG-248",
+      "species": "dog",
+      "source": "RC-DOG-248__freddygreatdane__CPBW1XwJ_Ct.jpg",
+      "identity": "grey-and-black merle Great Dane, long rectangular muzzle, amber eyes, dark ears and white chest",
+      "required": "no accessory"
+    }
+  ]
+}
