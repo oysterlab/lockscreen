@@ -265,7 +265,7 @@
   "beamOrigin": -0.5,
   "beamScale": 0.15,
   "roomOnly": false,
-  "_note": "PET-R004 mobile preview for RC-CAT-049. Uses the shared exp1 96-slot light field and its exact clean reference denominator (no subject-shaped light fill), moving curtain, indirect room light and branch-shadow overlay.",
+  "_note": "PET-R004 mobile preview for RC-CAT-049. Uses the shared exp1 96-slot light field and its exact clean reference denominator (no subject-shaped light fill), moving curtain, indirect room light and branch-shadow overlay. Subject-shaped night bounce is disabled to prevent a feathered halo around the pet.",
   "lightFrom": "pet_r004_shared",
   "indirectLight": {
     "off": "light/indirect_off.png",
@@ -273,7 +273,7 @@
     "blendMode": "signed-delta",
     "gain": 1.0,
     "plinthMask": "light/plinth_bounce_mask.png",
-    "subjectLift": 0.1,
+    "subjectLift": 0.0,
     "plinthLift": 0.12,
     "eveningStart": 18.5,
     "eveningFull": 20.0,

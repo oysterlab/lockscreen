@@ -125,10 +125,16 @@ def write_scene(image_path: Path, template: dict) -> tuple[str, float]:
     view["lightFrom"] = "pet_r004_shared"
     view["subject"] = "subject.webp"
     view["relief"] = "relief.webp"
+    # The template's night subject lift paints a cool tint through the soft subject
+    # matte. On dark pets that feathered matte becomes a visible pet-shaped halo at
+    # night (most obvious around 02:42). Keep the room/plinth night treatment, but do
+    # not add any colour through the pet silhouette itself.
+    view.setdefault("indirectLight", {})["subjectLift"] = 0.0
     view["_note"] = (
         f"PET-R004 mobile preview for {pet_id}. Uses the shared exp1 96-slot light field "
         "and its exact clean reference denominator (no subject-shaped light fill), moving "
-        "curtain, indirect room light and branch-shadow overlay."
+        "curtain, indirect room light and branch-shadow overlay. Subject-shaped night "
+        "bounce is disabled to prevent a feathered halo around the pet."
     )
     (scene / "view.json").write_text(
         json.dumps(view, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
@@ -152,7 +158,7 @@ def main() -> None:
     preview_app.write_text(
         preview_app.read_text(encoding="utf-8").replace(
             'const AV = location.protocol === "file:" ? "" : "?a=blue18";',
-            'const AV = location.protocol === "file:" ? "" : "?a=pet-r004-cleanref-1";',
+            'const AV = location.protocol === "file:" ? "" : "?a=pet-r004-nohalo-2";',
         ),
         encoding="utf-8",
     )
