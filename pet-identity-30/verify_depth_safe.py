@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import struct
 from pathlib import Path
 
@@ -12,7 +13,7 @@ from pathlib import Path
 PAGE = Path(__file__).resolve().parent
 PREVIEW = PAGE / "preview"
 SURFACE_VERSION = "pet-r005-depth-normal-1"
-RUNTIME_VERSION = "pet-r007-curtain-clear-pets-1"
+RUNTIME_VERSION = "pet-r008-disjoint-pets-1"
 MAP_SIZE = (941, 1672)
 
 
@@ -33,9 +34,35 @@ def digest(path: Path) -> str:
 
 
 def main() -> None:
+    current_manifest = json.loads(
+        (PAGE / "generation-r008/manifest.json").read_text(encoding="utf-8")
+    )
+    previous_manifest = json.loads(
+        (PAGE / "generation-r007/manifest.json").read_text(encoding="utf-8")
+    )
+    current_ids = {item["id"] for item in current_manifest["items"]}
+    previous_ids = {item["id"] for item in previous_manifest["items"]}
+    assert len(current_ids) == 30, "PET-R008 manifest does not contain 30 distinct IDs"
+    assert not current_ids & previous_ids, "PET-R008 repeats PET-R007 IDs"
+
+    input_ids = {path.stem for path in (PAGE / "assets/input").glob("*.jpg")}
+    native_ids = {path.stem for path in (PAGE / "assets/output-native").glob("*.png")}
+    jpeg_ids = {path.stem for path in (PAGE / "assets/output").glob("*.jpg")}
+    page_ids = set(
+        re.findall(
+            r"\{id:'([^']+)', species:'(?:cat|dog)'",
+            (PAGE / "index.html").read_text(encoding="utf-8"),
+        )
+    )
+    assert input_ids == current_ids, "public input IDs differ from PET-R008 manifest"
+    assert native_ids == current_ids, "native output IDs differ from PET-R008 manifest"
+    assert jpeg_ids == current_ids, "gallery output IDs differ from PET-R008 manifest"
+    assert page_ids == current_ids, "page IDs differ from PET-R008 manifest"
+
     manifest = json.loads((PREVIEW / "scenes.json").read_text(encoding="utf-8"))
     assert len(manifest) == 30, f"expected 30 scenes, found {len(manifest)}"
     assert len({item["id"] for item in manifest}) == 30, "duplicate scene IDs"
+    assert {item["id"] for item in manifest} == current_ids, "scene IDs differ from PET-R008"
 
     views = sorted(PREVIEW.glob("assets/photo3d_pet_r004_*/view.json"))
     assert len(views) == 30, f"expected 30 view.json files, found {len(views)}"
@@ -105,7 +132,8 @@ def main() -> None:
     assert (PREVIEW / "surface-contact-sheet.jpg").stat().st_size > 100_000
 
     print(
-        "PASS: 30 dense depth + normal scenes; native reference UV immutable; "
+        "PASS: PET-R008/PET-R007 ID intersection 0; 30 synchronized inputs, outputs, "
+        "page cards, and dense depth + normal scenes; native reference UV immutable; "
         "zero pet masks/relief; unclipped depth-occluded curtain motion; "
         "normal shading clamped to 0.88..1.12"
     )

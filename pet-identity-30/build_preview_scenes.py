@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build PET-R007 previews with dense full-frame depth and normal lighting.
+"""Build PET-R008 previews with dense full-frame depth and normal lighting.
 
 The generated 9:16 image is immutable. Dense scene geometry may bend the light field
 and modulate surface shading, but never cuts out, warps, replaces, or composites pet
@@ -18,9 +18,9 @@ ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "pet-identity-30"
 PREVIEW = PAGE / "preview"
 NATIVE_OUTPUT = PAGE / "assets/output-native"
-TEMPLATE = PREVIEW / "assets/photo3d_pet_r004_cz_cat_006/view.json"
+TEMPLATE = PREVIEW / "assets/photo3d_pet_r004_shared/view-template.json"
 SHARED = PREVIEW / "assets/photo3d_pet_r004_shared"
-ASSET_VERSION = "pet-r007-curtain-clear-pets-1"
+ASSET_VERSION = "pet-r008-disjoint-pets-1"
 
 
 def slug(pet_id: str) -> str:
@@ -62,7 +62,7 @@ def write_scene(image_path: Path, template: dict) -> str:
     else:
         view.pop("surfaceLighting", None)
     view["_note"] = (
-        f"PET-R007 curtain-clear preview for {pet_id}. The native generated PNG remains at "
+        f"PET-R008 disjoint-source preview for {pet_id}. The native generated PNG remains at "
         "its original UV. Dense full-frame depth bends only the sampled light field and "
         "dense normals apply bounded multiplicative shading. No subject mask, cutout, "
         "reference-pixel displacement, subject lift, or pet-local compositing is loaded. "
@@ -183,6 +183,12 @@ def main() -> None:
     (PREVIEW / "scenes.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    expected_scene_dirs = {
+        PREVIEW / f"assets/photo3d_pet_r004_{slug(image.stem)}" for image in images
+    }
+    for old_scene in (PREVIEW / "assets").glob("photo3d_pet_r004_*"):
+        if old_scene.is_dir() and old_scene != SHARED and old_scene not in expected_scene_dirs:
+            shutil.rmtree(old_scene)
     (PREVIEW / "mask-contact-sheet.jpg").unlink(missing_ok=True)
 
 

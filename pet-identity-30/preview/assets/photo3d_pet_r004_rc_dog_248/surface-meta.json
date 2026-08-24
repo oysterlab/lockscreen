@@ -1,0 +1,17 @@
+{
+  "pipeline": "pet-r005-depth-normal-1",
+  "model": "depth-anything/Depth-Anything-V2-Small-hf",
+  "depthConvention": "near=1, far=0",
+  "source": "../../../assets/output-native/RC-DOG-248.png",
+  "normalSlope": 32.0,
+  "normalGradientClip": 0.012,
+  "modelPercentileRange": [
+    0.5355131196975708,
+    5.1466885185241695
+  ],
+  "invariants": [
+    "full-frame dense maps only",
+    "no pet mask or alpha matte",
+    "no reference pixel displacement or replacement"
+  ]
+}

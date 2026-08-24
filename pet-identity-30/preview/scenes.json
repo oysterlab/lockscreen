@@ -1,272 +1,272 @@
 [
   {
-    "id": "CZ-CAT-006",
-    "scene": "pet_r004_cz_cat_006",
-    "reference": "assets/output-native/CZ-CAT-006.png",
+    "id": "CZ-CAT-012",
+    "scene": "pet_r004_cz_cat_012",
+    "reference": "assets/output-native/CZ-CAT-012.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_cz_cat_006/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_cz_cat_006/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_cz_cat_012/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_cz_cat_012/surface-normal.png"
   },
   {
-    "id": "RC-CAT-001",
-    "scene": "pet_r004_rc_cat_001",
-    "reference": "assets/output-native/RC-CAT-001.png",
+    "id": "RC-CAT-002",
+    "scene": "pet_r004_rc_cat_002",
+    "reference": "assets/output-native/RC-CAT-002.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_001/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_001/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_002/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_002/surface-normal.png"
   },
   {
-    "id": "RC-CAT-003",
-    "scene": "pet_r004_rc_cat_003",
-    "reference": "assets/output-native/RC-CAT-003.png",
+    "id": "RC-CAT-006",
+    "scene": "pet_r004_rc_cat_006",
+    "reference": "assets/output-native/RC-CAT-006.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_003/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_003/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_006/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_006/surface-normal.png"
   },
   {
-    "id": "RC-CAT-005",
-    "scene": "pet_r004_rc_cat_005",
-    "reference": "assets/output-native/RC-CAT-005.png",
+    "id": "RC-CAT-016",
+    "scene": "pet_r004_rc_cat_016",
+    "reference": "assets/output-native/RC-CAT-016.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_005/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_005/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_016/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_016/surface-normal.png"
   },
   {
-    "id": "RC-CAT-018",
-    "scene": "pet_r004_rc_cat_018",
-    "reference": "assets/output-native/RC-CAT-018.png",
+    "id": "RC-CAT-039",
+    "scene": "pet_r004_rc_cat_039",
+    "reference": "assets/output-native/RC-CAT-039.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_018/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_018/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_039/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_039/surface-normal.png"
   },
   {
-    "id": "RC-CAT-028",
-    "scene": "pet_r004_rc_cat_028",
-    "reference": "assets/output-native/RC-CAT-028.png",
+    "id": "RC-CAT-045",
+    "scene": "pet_r004_rc_cat_045",
+    "reference": "assets/output-native/RC-CAT-045.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_028/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_028/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_045/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_045/surface-normal.png"
   },
   {
-    "id": "RC-CAT-036",
-    "scene": "pet_r004_rc_cat_036",
-    "reference": "assets/output-native/RC-CAT-036.png",
+    "id": "RC-CAT-048",
+    "scene": "pet_r004_rc_cat_048",
+    "reference": "assets/output-native/RC-CAT-048.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_036/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_036/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_048/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_048/surface-normal.png"
   },
   {
-    "id": "RC-CAT-049",
-    "scene": "pet_r004_rc_cat_049",
-    "reference": "assets/output-native/RC-CAT-049.png",
+    "id": "RC-CAT-064",
+    "scene": "pet_r004_rc_cat_064",
+    "reference": "assets/output-native/RC-CAT-064.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_049/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_049/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_064/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_064/surface-normal.png"
   },
   {
-    "id": "RC-CAT-065",
-    "scene": "pet_r004_rc_cat_065",
-    "reference": "assets/output-native/RC-CAT-065.png",
+    "id": "RC-CAT-074",
+    "scene": "pet_r004_rc_cat_074",
+    "reference": "assets/output-native/RC-CAT-074.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_065/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_065/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_074/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_074/surface-normal.png"
   },
   {
-    "id": "RC-CAT-066",
-    "scene": "pet_r004_rc_cat_066",
-    "reference": "assets/output-native/RC-CAT-066.png",
+    "id": "RC-CAT-089",
+    "scene": "pet_r004_rc_cat_089",
+    "reference": "assets/output-native/RC-CAT-089.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_066/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_066/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_089/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_089/surface-normal.png"
   },
   {
-    "id": "RC-CAT-081",
-    "scene": "pet_r004_rc_cat_081",
-    "reference": "assets/output-native/RC-CAT-081.png",
+    "id": "RC-CAT-090",
+    "scene": "pet_r004_rc_cat_090",
+    "reference": "assets/output-native/RC-CAT-090.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_081/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_081/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_090/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_090/surface-normal.png"
   },
   {
-    "id": "RC-CAT-092",
-    "scene": "pet_r004_rc_cat_092",
-    "reference": "assets/output-native/RC-CAT-092.png",
+    "id": "RC-CAT-099",
+    "scene": "pet_r004_rc_cat_099",
+    "reference": "assets/output-native/RC-CAT-099.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_092/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_092/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_099/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_099/surface-normal.png"
   },
   {
-    "id": "RC-CAT-105",
-    "scene": "pet_r004_rc_cat_105",
-    "reference": "assets/output-native/RC-CAT-105.png",
+    "id": "RC-CAT-102",
+    "scene": "pet_r004_rc_cat_102",
+    "reference": "assets/output-native/RC-CAT-102.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_105/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_105/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_102/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_102/surface-normal.png"
   },
   {
-    "id": "RC-CAT-117",
-    "scene": "pet_r004_rc_cat_117",
-    "reference": "assets/output-native/RC-CAT-117.png",
+    "id": "RC-CAT-109",
+    "scene": "pet_r004_rc_cat_109",
+    "reference": "assets/output-native/RC-CAT-109.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_117/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_117/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_109/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_109/surface-normal.png"
   },
   {
-    "id": "RC-CAT-126",
-    "scene": "pet_r004_rc_cat_126",
-    "reference": "assets/output-native/RC-CAT-126.png",
+    "id": "RC-CAT-123",
+    "scene": "pet_r004_rc_cat_123",
+    "reference": "assets/output-native/RC-CAT-123.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_126/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_126/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_cat_123/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_cat_123/surface-normal.png"
   },
   {
-    "id": "RC-DOG-136",
-    "scene": "pet_r004_rc_dog_136",
-    "reference": "assets/output-native/RC-DOG-136.png",
+    "id": "RC-DOG-137",
+    "scene": "pet_r004_rc_dog_137",
+    "reference": "assets/output-native/RC-DOG-137.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_136/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_136/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_137/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_137/surface-normal.png"
   },
   {
-    "id": "RC-DOG-144",
-    "scene": "pet_r004_rc_dog_144",
-    "reference": "assets/output-native/RC-DOG-144.png",
+    "id": "RC-DOG-142",
+    "scene": "pet_r004_rc_dog_142",
+    "reference": "assets/output-native/RC-DOG-142.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_144/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_144/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_142/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_142/surface-normal.png"
   },
   {
-    "id": "RC-DOG-154",
-    "scene": "pet_r004_rc_dog_154",
-    "reference": "assets/output-native/RC-DOG-154.png",
+    "id": "RC-DOG-151",
+    "scene": "pet_r004_rc_dog_151",
+    "reference": "assets/output-native/RC-DOG-151.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_154/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_154/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_151/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_151/surface-normal.png"
   },
   {
-    "id": "RC-DOG-163",
-    "scene": "pet_r004_rc_dog_163",
-    "reference": "assets/output-native/RC-DOG-163.png",
+    "id": "RC-DOG-161",
+    "scene": "pet_r004_rc_dog_161",
+    "reference": "assets/output-native/RC-DOG-161.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_163/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_163/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_161/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_161/surface-normal.png"
   },
   {
-    "id": "RC-DOG-176",
-    "scene": "pet_r004_rc_dog_176",
-    "reference": "assets/output-native/RC-DOG-176.png",
+    "id": "RC-DOG-175",
+    "scene": "pet_r004_rc_dog_175",
+    "reference": "assets/output-native/RC-DOG-175.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_176/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_176/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_175/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_175/surface-normal.png"
   },
   {
-    "id": "RC-DOG-193",
-    "scene": "pet_r004_rc_dog_193",
-    "reference": "assets/output-native/RC-DOG-193.png",
+    "id": "RC-DOG-196",
+    "scene": "pet_r004_rc_dog_196",
+    "reference": "assets/output-native/RC-DOG-196.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_193/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_193/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_196/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_196/surface-normal.png"
   },
   {
-    "id": "RC-DOG-194",
-    "scene": "pet_r004_rc_dog_194",
-    "reference": "assets/output-native/RC-DOG-194.png",
+    "id": "RC-DOG-210",
+    "scene": "pet_r004_rc_dog_210",
+    "reference": "assets/output-native/RC-DOG-210.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_194/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_194/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_210/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_210/surface-normal.png"
   },
   {
-    "id": "RC-DOG-206",
-    "scene": "pet_r004_rc_dog_206",
-    "reference": "assets/output-native/RC-DOG-206.png",
+    "id": "RC-DOG-216",
+    "scene": "pet_r004_rc_dog_216",
+    "reference": "assets/output-native/RC-DOG-216.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_206/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_206/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_216/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_216/surface-normal.png"
   },
   {
-    "id": "RC-DOG-208",
-    "scene": "pet_r004_rc_dog_208",
-    "reference": "assets/output-native/RC-DOG-208.png",
+    "id": "RC-DOG-217",
+    "scene": "pet_r004_rc_dog_217",
+    "reference": "assets/output-native/RC-DOG-217.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_208/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_208/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_217/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_217/surface-normal.png"
   },
   {
-    "id": "RC-DOG-219",
-    "scene": "pet_r004_rc_dog_219",
-    "reference": "assets/output-native/RC-DOG-219.png",
+    "id": "RC-DOG-222",
+    "scene": "pet_r004_rc_dog_222",
+    "reference": "assets/output-native/RC-DOG-222.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_219/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_219/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_222/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_222/surface-normal.png"
   },
   {
-    "id": "RC-DOG-220",
-    "scene": "pet_r004_rc_dog_220",
-    "reference": "assets/output-native/RC-DOG-220.png",
+    "id": "RC-DOG-230",
+    "scene": "pet_r004_rc_dog_230",
+    "reference": "assets/output-native/RC-DOG-230.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_220/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_220/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_230/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_230/surface-normal.png"
   },
   {
-    "id": "RC-DOG-224",
-    "scene": "pet_r004_rc_dog_224",
-    "reference": "assets/output-native/RC-DOG-224.png",
+    "id": "RC-DOG-235",
+    "scene": "pet_r004_rc_dog_235",
+    "reference": "assets/output-native/RC-DOG-235.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_224/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_224/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_235/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_235/surface-normal.png"
   },
   {
-    "id": "RC-DOG-232",
-    "scene": "pet_r004_rc_dog_232",
-    "reference": "assets/output-native/RC-DOG-232.png",
+    "id": "RC-DOG-241",
+    "scene": "pet_r004_rc_dog_241",
+    "reference": "assets/output-native/RC-DOG-241.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_232/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_232/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_241/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_241/surface-normal.png"
   },
   {
-    "id": "RC-DOG-240",
-    "scene": "pet_r004_rc_dog_240",
-    "reference": "assets/output-native/RC-DOG-240.png",
+    "id": "RC-DOG-245",
+    "scene": "pet_r004_rc_dog_245",
+    "reference": "assets/output-native/RC-DOG-245.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_240/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_240/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_245/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_245/surface-normal.png"
   },
   {
-    "id": "RC-DOG-257",
-    "scene": "pet_r004_rc_dog_257",
-    "reference": "assets/output-native/RC-DOG-257.png",
+    "id": "RC-DOG-248",
+    "scene": "pet_r004_rc_dog_248",
+    "reference": "assets/output-native/RC-DOG-248.png",
     "mask": null,
     "relief": null,
-    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_257/surface-depth.png",
-    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_257/surface-normal.png"
+    "surfaceDepth": "preview/assets/photo3d_pet_r004_rc_dog_248/surface-depth.png",
+    "surfaceNormal": "preview/assets/photo3d_pet_r004_rc_dog_248/surface-normal.png"
   }
 ]
