@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17130f">
+  <title>PET-R004 · 고양이 15 + 강아지 15</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #17130f;
+      --panel: #211b15;
+      --panel-2: #2a221a;
+      --line: rgba(255,255,255,.1);
+      --text: #f7f0e7;
+      --muted: #bdb0a1;
+      --accent: #e6b97b;
+      --accent-2: #9fc4b3;
+      --warn: #d9a96c;
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(208,165,108,.12), transparent 29rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    button, a { font: inherit; }
+    a { color: inherit; }
+    .wrap { width: min(1480px, calc(100% - 32px)); margin: 0 auto; }
+
+    header { padding: 64px 0 28px; }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--accent);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    h1 { margin: 0; max-width: 880px; font-size: clamp(2rem, 5vw, 4.6rem); line-height: 1.02; letter-spacing: -.045em; }
+    .lede { max-width: 820px; margin: 20px 0 0; color: var(--muted); font-size: clamp(1rem, 2vw, 1.22rem); }
+    .notice {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 22px;
+      padding: 9px 13px;
+      border: 1px solid rgba(230,185,123,.32);
+      border-radius: 999px;
+      color: #f1cf9d;
+      background: rgba(230,185,123,.08);
+      font-size: .88rem;
+      font-weight: 700;
+    }
+    .notice::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--warn); }
+
+    .stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 32px 0; }
+    .stat { padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.035); }
+    .stat strong { display: block; font-size: 1.55rem; letter-spacing: -.03em; }
+    .stat span { color: var(--muted); font-size: .8rem; }
+
+    .method {
+      margin-bottom: 34px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--panel);
+    }
+    .method summary { cursor: pointer; padding: 16px 18px; font-weight: 750; }
+    .method-body { display: grid; grid-template-columns: 1fr 1.45fr; gap: 22px; padding: 0 18px 20px; }
+    .method-copy { color: var(--muted); }
+    .method-copy ol { padding-left: 20px; }
+    .refs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .ref { margin: 0; }
+    .ref img { display: block; width: 100%; aspect-ratio: 9 / 16; object-fit: cover; border-radius: 10px; background: #0d0b09; }
+    .ref figcaption { padding-top: 6px; color: var(--muted); font-size: .72rem; }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 13px 0;
+      margin-bottom: 16px;
+      background: rgba(23,19,15,.91);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--line);
+    }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filter {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 13px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .filter[aria-pressed="true"] { color: #1e1812; background: var(--accent); border-color: var(--accent); font-weight: 800; }
+    .count { color: var(--muted); font-size: .88rem; }
+
+    .gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding-bottom: 80px; }
+    .card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); overflow: hidden; }
+    .card-head { display: flex; justify-content: space-between; gap: 12px; padding: 15px 16px 13px; border-bottom: 1px solid var(--line); }
+    .id { margin: 0; font-size: 1rem; letter-spacing: -.01em; }
+    .species { color: var(--muted); font-size: .78rem; }
+    .status { align-self: flex-start; white-space: nowrap; padding: 5px 8px; border-radius: 999px; color: #f1cf9d; background: rgba(230,185,123,.09); border: 1px solid rgba(230,185,123,.25); font-size: .68rem; font-weight: 800; }
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); }
+    .shot { position: relative; margin: 0; min-width: 0; background: #0e0c0a; }
+    .shot img { display: block; width: 100%; height: clamp(320px, 42vw, 620px); object-fit: contain; cursor: zoom-in; background: #0e0c0a; }
+    .shot.output img { object-fit: cover; object-position: center; }
+    .shot figcaption { position: absolute; top: 9px; left: 9px; padding: 5px 8px; border-radius: 999px; background: rgba(17,14,11,.78); backdrop-filter: blur(8px); font-size: .69rem; font-weight: 800; letter-spacing: .04em; }
+    .card-copy { padding: 14px 16px 16px; }
+    .trait { margin: 0; color: #e9dfd4; font-size: .88rem; }
+    .required { margin: 8px 0 0; color: var(--accent-2); font-size: .82rem; }
+    .flag { margin: 8px 0 0; padding-top: 8px; border-top: 1px solid var(--line); color: #dfb981; font-size: .78rem; }
+
+    .sheet-link { display: inline-block; margin-bottom: 42px; color: var(--accent); text-underline-offset: 4px; }
+    footer { padding: 30px 0 58px; border-top: 1px solid var(--line); color: var(--muted); font-size: .82rem; }
+
+    dialog { width: min(94vw, 980px); max-height: 94vh; padding: 0; border: 1px solid var(--line); border-radius: 18px; background: #0c0a08; color: var(--text); box-shadow: 0 28px 90px rgba(0,0,0,.6); }
+    dialog::backdrop { background: rgba(0,0,0,.82); backdrop-filter: blur(7px); }
+    dialog img { display: block; max-width: 100%; max-height: 84vh; margin: 0 auto; object-fit: contain; }
+    .modal-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 13px; border-bottom: 1px solid var(--line); }
+    .modal-title { color: var(--muted); font-size: .82rem; }
+    .close { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; background: var(--panel-2); color: var(--text); cursor: pointer; }
+
+    @media (max-width: 980px) {
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .gallery { grid-template-columns: 1fr; }
+      .shot img { height: min(72vw, 620px); }
+      .method-body { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      header { padding-top: 42px; }
+      .wrap { width: min(100% - 20px, 1480px); }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .stat:last-child { grid-column: 1 / -1; }
+      .toolbar { align-items: flex-start; flex-direction: column; }
+      .compare { grid-template-columns: 1fr; }
+      .shot img { height: auto; max-height: 76vh; }
+      .shot.output img { object-fit: contain; }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <p class="eyebrow">PET-R004 · 2026-08-24</p>
+    <h1>고양이 15 + 강아지 15<br>직접 장면 생성 검증</h1>
+    <p class="lede">사용자 입력 동물을 치비 캐릭터로 변환하고, 별도 누끼나 크로마키 없이 <code>base_9x16</code> 장면 안에서 한 번에 생성한 30개 비교 결과입니다.</p>
+    <div class="notice">자동 PASS 없음 · 전 항목 owner review required</div>
+
+    <div class="stats" aria-label="실험 요약">
+      <div class="stat"><strong>30</strong><span>전체 결과</span></div>
+      <div class="stat"><strong>15</strong><span>고양이</span></div>
+      <div class="stat"><strong>15</strong><span>강아지</span></div>
+      <div class="stat"><strong>941×1672</strong><span>네이티브 출력</span></div>
+      <div class="stat"><strong>0</strong><span>크로마·사후 합성</span></div>
+    </div>
+
+    <details class="method">
+      <summary>생성 방식과 레퍼런스 보기</summary>
+      <div class="method-body">
+        <div class="method-copy">
+          <ol>
+            <li>Image 1: 수정 대상인 빈 <code>base_9x16</code></li>
+            <li>Image 2: 사용자 입력 동물 및 액세서리</li>
+            <li>Images 3–4: 치비 스타일·크기·배치만 안내</li>
+          </ol>
+          <p>동물과 필수 소품 전체가 골든 레퍼런스보다 커지지 않도록 제한했습니다. 결과 이미지는 네이티브 비율 그대로이며 가로·세로 독립 리사이즈를 하지 않았습니다.</p>
+        </div>
+        <div class="refs">
+          <figure class="ref"><img src="assets/reference/base.jpg" alt="빈 base 9x16 장면"><figcaption>Image 1 · edit target</figcaption></figure>
+          <figure class="ref"><img src="assets/reference/target-latte.jpg" alt="Latte 치비 골든 레퍼런스"><figcaption>Image 3 · Latte golden</figcaption></figure>
+          <figure class="ref"><img src="assets/reference/target-nila.jpg" alt="Nila 치비 골든 레퍼런스"><figcaption>Image 4 · Nila golden</figcaption></figure>
+        </div>
+      </div>
+    </details>
+
+    <a class="sheet-link" href="assets/contact-sheet.jpg" target="_blank" rel="noopener">30개 전체 콘택트시트 열기 ↗</a>
+  </header>
+
+  <main class="wrap">
+    <div class="toolbar">
+      <div class="filters" aria-label="동물 종류 필터">
+        <button class="filter" data-filter="all" aria-pressed="true">전체 30</button>
+        <button class="filter" data-filter="cat" aria-pressed="false">고양이 15</button>
+        <button class="filter" data-filter="dog" aria-pressed="false">강아지 15</button>
+      </div>
+      <div class="count" id="visibleCount">30개 표시 중</div>
+    </div>
+    <section class="gallery" id="gallery" aria-live="polite"></section>
+  </main>
+
+  <footer>
+    <div class="wrap">PET-R004 · Built-in ImageGen direct-base edit · 공개 결과는 품질 판정이 아니라 오너 검수용 후보입니다.</div>
+  </footer>
+
+  <dialog id="lightbox">
+    <div class="modal-bar"><span class="modal-title" id="modalTitle"></span><button class="close" id="closeModal">닫기</button></div>
+    <img id="modalImage" alt="확대 이미지">
+  </dialog>
+
+  <script>
+    const pets = [
+      {id:'CZ-CAT-006', species:'cat', trait:'검정·흰색 턱시도, 넓은 황록색 눈, 흰 턱·가슴·발', required:'추가 액세서리 없음'},
+      {id:'RC-CAT-001', species:'cat', trait:'둥근 은갈색 태비 얼굴, 연녹색 눈, 이마 M 무늬', required:'회색 니트 상어 후드·이빨·지느러미'},
+      {id:'RC-CAT-003', species:'cat', trait:'은색 셰이디드, 둥근 얼굴, 연녹색 눈, 보라색 목줄', required:'얕은 베이지색 직조 바구니', flag:'털과 해부학적 질감이 골든보다 실사에 가깝게 남음'},
+      {id:'RC-CAT-005', species:'cat', trait:'순백색 털, 파란 회색 눈, 작은 분홍 코', required:'청록 목줄과 라벤더 꽃 모양 태그'},
+      {id:'RC-CAT-018', species:'cat', trait:'좌측 검정·우측 주황 얼굴, 녹색·파란색 오드아이', required:'분홍 목줄과 하트 태그'},
+      {id:'RC-CAT-028', species:'cat', trait:'접힌 귀, 회색·주황·크림색 얼굴 패치, 녹색 눈', required:'몸과 머리를 감싼 회색 저지 원단'},
+      {id:'RC-CAT-036', species:'cat', trait:'순백색 털, 사파이어색 눈, 둥근 얼굴', required:'검정·흰색 깅엄 체크 셔츠'},
+      {id:'RC-CAT-049', species:'cat', trait:'긴 황금색 털, 청록색 눈, 크림색 가슴 갈기', required:'추가 액세서리 없음', flag:'긴 털 표현에 실사 디테일이 일부 남음'},
+      {id:'RC-CAT-065', species:'cat', trait:'납작하고 작은 칼리코 얼굴, 검정·주황·흰색 패치', required:'추가 액세서리 없음'},
+      {id:'RC-CAT-066', species:'cat', trait:'회색·흰색 털과 코 아래의 고유한 흰 콧수염 무늬', required:'추가 액세서리 없음'},
+      {id:'RC-CAT-081', species:'cat', trait:'무거운 크림·주황 태비 체형과 가늘게 뜬 눈', required:'추가 액세서리 없음'},
+      {id:'RC-CAT-092', species:'cat', trait:'갈색·흰색 태비, 초록 눈, 송곳니가 보이는 웃음', required:'추가 액세서리 없음'},
+      {id:'RC-CAT-105', species:'cat', trait:'갈색 벵갈 로제트, 큰 귀, 청록색 눈', required:'빨강·검정 버팔로 체크 하네스'},
+      {id:'RC-CAT-117', species:'cat', trait:'주황·흰색 태비, 가는 초록 눈, 흰 앞발', required:'교차한 긴 앞발 포즈', flag:'스케일 보정 후 교차 앞발 단서가 약해짐'},
+      {id:'RC-CAT-126', species:'cat', trait:'주황색 털, 큰 녹금색 눈, 넓은 주둥이와 젖은 털', required:'얼굴과 이마의 물방울 유지'},
+
+      {id:'RC-DOG-136', species:'dog', trait:'검정·황갈색 장모 스피츠 믹스, 회색 가슴 갈기, 작은 혀', required:'머리 위의 큰 하늘색 선물 리본'},
+      {id:'RC-DOG-144', species:'dog', trait:'황갈색 퍼그, 검은 주둥이, 둥근 눈, 말린 꼬리', required:'오른쪽으로 길게 나온 분홍색 혀'},
+      {id:'RC-DOG-154', species:'dog', trait:'적갈색 시바견, 크림색 볼·가슴, 웃는 표정과 말린 꼬리', required:'검정 목줄과 짧은 리드줄'},
+      {id:'RC-DOG-163', species:'dog', trait:'작은 황갈색·흰색 치와와 믹스, 매우 큰 옆 귀, 분홍 코', required:'파랑·빨강·흰색 니트 스웨터와 체크 패널'},
+      {id:'RC-DOG-176', species:'dog', trait:'흰색·황갈색 와이어 코트, 긴 주둥이, 매우 큰 귀와 감은 눈', required:'금색 패턴의 검정 목줄', flag:'큰 귀까지 포함한 축척 경계를 오너가 확인해야 함'},
+      {id:'RC-DOG-193', species:'dog', trait:'노령 크림색 시추 믹스, 큰 눈, 나온 혀', required:'기울어진 검정 톱햇과 검정 랩/케이프'},
+      {id:'RC-DOG-194', species:'dog', trait:'크림색 스피츠 믹스, 곧은 귀, 차분한 표정', required:'버건디 터틀넥과 빨강·베이지·파랑 체크 코트'},
+      {id:'RC-DOG-206', species:'dog', trait:'솔트앤페퍼 슈나우저, 회색 눈썹과 흰 수염', required:'흰 목욕가운과 머리 수건'},
+      {id:'RC-DOG-208', species:'dog', trait:'검정·은색 슈나우저 강아지, 밝은 눈썹·수염·다리', required:'추가 액세서리 없음'},
+      {id:'RC-DOG-219', species:'dog', trait:'초콜릿 래브라도, 헤이즐 눈과 부드러운 곁눈질', required:'빨간 목줄과 입에 문 연보라색 꽃줄기'},
+      {id:'RC-DOG-220', species:'dog', trait:'회색·흰색 울프독, 넓은 얼굴과 묵직한 체형', required:'추가 액세서리 없음'},
+      {id:'RC-DOG-224', species:'dog', trait:'테디베어 컷의 작은 주황 포메라니안', required:'파란 소매·노란 구름 쿠션·회색 별 인형'},
+      {id:'RC-DOG-232', species:'dog', trait:'둥근 주황 포메라니안, 웃는 입과 분홍 혀', required:'산타모자와 빨강·흰색 줄무늬 선물상자'},
+      {id:'RC-DOG-240', species:'dog', trait:'검정·황갈색 닥스훈트, 긴 주둥이·몸통과 처진 귀', required:'빨간 가죽 하네스와 입에 문 나뭇가지'},
+      {id:'RC-DOG-257', species:'dog', trait:'짙은 브린들 그레이트데인, 긴 직사각형 주둥이와 흰 가슴선', required:'추가 액세서리 없음', flag:'초대형 체형 단서는 치비 압축으로 약해질 수 있음'}
+    ];
+
+    const gallery = document.querySelector('#gallery');
+    const visibleCount = document.querySelector('#visibleCount');
+    const lightbox = document.querySelector('#lightbox');
+    const modalImage = document.querySelector('#modalImage');
+    const modalTitle = document.querySelector('#modalTitle');
+
+    function labelFor(species) { return species === 'cat' ? '고양이' : '강아지'; }
+
+    function render(filter = 'all') {
+      const list = pets.filter(p => filter === 'all' || p.species === filter);
+      gallery.innerHTML = list.map(p => `
+        <article class="card" data-species="${p.species}">
+          <div class="card-head">
+            <div><h2 class="id">${p.id}</h2><span class="species">${labelFor(p.species)}</span></div>
+            <span class="status">OWNER REVIEW</span>
+          </div>
+          <div class="compare">
+            <figure class="shot input">
+              <img loading="lazy" src="assets/input/${p.id}.jpg" alt="${p.id} 사용자 입력 이미지" data-title="${p.id} · 입력">
+              <figcaption>INPUT</figcaption>
+            </figure>
+            <figure class="shot output">
+              <img loading="lazy" src="assets/output/${p.id}.jpg" alt="${p.id} 치비 생성 결과" data-title="${p.id} · 결과">
+              <figcaption>RESULT</figcaption>
+            </figure>
+          </div>
+          <div class="card-copy">
+            <p class="trait">${p.trait}</p>
+            <p class="required">반영 대상 · ${p.required}</p>
+            ${p.flag ? `<p class="flag">관찰 포인트 · ${p.flag}</p>` : ''}
+          </div>
+        </article>`).join('');
+      visibleCount.textContent = `${list.length}개 표시 중`;
+    }
+
+    document.querySelectorAll('.filter').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.filter').forEach(b => b.setAttribute('aria-pressed', 'false'));
+        button.setAttribute('aria-pressed', 'true');
+        render(button.dataset.filter);
+      });
+    });
+
+    gallery.addEventListener('click', event => {
+      const image = event.target.closest('img');
+      if (!image) return;
+      modalImage.src = image.src;
+      modalImage.alt = image.alt;
+      modalTitle.textContent = image.dataset.title;
+      lightbox.showModal();
+    });
+
+    document.querySelector('#closeModal').addEventListener('click', () => lightbox.close());
+    lightbox.addEventListener('click', event => { if (event.target === lightbox) lightbox.close(); });
+    render();
+  </script>
+</body>
+</html>
