@@ -2,7 +2,7 @@
   "renderMode": "fullday",
   "scene": "pet_r004_rc_dog_163",
   "mode": "relight",
-  "reference": "../../../assets/output/RC-DOG-163.jpg",
+  "reference": "../../../assets/output-native/RC-DOG-163.png",
   "lightPattern": "light/l%03d.webp",
   "referenceLight": "../photo3d_pet_r004_shared/light/ref.webp",
   "referenceSlot": 93,
@@ -265,7 +265,7 @@
   "beamOrigin": -0.5,
   "beamScale": 0.15,
   "roomOnly": false,
-  "_note": "PET-R004 mobile preview for RC-DOG-163. Uses the shared exp1 96-slot light field and its exact clean reference denominator (no subject-shaped light fill), moving curtain, indirect room light and branch-shadow overlay. Subject-shaped night bounce is disabled to prevent a feathered halo around the pet.",
+  "_note": "PET-R004 flat-safe preview for RC-DOG-163. The native generated PNG is immutable. Time light uses one continuous full-frame field; no subject mask, subject relief, subject lift, cutout, or pet-local UV displacement is loaded. Curtain replacement is restricted to the room-only left safe zone by shared metadata.",
   "lightFrom": "pet_r004_shared",
   "indirectLight": {
     "off": "light/indirect_off.png",
@@ -285,8 +285,6 @@
     "periodSec": 47,
     "period2Sec": 73
   },
-  "subject": "subject.webp",
-  "relief": "relief.webp",
   "overlay": {
     "id": "branch",
     "gain": 1.0,

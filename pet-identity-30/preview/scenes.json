@@ -2,151 +2,211 @@
   {
     "id": "CZ-CAT-006",
     "scene": "pet_r004_cz_cat_006",
-    "maskCoverage": 0.0478
+    "reference": "assets/output-native/CZ-CAT-006.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-CAT-001",
     "scene": "pet_r004_rc_cat_001",
-    "maskCoverage": 0.0545
+    "reference": "assets/output-native/RC-CAT-001.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-CAT-003",
     "scene": "pet_r004_rc_cat_003",
-    "maskCoverage": 0.0573
+    "reference": "assets/output-native/RC-CAT-003.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-CAT-005",
     "scene": "pet_r004_rc_cat_005",
-    "maskCoverage": 0.0491
+    "reference": "assets/output-native/RC-CAT-005.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-CAT-018",
     "scene": "pet_r004_rc_cat_018",
-    "maskCoverage": 0.0541
+    "reference": "assets/output-native/RC-CAT-018.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-CAT-028",
     "scene": "pet_r004_rc_cat_028",
-    "maskCoverage": 0.06
+    "reference": "assets/output-native/RC-CAT-028.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-CAT-036",
     "scene": "pet_r004_rc_cat_036",
-    "maskCoverage": 0.0473
+    "reference": "assets/output-native/RC-CAT-036.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-CAT-049",
     "scene": "pet_r004_rc_cat_049",
-    "maskCoverage": 0.055
+    "reference": "assets/output-native/RC-CAT-049.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-CAT-065",
     "scene": "pet_r004_rc_cat_065",
-    "maskCoverage": 0.0488
+    "reference": "assets/output-native/RC-CAT-065.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-CAT-066",
     "scene": "pet_r004_rc_cat_066",
-    "maskCoverage": 0.0531
+    "reference": "assets/output-native/RC-CAT-066.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-CAT-081",
     "scene": "pet_r004_rc_cat_081",
-    "maskCoverage": 0.0524
+    "reference": "assets/output-native/RC-CAT-081.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-CAT-092",
     "scene": "pet_r004_rc_cat_092",
-    "maskCoverage": 0.0549
+    "reference": "assets/output-native/RC-CAT-092.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-CAT-105",
     "scene": "pet_r004_rc_cat_105",
-    "maskCoverage": 0.0496
+    "reference": "assets/output-native/RC-CAT-105.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-CAT-117",
     "scene": "pet_r004_rc_cat_117",
-    "maskCoverage": 0.0479
+    "reference": "assets/output-native/RC-CAT-117.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-CAT-126",
     "scene": "pet_r004_rc_cat_126",
-    "maskCoverage": 0.0546
+    "reference": "assets/output-native/RC-CAT-126.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-DOG-136",
     "scene": "pet_r004_rc_dog_136",
-    "maskCoverage": 0.0534
+    "reference": "assets/output-native/RC-DOG-136.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-DOG-144",
     "scene": "pet_r004_rc_dog_144",
-    "maskCoverage": 0.0481
+    "reference": "assets/output-native/RC-DOG-144.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-DOG-154",
     "scene": "pet_r004_rc_dog_154",
-    "maskCoverage": 0.0509
+    "reference": "assets/output-native/RC-DOG-154.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-DOG-163",
     "scene": "pet_r004_rc_dog_163",
-    "maskCoverage": 0.0454
+    "reference": "assets/output-native/RC-DOG-163.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-DOG-176",
     "scene": "pet_r004_rc_dog_176",
-    "maskCoverage": 0.0497
+    "reference": "assets/output-native/RC-DOG-176.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-DOG-193",
     "scene": "pet_r004_rc_dog_193",
-    "maskCoverage": 0.0518
+    "reference": "assets/output-native/RC-DOG-193.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-DOG-194",
     "scene": "pet_r004_rc_dog_194",
-    "maskCoverage": 0.0504
+    "reference": "assets/output-native/RC-DOG-194.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-DOG-206",
     "scene": "pet_r004_rc_dog_206",
-    "maskCoverage": 0.049
+    "reference": "assets/output-native/RC-DOG-206.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-DOG-208",
     "scene": "pet_r004_rc_dog_208",
-    "maskCoverage": 0.0488
+    "reference": "assets/output-native/RC-DOG-208.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-DOG-219",
     "scene": "pet_r004_rc_dog_219",
-    "maskCoverage": 0.0483
+    "reference": "assets/output-native/RC-DOG-219.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-DOG-220",
     "scene": "pet_r004_rc_dog_220",
-    "maskCoverage": 0.0551
+    "reference": "assets/output-native/RC-DOG-220.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-DOG-224",
     "scene": "pet_r004_rc_dog_224",
-    "maskCoverage": 0.0523
+    "reference": "assets/output-native/RC-DOG-224.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-DOG-232",
     "scene": "pet_r004_rc_dog_232",
-    "maskCoverage": 0.052
+    "reference": "assets/output-native/RC-DOG-232.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-DOG-240",
     "scene": "pet_r004_rc_dog_240",
-    "maskCoverage": 0.0547
+    "reference": "assets/output-native/RC-DOG-240.png",
+    "mask": null,
+    "relief": null
   },
   {
     "id": "RC-DOG-257",
     "scene": "pet_r004_rc_dog_257",
-    "maskCoverage": 0.048
+    "reference": "assets/output-native/RC-DOG-257.png",
+    "mask": null,
+    "relief": null
   }
 ]

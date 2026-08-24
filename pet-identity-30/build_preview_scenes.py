@@ -9,6 +9,7 @@ No subject pixels are segmented, warped, replaced, brightened, or composited.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 from pathlib import Path
 
@@ -17,8 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "pet-identity-30"
 PREVIEW = PAGE / "preview"
 NATIVE_OUTPUT = PAGE / "assets/output-native"
-TEMPLATE = ROOT / "assets/photo3d_exp1_latte/view.json"
-LIGHT_SOURCE = ROOT / "assets/photo3d_exp1/light"
+TEMPLATE = PREVIEW / "assets/photo3d_pet_r004_cz_cat_006/view.json"
 SHARED = PREVIEW / "assets/photo3d_pet_r004_shared"
 ASSET_VERSION = "pet-r004-flat-safe-1"
 
@@ -62,35 +62,45 @@ def write_scene(image_path: Path, template: dict) -> str:
 
 def main() -> None:
     PREVIEW.mkdir(parents=True, exist_ok=True)
-    (PREVIEW / "vendor").mkdir(parents=True, exist_ok=True)
-    for source, target in (
-        (ROOT / "viewer.html", PREVIEW / "viewer.html"),
-        (ROOT / "app.js", PREVIEW / "app.js"),
-        (ROOT / "style.css", PREVIEW / "style.css"),
-        (ROOT / "vendor/three.module.js", PREVIEW / "vendor/three.module.js"),
-    ):
-        shutil.copy2(source, target)
+    # The published preview runtime is committed with this page. Do not depend on
+    # untracked root-level app files; a clean checkout must be sufficient to rebuild.
+    required_runtime = (
+        PREVIEW / "viewer.html",
+        PREVIEW / "app.js",
+        PREVIEW / "style.css",
+        PREVIEW / "vendor/three.module.js",
+    )
+    missing = [str(path.relative_to(ROOT)) for path in required_runtime if not path.exists()]
+    if missing:
+        raise RuntimeError(f"committed preview runtime is incomplete: {missing}")
 
     preview_app = PREVIEW / "app.js"
     preview_app.write_text(
-        preview_app.read_text(encoding="utf-8").replace(
-            'const AV = location.protocol === "file:" ? "" : "?a=blue18";',
+        re.sub(
+            r'const AV = location\.protocol === "file:" \? "" : "\?a=[^"]+";',
             f'const AV = location.protocol === "file:" ? "" : "?a={ASSET_VERSION}";',
+            preview_app.read_text(encoding="utf-8"),
+            count=1,
         ),
         encoding="utf-8",
     )
     preview_viewer = PREVIEW / "viewer.html"
     preview_viewer.write_text(
-        preview_viewer.read_text(encoding="utf-8").replace(
-            './app.js?v=mesh-89', f'./app.js?v={ASSET_VERSION}'
+        re.sub(
+            r'\./app\.js\?v=[^"\']+',
+            f'./app.js?v={ASSET_VERSION}',
+            preview_viewer.read_text(encoding="utf-8"),
+            count=1,
         ),
         encoding="utf-8",
     )
 
     curtain_target = PREVIEW / "assets/curtain_exp1"
-    curtain_target.mkdir(parents=True, exist_ok=True)
-    for name in ("meta.json", "light.webp", "motion.mp4", "f006.webp"):
-        shutil.copy2(ROOT / f"assets/curtain_exp1/{name}", curtain_target / name)
+    curtain_files = tuple(curtain_target / name for name in (
+        "meta.json", "light.webp", "motion.mp4", "f006.webp"
+    ))
+    if missing_curtain := [path.name for path in curtain_files if not path.exists()]:
+        raise RuntimeError(f"committed curtain assets are incomplete: {missing_curtain}")
     curtain_meta_path = curtain_target / "meta.json"
     curtain_meta = json.loads(curtain_meta_path.read_text(encoding="utf-8"))
     # Keep the clip's original source mapping, but fade its replacement out before the
@@ -106,14 +116,17 @@ def main() -> None:
     )
 
     overlay_target = PREVIEW / "assets/overlay_branch"
-    overlay_target.mkdir(parents=True, exist_ok=True)
-    for name in ("meta.json", "motion.mp4"):
-        shutil.copy2(ROOT / f"assets/overlay_branch/{name}", overlay_target / name)
+    if missing_overlay := [
+        name for name in ("meta.json", "motion.mp4") if not (overlay_target / name).exists()
+    ]:
+        raise RuntimeError(f"committed overlay assets are incomplete: {missing_overlay}")
 
     shared_light = SHARED / "light"
-    if shared_light.exists():
-        shutil.rmtree(shared_light)
-    shutil.copytree(LIGHT_SOURCE, shared_light)
+    expected_light = [shared_light / "ref.webp"] + [
+        shared_light / f"l{index:03d}.webp" for index in range(96)
+    ]
+    if missing_light := [path.name for path in expected_light if not path.exists()]:
+        raise RuntimeError(f"committed light field is incomplete: {missing_light}")
 
     template = json.loads(TEMPLATE.read_text(encoding="utf-8"))
     images = sorted(NATIVE_OUTPUT.glob("*.png"))
