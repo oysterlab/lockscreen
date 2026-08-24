@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="ELURA PET-R002 — 15 user cats, three two-hour chibi identity prompt cycles, archived without assistant self-approval.">
+  <title>ELURA · PET-R002 Chibi Identity Loop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero">
+    <nav>
+      <span class="wordmark">ELURA / PET LAB</span>
+      <span class="mono">PET-R002 · 2026.08.24 KST</span>
+    </nav>
+    <div class="hero-grid">
+      <div>
+        <p class="eyebrow">A2 / CHIBI IDENTITY PRODUCT GATE</p>
+        <h1>귀여워도,<br><em>그 고양이여야 한다.</em></h1>
+      </div>
+      <div class="hero-copy">
+        <p>15개 사용자 입력을 같은 조건으로 세 번 생성한다. 치비·크기·동일 개체·액세서리·만지고 싶은 질감을 Hard Gate로 보고, 내가 임의로 PASS를 선언하지 않는다.</p>
+        <div class="run-status" id="runStatus"></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="truth-strip">
+      <div><span class="mono">CURRENT PRODUCT STATUS</span><strong id="productStatus">OWNER REVIEW REQUIRED</strong></div>
+      <p>기술 게이트는 코드로 검증하지만, 동일 개체성·치비 감도·액세서리 충실도·귀여움과 촉감은 사용자 승인 전까지 PASS가 아니다.</p>
+    </section>
+
+    <section class="section metrics-section">
+      <div class="section-head">
+        <div><p class="eyebrow">ROUND SCOREBOARD</p><h2>통과가 아니라<br>개선의 기록</h2></div>
+        <p class="section-note">각 회차는 한 가지 개념만 바꾼다. `Machine lock`은 해상도·보호 배경·크기·배치 검사이며, 사람 판단을 대신하지 않는다.</p>
+      </div>
+      <div class="metrics-grid" id="metricsGrid"></div>
+    </section>
+
+    <section class="section contract-section">
+      <div class="section-head">
+        <div><p class="eyebrow">FIXED PRODUCTION CONTRACT</p><h2>정체성은 생성하고,<br>배경은 잠근다.</h2></div>
+        <p class="section-note">전체 장면을 다시 그리지 않는다. 고양이와 필수 액세서리만 생성·분리한 뒤, 원본 배경에 정해진 좌표와 크기로 합성한다.</p>
+      </div>
+      <div class="contract-grid">
+        <article class="contract-card"><img src="assets/reference/base.jpg" alt="고양이가 없는 잠금 배경"><div><span>01 / PIXEL LOCK</span><h3>1080×1920 원본 배경</h3><p>고양이·액세서리·접지 그림자 밖 픽셀 차이는 정확히 0.</p></div></article>
+        <article class="contract-card golden"><div class="double"><img src="assets/reference/latte.jpg" alt="Latte 치비 레퍼런스"><img src="assets/reference/nila.jpg" alt="Nila 치비 레퍼런스"></div><div><span>02 / STYLE ONLY</span><h3>Latte / Nila 골든</h3><p>치비 조형·촉감·크기만 참고한다. 색·얼굴·무늬·정체성은 복사 금지.</p></div></article>
+        <article class="contract-card source-stack"><div class="triple"><img src="assets/source/RC-CAT-018.jpg" alt="Venus 원본"><img src="assets/source/RC-CAT-036.jpg" alt="Coby 원본"><img src="assets/source/RC-CAT-105.jpg" alt="Suki 원본"></div><div><span>03 / IDENTITY + OBJECT</span><h3>사용자 사진이 유일한 정체성</h3><p>눈·두상·주둥이·귀·무늬 topology·체형과 모든 고양이 관련 물건을 잠근다.</p></div></article>
+      </div>
+    </section>
+
+    <section class="section geometry-section">
+      <div class="geometry-copy"><p class="eyebrow">DETERMINISTIC GUIDE</p><h2>고양이는 레퍼런스보다<br>커질 수 없다.</h2><p>생성 결과의 보이는 실루엣을 고정 박스에 맞춰 합성한다. 그래서 입력 사진의 크롭이나 포즈가 달라도 잠금화면 상단 여백과 받침대 접지는 동일하다.</p></div>
+      <div class="geometry-stats" id="geometryStats"></div>
+    </section>
+
+    <section class="section evolution-section">
+      <div class="section-head"><div><p class="eyebrow">CONTROLLED ITERATION</p><h2>회차마다 하나만 바꾼다.</h2></div><p class="section-note">무엇이 효과를 냈는지 알 수 있도록 나머지 입력, 골든, 크기, 배경, 합성 코드는 고정한다.</p></div>
+      <div class="timeline" id="timeline"></div>
+    </section>
+
+    <section class="section gate-section">
+      <div class="section-head"><div><p class="eyebrow">V2 HARD GATES</p><h2>평균점수로<br>실패를 숨기지 않는다.</h2></div><p class="section-note">하나라도 실패하면 그 샘플은 FAIL. 15개 중 하나라도 FAIL이면 해당 프롬프트·파이프라인은 제품 PASS가 아니다.</p></div>
+      <div class="gate-grid" id="gateGrid"></div>
+    </section>
+
+    <section class="section samples-section">
+      <div class="section-head sample-head"><div><p class="eyebrow">15 FIXED SAMPLES</p><h2>원본과 세 회차를 직접 비교</h2></div><div class="legend"><span class="candidate-dot"></span>CANDIDATE · 사용자 검토 전 PASS 아님</div></div>
+      <div class="sample-list" id="sampleList"></div>
+    </section>
+
+    <section class="section archive-section">
+      <div><p class="eyebrow">REPRODUCIBLE ARCHIVE</p><h2>프롬프트와 판정 규칙까지 남긴다.</h2></div>
+      <div class="archive-links">
+        <a href="assets/downloads/FINAL-REPORT.md">Final controlled report <span>MD ↘</span></a>
+        <a href="assets/downloads/run-manifest.json">Run manifest <span>JSON ↘</span></a>
+        <a href="assets/downloads/metrics.csv">45-row machine metrics <span>CSV ↘</span></a>
+        <a href="assets/downloads/manifests.csv">Identity / accessory manifests <span>CSV ↘</span></a>
+        <a href="assets/downloads/prompt-round-01.md">Round 01 prompt <span>MD ↘</span></a>
+        <a href="assets/downloads/round-02-prompt.md">Round 02 prompt <span>MD ↘</span></a>
+        <a href="assets/downloads/round-03-prompt.md">Round 03 prompt <span>MD ↘</span></a>
+        <a href="assets/downloads/EVALUATION-V2.md">V2 evaluation list <span>MD ↘</span></a>
+        <a href="assets/downloads/contact-sheets/round-01.jpg">Round 01 contact sheet <span>JPG ↘</span></a>
+        <a href="assets/downloads/contact-sheets/round-02.jpg">Round 02 contact sheet <span>JPG ↘</span></a>
+        <a href="assets/downloads/contact-sheets/round-03.jpg">Round 03 contact sheet <span>JPG ↘</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer><span>ELURA PET IDENTITY LAB</span><span class="mono">Built-in ImageGen · quality auto · no API</span></footer>
+
+  <dialog id="lightbox"><button aria-label="닫기">×</button><img alt="확대 이미지"><div><strong></strong><p></p></div></dialog>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

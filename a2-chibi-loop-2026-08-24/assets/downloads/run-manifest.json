@@ -1,0 +1,42 @@
+{
+  "experiment_id": "PET-R002_chibi_identity_loop_2026-08-24",
+  "timezone": "Asia/Seoul",
+  "sample_count": 15,
+  "generator": "Codex built-in ImageGen",
+  "generator_quality": "auto",
+  "api_used": false,
+  "locked_background": "samples/experiment_1/base_9x16.png",
+  "style_references": [
+    "samples/experiment_1/target_latte.png",
+    "samples/experiment_1/target_nila.png",
+    "samples/experiment_1/target_latte_9x16.png",
+    "samples/experiment_1/target_nila_9x16.png"
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "scheduled_start_kst": "2026-08-24T08:35:34+09:00",
+      "actual_start_kst": "2026-08-24T08:35:34+09:00",
+      "completed_kst": "2026-08-24T08:47:34+09:00",
+      "status": "complete",
+      "change": "role-labelled per-cat identity and accessory manifest baseline"
+    },
+    {
+      "round": 2,
+      "scheduled_start_kst": "2026-08-24T10:35:34+09:00",
+      "actual_start_kst": "2026-08-24T10:36:04+09:00",
+      "completed_kst": "2026-08-24T10:50:02+09:00",
+      "status": "complete",
+      "change": "anti-leak source-first identity firewall"
+    },
+    {
+      "round": 3,
+      "scheduled_start_kst": "2026-08-24T12:35:34+09:00",
+      "actual_start_kst": "2026-08-24T12:36:11+09:00",
+      "completed_kst": "2026-08-24T12:48:27+09:00",
+      "status": "complete",
+      "change": "golden chibi sculpt and tactile affect calibration"
+    }
+  ],
+  "product_pass_policy": "All G0-G6 gates plus owner approval; assistant cannot self-approve."
+}
