@@ -265,7 +265,7 @@
   "beamOrigin": -0.5,
   "beamScale": 0.15,
   "roomOnly": false,
-  "_note": "PET-R004 flat-safe preview for RC-DOG-136. The native generated PNG is immutable. Time light uses one continuous full-frame field; no subject mask, subject relief, subject lift, cutout, or pet-local UV displacement is loaded. Curtain replacement is restricted to the room-only left safe zone by shared metadata.",
+  "_note": "PET-R005 depth-safe preview for RC-DOG-136. The native generated PNG remains at its original UV. Dense full-frame depth bends only the sampled light field and dense normals apply bounded multiplicative shading. No subject mask, cutout, reference-pixel displacement, subject lift, or pet-local compositing is loaded. Curtain replacement is restricted to the room-only left safe zone.",
   "lightFrom": "pet_r004_shared",
   "indirectLight": {
     "off": "light/indirect_off.png",

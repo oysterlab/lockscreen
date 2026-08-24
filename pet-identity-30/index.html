@@ -251,10 +251,12 @@
       <div class="preview-controls">
         <p class="preview-kicker">Mobile app renderer</p>
         <h2 class="preview-heading" id="previewPetTitle">선택한 이미지</h2>
-        <p class="preview-description">아래 시간을 움직이면 앱과 같은 96단계 라이트맵이 장면 전체에 적용됩니다. 창문 그림자, 야간 간접조명, 움직이는 커튼과 나뭇가지 그림자도 동일한 렌더러가 처리합니다.</p>
+        <p class="preview-description">아래 시간을 움직이면 앱과 같은 96단계 라이트맵이 장면 전체에 적용됩니다. 전체 장면 depth로 창문 그림자가 펫의 부피를 따라 이동하고, normal로 털·얼굴·몸통 굴곡의 명암도 함께 변합니다.</p>
         <div class="effect-list" aria-label="적용 효과">
           <span class="effect-chip">96-slot light</span>
-          <span class="effect-chip">window shadow</span>
+          <span class="effect-chip">dense depth</span>
+          <span class="effect-chip">surface normal</span>
+          <span class="effect-chip">bent window shadow</span>
           <span class="effect-chip">curtain motion</span>
           <span class="effect-chip">night bounce</span>
         </div>
@@ -403,7 +405,7 @@
       previewPetTitle.textContent = `${petId} · 앱 프리뷰`;
       document.querySelector('#previewModalTitle').textContent = `${petId} · 시간대별 모바일 프리뷰`;
       previewStatus.textContent = '96단계 라이트와 커튼을 불러오는 중';
-      previewFrame.src = `preview/viewer.html?scene=${sceneFor(petId)}&wallpaper&tod=12:00&wakegust&build=pet-r004-flat-safe-1`;
+      previewFrame.src = `preview/viewer.html?scene=${sceneFor(petId)}&wallpaper&tod=12:00&wakegust&build=pet-r005-depth-normal-1`;
       previewDialog.showModal();
     }
     function closePreview() {

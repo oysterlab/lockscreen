@@ -28,7 +28,7 @@ const P3D = scenePathParam
   : (sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d_cherry2dio/");
 // asset cache-buster: bump on any rebuilt PNG so phones don't serve a stale image
 // (index.html's ?v= only refreshes the code, not these depth/colour PNGs).
-const AV = location.protocol === "file:" ? "" : "?a=pet-r004-flat-safe-1";
+const AV = location.protocol === "file:" ? "" : "?a=pet-r005-depth-normal-1";
 // scenes that carry an idle-flick animation (assets/photo3d_<scene>/anim/manifest.json):
 // the foreground plate is swapped through a short clip every ~10s, then held.
 const ANIM_SCENES = new Set(["cherry2dio", "nila2dio"]);
@@ -531,10 +531,16 @@ const FRAG_FULLDAY = `
   uniform float uOvGain;      // 0 disables; a sunlit element is faded out with the day
   uniform vec2 uOvRange;
   uniform sampler2D uShadowRelief;
+  uniform float uDepthPivot;
+  uniform float uDepthProjectionGain;
   uniform vec2 uShiftA;
   uniform vec2 uShiftB;
   uniform vec2 uShiftRef;
   uniform float uHasRelief;
+  uniform sampler2D uSurfaceNormal;
+  uniform float uHasNormal;
+  uniform float uNormalGain;
+  uniform vec3 uLightDir;
   // Curtain breathing. The drape is not a shadow — it is an object with a silhouette — so it
   // cannot be a multiplicative overlay: the still's curtain stays put while the clip's copy
   // slides, and the moving outline lands on top as a translucent double (measured on a clip
@@ -565,7 +571,11 @@ const FRAG_FULLDAY = `
 
   void main() {
     vec3 ref = texture2D(uRef, vUv).rgb;
-    float relief = uHasRelief * texture2D(uShadowRelief, vUv).r;
+    // Dense full-frame depth bends only the LIGHT lookup. Reference pixels always use
+    // vUv unchanged, so a depth error cannot bite into a silhouette or expose a cutout.
+    float rawDepth = texture2D(uShadowRelief, vUv).r;
+    float relief = uHasRelief
+      * max(rawDepth - uDepthPivot, 0.0) * uDepthProjectionGain;
     vec3 lo0 = texture2D(uLowRef, vUv + uShiftRef * relief).rgb;
     vec3 lo = mix(texture2D(uLowA, vUv + uShiftA * relief).rgb,
                   texture2D(uLowB, vUv + uShiftB * relief).rgb, uMix);
@@ -582,6 +592,21 @@ const FRAG_FULLDAY = `
     // the reference's own light is divided out; clamped because a near-black reference
     // pixel would otherwise turn its own compression noise into a bright speckle
     vec3 ratio = clamp(lo / max(lo0, vec3(0.02)), vec3(0.0), vec3(4.0));
+    if (uHasNormal > 0.5 && uNormalGain > 0.0) {
+      vec3 n = normalize(texture2D(uSurfaceNormal, vUv).rgb * 2.0 - 1.0);
+      vec3 lightDir = normalize(uLightDir);
+      float neutral = max(lightDir.z, 0.05);
+      float lambert = max(dot(n, lightDir), 0.0);
+      float currentLight = dot(lo, vec3(0.2126, 0.7152, 0.0722));
+      float currentDirectional = 0.18 + 0.82 * smoothstep(0.16, 0.72, currentLight);
+      // A cliff normal is usually an object silhouette, where extra contrast would look
+      // like the old cutout halo. Fade normal shading there and keep it on broad internal
+      // curvature such as the forehead, cheeks, torso, hat crown, and podium top.
+      float surfaceConfidence = smoothstep(0.78, 0.97, n.z);
+      float shape = 1.0 + (lambert - neutral)
+        * uNormalGain * currentDirectional * surfaceConfidence;
+      ratio *= clamp(shape, 0.88, 1.12);
+    }
     // step, never blend, between overlay frames when they are a frame apart; uOvMix is
     // only ever non-zero when the two are adjacent in the element's own cycle
     if (uOvGain > 0.0) {
@@ -972,12 +997,20 @@ loadJsonOpt(P3D + "view.json" + AV)
       }
       const depthTex = viewCfg.depthMap
         ? await loadTexture(url(viewCfg.depthMap)).then(prep) : null;
+      const surfaceCfg = viewCfg.surfaceLighting || null;
+      const [surfaceDepthTex, surfaceNormalTex] = await Promise.all([
+        surfaceCfg?.depth
+          ? loadTexture(url(surfaceCfg.depth)).then(prep).catch(() => null) : null,
+        surfaceCfg?.normal
+          ? loadTexture(url(surfaceCfg.normal)).then(prep).catch(() => null) : null,
+      ]);
       // shadow relief: per-pixel depth of the subject over what the clip recorded behind
       // it, and the per-slot lateral offset of the window shadow. Only scenes built with
       // SUBJECT_DEPTH have it; without it the shadow lands as a flat projection, which is
       // what every scene did before.
-      const reliefTex = viewCfg.relief
+      const legacyReliefTex = viewCfg.relief
         ? await loadTexture(url(viewCfg.relief)).then(prep).catch(() => null) : null;
+      const reliefTex = surfaceDepthTex || legacyReliefTex;
       const beamShift = Array.isArray(viewCfg.beamShift) ? viewCfg.beamShift : null;
       const beamScale = params.has("bend")
         ? parseFloat(params.get("bend"))
@@ -1019,10 +1052,23 @@ loadJsonOpt(P3D + "view.json" + AV)
           // never leave a sampler unbound: uHasRelief already zeroes the term, but some
           // drivers fault on sampling a null texture rather than returning black
           uShadowRelief: { value: reliefTex || BLANK },
+          uDepthPivot: { value: surfaceDepthTex
+            ? Number(surfaceCfg?.depthPivot ?? 0.34) : 0 },
+          uDepthProjectionGain: { value: surfaceDepthTex
+            ? Number(surfaceCfg?.projectionGain ?? 0.55) : 1 },
           uShiftA: { value: new THREE.Vector2(0, 0) },
           uShiftB: { value: new THREE.Vector2(0, 0) },
           uShiftRef: { value: new THREE.Vector2(refShift, 0) },
           uHasRelief: { value: reliefTex ? 1 : 0 },
+          uSurfaceNormal: { value: surfaceNormalTex || BLANK },
+          uHasNormal: { value: surfaceNormalTex ? 1 : 0 },
+          uNormalGain: { value: params.has("ngain")
+            ? Math.max(0, Number(params.get("ngain")) || 0)
+            : Math.max(0, Number(surfaceCfg?.normalGain ?? 0.55)) },
+          uLightDir: { value: new THREE.Vector3(
+            ...(Array.isArray(surfaceCfg?.lightDirection)
+              ? surfaceCfg.lightDirection : [-0.52, 0.28, 0.806])
+          ).normalize() },
           uCurA: { value: BLANK },
           uCurB: { value: BLANK },
           uCurLight: { value: BLANK },

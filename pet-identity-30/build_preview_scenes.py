@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Build PET-R004 previews without any pet-derived mask or relief texture.
+"""Build PET-R005 previews with dense full-frame depth and normal lighting.
 
-The generated 9:16 image is immutable. Time-of-day relighting is sampled at the same
-UV for every pixel, and curtain motion is limited to a left-side room-only safe zone.
-No subject pixels are segmented, warped, replaced, brightened, or composited.
+The generated 9:16 image is immutable. Dense scene geometry may bend the light field
+and modulate surface shading, but never cuts out, warps, replaces, or composites pet
+pixels. Curtain motion remains limited to a left-side room-only safe zone.
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ PREVIEW = PAGE / "preview"
 NATIVE_OUTPUT = PAGE / "assets/output-native"
 TEMPLATE = PREVIEW / "assets/photo3d_pet_r004_cz_cat_006/view.json"
 SHARED = PREVIEW / "assets/photo3d_pet_r004_shared"
-ASSET_VERSION = "pet-r004-flat-safe-1"
+ASSET_VERSION = "pet-r005-depth-normal-1"
 
 
 def slug(pet_id: str) -> str:
@@ -48,11 +48,25 @@ def write_scene(image_path: Path, template: dict) -> str:
     view.pop("subject", None)
     view.pop("relief", None)
     view.setdefault("indirectLight", {})["subjectLift"] = 0.0
+    depth_map = scene / "surface-depth.png"
+    normal_map = scene / "surface-normal.png"
+    if depth_map.exists() and normal_map.exists():
+        view["surfaceLighting"] = {
+            "depth": depth_map.name,
+            "normal": normal_map.name,
+            "depthPivot": 0.34,
+            "projectionGain": 0.55,
+            "normalGain": 0.55,
+            "lightDirection": [-0.52, 0.28, 0.806],
+        }
+    else:
+        view.pop("surfaceLighting", None)
     view["_note"] = (
-        f"PET-R004 flat-safe preview for {pet_id}. The native generated PNG is immutable. "
-        "Time light uses one continuous full-frame field; no subject mask, subject relief, "
-        "subject lift, cutout, or pet-local UV displacement is loaded. Curtain replacement "
-        "is restricted to the room-only left safe zone by shared metadata."
+        f"PET-R005 depth-safe preview for {pet_id}. The native generated PNG remains at "
+        "its original UV. Dense full-frame depth bends only the sampled light field and "
+        "dense normals apply bounded multiplicative shading. No subject mask, cutout, "
+        "reference-pixel displacement, subject lift, or pet-local compositing is loaded. "
+        "Curtain replacement is restricted to the room-only left safe zone."
     )
     (scene / "view.json").write_text(
         json.dumps(view, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
@@ -136,6 +150,11 @@ def main() -> None:
     report = []
     for image in images:
         scene_id = write_scene(image, template)
+        scene_dir = PREVIEW / f"assets/photo3d_{scene_id}"
+        has_surface = all(
+            (scene_dir / name).exists()
+            for name in ("surface-depth.png", "surface-normal.png")
+        )
         report.append(
             {
                 "id": image.stem,
@@ -143,6 +162,14 @@ def main() -> None:
                 "reference": f"assets/output-native/{image.name}",
                 "mask": None,
                 "relief": None,
+                "surfaceDepth": (
+                    f"preview/assets/photo3d_{scene_id}/surface-depth.png"
+                    if has_surface else None
+                ),
+                "surfaceNormal": (
+                    f"preview/assets/photo3d_{scene_id}/surface-normal.png"
+                    if has_surface else None
+                ),
             }
         )
         print(f"{image.stem}: {scene_id}, native PNG, no mask/relief")
