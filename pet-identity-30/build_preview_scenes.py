@@ -35,25 +35,6 @@ def slug(pet_id: str) -> str:
     return pet_id.lower().replace("-", "_")
 
 
-def pushpull(image: np.ndarray, hole: np.ndarray, levels: int = 9) -> np.ndarray:
-    """Fill a large subject hole without flattening the room into one colour."""
-    keep = (~hole).astype(np.float32)
-    images = [image * keep[:, :, None]]
-    weights = [keep]
-    for _ in range(levels):
-        images.append(cv2.pyrDown(images[-1]))
-        weights.append(cv2.pyrDown(weights[-1]))
-    up_image, up_weight = images[-1], weights[-1]
-    for index in range(levels - 1, -1, -1):
-        height, width = images[index].shape[:2]
-        image_up = cv2.resize(up_image, (width, height), interpolation=cv2.INTER_LINEAR)
-        weight_up = cv2.resize(up_weight, (width, height), interpolation=cv2.INTER_LINEAR)
-        alpha = np.clip(weights[index], 0, 1)
-        up_image = images[index] + image_up * (1 - alpha)[:, :, None]
-        up_weight = weights[index] + weight_up * (1 - alpha)
-    return up_image / np.maximum(up_weight, 1e-6)[:, :, None]
-
-
 def subject_mask(result: np.ndarray, base: np.ndarray) -> np.ndarray:
     """Find the newly generated pet/props while ignoring gentle room redraws."""
     height, width = result.shape[:2]
@@ -111,7 +92,13 @@ def write_scene(image_path: Path, template: dict) -> tuple[str, float]:
     pet_id = image_path.stem
     scene_id = f"pet_r004_{slug(pet_id)}"
     scene = PREVIEW / f"assets/photo3d_{scene_id}"
-    (scene / "light").mkdir(parents=True, exist_ok=True)
+    scene.mkdir(parents=True, exist_ok=True)
+    # Do not derive a denominator by cutting the pet out and filling that hole. Even a
+    # smooth fill leaves a pet-shaped low-frequency change; division turns it into the
+    # recycled-looking stain seen around subjects. All PET-R004 frames share the same
+    # base illumination, so they use the source room's exact clean reference light.
+    if (scene / "light").exists():
+        shutil.rmtree(scene / "light")
 
     result_u8 = cv2.imread(str(image_path), cv2.IMREAD_COLOR)
     if result_u8 is None:
@@ -131,31 +118,17 @@ def write_scene(image_path: Path, template: dict) -> tuple[str, float]:
     relief = mask * (34.0 + 62.0 * np.sqrt(distance))
     cv2.imwrite(str(scene / "relief.webp"), np.clip(relief, 0, 255).astype(np.uint8), QUALITY)
 
-    hole = cv2.dilate(
-        solid.astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (25, 25))
-    ) > 0
-    reference_light = cv2.GaussianBlur(pushpull(result + 1.0, hole), (0, 0), 8.0) - 1.0
-    light_width = 1080
-    light_height = round(light_width * height / width)
-    reference_light = cv2.resize(
-        reference_light, (light_width, light_height), interpolation=cv2.INTER_AREA
-    )
-    cv2.imwrite(
-        str(scene / "light/ref.webp"),
-        np.clip(reference_light, 0, 255).astype(np.uint8),
-        [int(cv2.IMWRITE_WEBP_QUALITY), 96],
-    )
-
     view = json.loads(json.dumps(template))
     view["scene"] = scene_id
     view["reference"] = f"../../../assets/output/{pet_id}.jpg"
-    view["referenceLight"] = "light/ref.webp"
+    view["referenceLight"] = "../photo3d_pet_r004_shared/light/ref.webp"
     view["lightFrom"] = "pet_r004_shared"
     view["subject"] = "subject.webp"
     view["relief"] = "relief.webp"
     view["_note"] = (
-        f"PET-R004 mobile preview for {pet_id}. Uses the shared exp1 96-slot light field, "
-        "moving curtain, indirect room light and branch-shadow overlay."
+        f"PET-R004 mobile preview for {pet_id}. Uses the shared exp1 96-slot light field "
+        "and its exact clean reference denominator (no subject-shaped light fill), moving "
+        "curtain, indirect room light and branch-shadow overlay."
     )
     (scene / "view.json").write_text(
         json.dumps(view, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
@@ -173,6 +146,16 @@ def main() -> None:
         (ROOT / "vendor/three.module.js", PREVIEW / "vendor/three.module.js"),
     ):
         shutil.copy2(source, target)
+    # The runtime's asset cache key must change when scene metadata changes; otherwise a
+    # browser can keep the old per-pet denominator URL after those files are removed.
+    preview_app = PREVIEW / "app.js"
+    preview_app.write_text(
+        preview_app.read_text(encoding="utf-8").replace(
+            'const AV = location.protocol === "file:" ? "" : "?a=blue18";',
+            'const AV = location.protocol === "file:" ? "" : "?a=pet-r004-cleanref-1";',
+        ),
+        encoding="utf-8",
+    )
 
     curtain_target = PREVIEW / "assets/curtain_exp1"
     curtain_target.mkdir(parents=True, exist_ok=True)

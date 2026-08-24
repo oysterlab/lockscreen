@@ -4,7 +4,7 @@
   "mode": "relight",
   "reference": "../../../assets/output/CZ-CAT-006.jpg",
   "lightPattern": "light/l%03d.webp",
-  "referenceLight": "light/ref.webp",
+  "referenceLight": "../photo3d_pet_r004_shared/light/ref.webp",
   "referenceSlot": 93,
   "framePattern": "frames/f%03d.webp",
   "slots": 96,
@@ -265,7 +265,7 @@
   "beamOrigin": -0.5,
   "beamScale": 0.15,
   "roomOnly": false,
-  "_note": "PET-R004 mobile preview for CZ-CAT-006. Uses the shared exp1 96-slot light field, moving curtain, indirect room light and branch-shadow overlay.",
+  "_note": "PET-R004 mobile preview for CZ-CAT-006. Uses the shared exp1 96-slot light field and its exact clean reference denominator (no subject-shaped light fill), moving curtain, indirect room light and branch-shadow overlay.",
   "lightFrom": "pet_r004_shared",
   "indirectLight": {
     "off": "light/indirect_off.png",
