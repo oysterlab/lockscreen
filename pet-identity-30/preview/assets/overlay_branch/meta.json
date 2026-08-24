@@ -1,0 +1,19 @@
+{
+  "name": "branch",
+  "frames": 238,
+  "pattern": "f%03d.webp",
+  "video": "motion.mp4",
+  "videoFrames": 960,
+  "videoFps": 24,
+  "videoDuration": 40.0,
+  "width": 540,
+  "height": 960,
+  "range": [
+    0.35,
+    2.0
+  ],
+  "restFrame": 182,
+  "amplitude": 0.0231,
+  "sunlit": true,
+  "_note": "motion.mp4 preserves the 40-second loop with 24fps blended frames for continuous hardware decode; WebPs remain as a compatibility and frozen-QA fallback. The multiplicative modulation is neutral at 1.0 and composes onto any daylight hour."
+}

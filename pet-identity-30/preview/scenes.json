@@ -1,0 +1,152 @@
+[
+  {
+    "id": "CZ-CAT-006",
+    "scene": "pet_r004_cz_cat_006",
+    "maskCoverage": 0.0478
+  },
+  {
+    "id": "RC-CAT-001",
+    "scene": "pet_r004_rc_cat_001",
+    "maskCoverage": 0.0545
+  },
+  {
+    "id": "RC-CAT-003",
+    "scene": "pet_r004_rc_cat_003",
+    "maskCoverage": 0.0573
+  },
+  {
+    "id": "RC-CAT-005",
+    "scene": "pet_r004_rc_cat_005",
+    "maskCoverage": 0.0491
+  },
+  {
+    "id": "RC-CAT-018",
+    "scene": "pet_r004_rc_cat_018",
+    "maskCoverage": 0.0541
+  },
+  {
+    "id": "RC-CAT-028",
+    "scene": "pet_r004_rc_cat_028",
+    "maskCoverage": 0.06
+  },
+  {
+    "id": "RC-CAT-036",
+    "scene": "pet_r004_rc_cat_036",
+    "maskCoverage": 0.0473
+  },
+  {
+    "id": "RC-CAT-049",
+    "scene": "pet_r004_rc_cat_049",
+    "maskCoverage": 0.055
+  },
+  {
+    "id": "RC-CAT-065",
+    "scene": "pet_r004_rc_cat_065",
+    "maskCoverage": 0.0488
+  },
+  {
+    "id": "RC-CAT-066",
+    "scene": "pet_r004_rc_cat_066",
+    "maskCoverage": 0.0531
+  },
+  {
+    "id": "RC-CAT-081",
+    "scene": "pet_r004_rc_cat_081",
+    "maskCoverage": 0.0524
+  },
+  {
+    "id": "RC-CAT-092",
+    "scene": "pet_r004_rc_cat_092",
+    "maskCoverage": 0.0549
+  },
+  {
+    "id": "RC-CAT-105",
+    "scene": "pet_r004_rc_cat_105",
+    "maskCoverage": 0.0496
+  },
+  {
+    "id": "RC-CAT-117",
+    "scene": "pet_r004_rc_cat_117",
+    "maskCoverage": 0.0479
+  },
+  {
+    "id": "RC-CAT-126",
+    "scene": "pet_r004_rc_cat_126",
+    "maskCoverage": 0.0546
+  },
+  {
+    "id": "RC-DOG-136",
+    "scene": "pet_r004_rc_dog_136",
+    "maskCoverage": 0.0534
+  },
+  {
+    "id": "RC-DOG-144",
+    "scene": "pet_r004_rc_dog_144",
+    "maskCoverage": 0.0481
+  },
+  {
+    "id": "RC-DOG-154",
+    "scene": "pet_r004_rc_dog_154",
+    "maskCoverage": 0.0509
+  },
+  {
+    "id": "RC-DOG-163",
+    "scene": "pet_r004_rc_dog_163",
+    "maskCoverage": 0.0454
+  },
+  {
+    "id": "RC-DOG-176",
+    "scene": "pet_r004_rc_dog_176",
+    "maskCoverage": 0.0497
+  },
+  {
+    "id": "RC-DOG-193",
+    "scene": "pet_r004_rc_dog_193",
+    "maskCoverage": 0.0518
+  },
+  {
+    "id": "RC-DOG-194",
+    "scene": "pet_r004_rc_dog_194",
+    "maskCoverage": 0.0504
+  },
+  {
+    "id": "RC-DOG-206",
+    "scene": "pet_r004_rc_dog_206",
+    "maskCoverage": 0.049
+  },
+  {
+    "id": "RC-DOG-208",
+    "scene": "pet_r004_rc_dog_208",
+    "maskCoverage": 0.0488
+  },
+  {
+    "id": "RC-DOG-219",
+    "scene": "pet_r004_rc_dog_219",
+    "maskCoverage": 0.0483
+  },
+  {
+    "id": "RC-DOG-220",
+    "scene": "pet_r004_rc_dog_220",
+    "maskCoverage": 0.0551
+  },
+  {
+    "id": "RC-DOG-224",
+    "scene": "pet_r004_rc_dog_224",
+    "maskCoverage": 0.0523
+  },
+  {
+    "id": "RC-DOG-232",
+    "scene": "pet_r004_rc_dog_232",
+    "maskCoverage": 0.052
+  },
+  {
+    "id": "RC-DOG-240",
+    "scene": "pet_r004_rc_dog_240",
+    "maskCoverage": 0.0547
+  },
+  {
+    "id": "RC-DOG-257",
+    "scene": "pet_r004_rc_dog_257",
+    "maskCoverage": 0.048
+  }
+]

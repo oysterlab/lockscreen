@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"
+    />
+    <meta name="theme-color" content="#e79b5e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Cat Lock" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./style.css?v=mesh-61" />
+    <title>My Cat 3D Lock Viewer</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./vendor/three.module.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main class="lockscreen" aria-label="Cat depth lock screen">
+      <canvas id="scene" aria-hidden="true"></canvas>
+      <div class="grade" aria-hidden="true"></div>
+
+      <section class="clock" aria-live="polite">
+        <i class="lock-icon" data-lucide="lock" aria-hidden="true"></i>
+        <time id="time">--:--</time>
+        <span id="date">---</span>
+        <div class="page-dots" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <i></i>
+        </div>
+      </section>
+
+      <div class="controls" aria-label="Scene controls">
+        <button id="motionButton" type="button" aria-label="Enable motion" title="Enable motion">
+          <i data-lucide="compass"></i>
+        </button>
+        <button id="fullscreenButton" type="button" aria-label="Fullscreen" title="Fullscreen">
+          <i data-lucide="maximize"></i>
+        </button>
+        <button id="resetButton" type="button" aria-label="Reset view" title="Reset view">
+          <i data-lucide="rotate-ccw"></i>
+        </button>
+      </div>
+
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+      <noscript>JavaScript is required to view this lock screen.</noscript>
+    </main>
+
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+    <script type="module" src="./app.js?v=mesh-89"></script>
+  </body>
+</html>

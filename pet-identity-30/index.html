@@ -117,7 +117,7 @@
     .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); }
     .shot { position: relative; margin: 0; min-width: 0; background: #0e0c0a; }
     .shot img { display: block; width: 100%; height: clamp(320px, 42vw, 620px); object-fit: contain; cursor: zoom-in; background: #0e0c0a; }
-    .shot.output img { object-fit: cover; object-position: center; }
+    .shot.output img { object-fit: cover; object-position: center; cursor: pointer; }
     .shot figcaption { position: absolute; top: 9px; left: 9px; padding: 5px 8px; border-radius: 999px; background: rgba(17,14,11,.78); backdrop-filter: blur(8px); font-size: .69rem; font-weight: 800; letter-spacing: .04em; }
     .card-copy { padding: 14px 16px 16px; }
     .trait { margin: 0; color: #e9dfd4; font-size: .88rem; }
@@ -134,11 +134,35 @@
     .modal-title { color: var(--muted); font-size: .82rem; }
     .close { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; background: var(--panel-2); color: var(--text); cursor: pointer; }
 
+    .preview-dialog { width: min(96vw, 1080px); max-height: 96vh; overflow: auto; background: #100d0a; }
+    .preview-dialog .modal-bar { position: sticky; top: 0; z-index: 4; background: rgba(16,13,10,.94); backdrop-filter: blur(18px); }
+    .preview-body { display: grid; grid-template-columns: minmax(290px, 430px) minmax(280px, 1fr); gap: 28px; align-items: center; padding: 22px; }
+    .phone-shell { position: relative; width: min(100%, 390px); margin: 0 auto; aspect-ratio: 941 / 1672; overflow: hidden; border: 7px solid #29231d; border-radius: 34px; background: #000; box-shadow: 0 28px 70px rgba(0,0,0,.58), inset 0 0 0 1px rgba(255,255,255,.12); }
+    .phone-shell::before { content: ""; position: absolute; z-index: 3; top: 8px; left: 50%; width: 29%; height: 18px; transform: translateX(-50%); border-radius: 0 0 14px 14px; background: #17130f; pointer-events: none; }
+    .phone-shell iframe { width: 100%; height: 100%; border: 0; display: block; background: #000; }
+    .preview-controls { min-width: 0; }
+    .preview-kicker { margin: 0 0 8px; color: var(--accent); font-size: .76rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    .preview-heading { margin: 0; font-size: clamp(1.45rem, 3vw, 2.25rem); letter-spacing: -.035em; line-height: 1.08; }
+    .preview-description { margin: 12px 0 22px; color: var(--muted); font-size: .9rem; }
+    .effect-list { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 24px; }
+    .effect-chip { padding: 6px 9px; border: 1px solid rgba(159,196,179,.24); border-radius: 999px; color: #bfe0d0; background: rgba(159,196,179,.07); font-size: .72rem; font-weight: 750; }
+    .preview-clock { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .preview-time { font-size: 2.5rem; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+    .preview-status { color: var(--muted); font-size: .75rem; text-align: right; }
+    .time-range { width: 100%; accent-color: var(--accent); cursor: ew-resize; }
+    .time-ticks { display: flex; justify-content: space-between; margin: 4px 1px 15px; color: var(--muted); font-size: .68rem; font-variant-numeric: tabular-nums; }
+    .time-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .time-button { border: 1px solid var(--line); border-radius: 999px; padding: 8px 11px; color: var(--text); background: var(--panel-2); cursor: pointer; font-size: .78rem; }
+    .time-button:hover, .time-button:focus-visible { border-color: var(--accent); }
+    .time-button.playing { color: #21170d; background: var(--accent); border-color: var(--accent); font-weight: 850; }
+    .preview-note { margin: 20px 0 0; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .76rem; }
+
     @media (max-width: 980px) {
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .gallery { grid-template-columns: 1fr; }
       .shot img { height: min(72vw, 620px); }
       .method-body { grid-template-columns: 1fr; }
+      .preview-body { grid-template-columns: minmax(260px, 360px) minmax(260px, 1fr); gap: 20px; }
     }
     @media (max-width: 560px) {
       header { padding-top: 42px; }
@@ -149,6 +173,11 @@
       .compare { grid-template-columns: 1fr; }
       .shot img { height: auto; max-height: 76vh; }
       .shot.output img { object-fit: contain; }
+      .preview-dialog { width: 100vw; height: 100dvh; max-height: none; border: 0; border-radius: 0; }
+      .preview-body { grid-template-columns: 1fr; padding: 14px 14px 32px; }
+      .phone-shell { width: min(78vw, 330px); border-width: 5px; border-radius: 28px; }
+      .preview-description { margin-bottom: 14px; }
+      .effect-list { margin-bottom: 17px; }
     }
   </style>
 </head>
@@ -210,6 +239,44 @@
     <img id="modalImage" alt="확대 이미지">
   </dialog>
 
+  <dialog id="previewDialog" class="preview-dialog">
+    <div class="modal-bar">
+      <span class="modal-title" id="previewModalTitle">모바일 앱 프리뷰</span>
+      <button class="close" id="closePreview">닫기</button>
+    </div>
+    <div class="preview-body">
+      <div class="phone-shell">
+        <iframe id="previewFrame" title="선택한 반려동물 모바일 잠금화면 프리뷰" allow="autoplay"></iframe>
+      </div>
+      <div class="preview-controls">
+        <p class="preview-kicker">Mobile app renderer</p>
+        <h2 class="preview-heading" id="previewPetTitle">선택한 이미지</h2>
+        <p class="preview-description">아래 시간을 움직이면 앱과 같은 96단계 라이트맵이 장면 전체에 적용됩니다. 창문 그림자, 야간 간접조명, 움직이는 커튼과 나뭇가지 그림자도 동일한 렌더러가 처리합니다.</p>
+        <div class="effect-list" aria-label="적용 효과">
+          <span class="effect-chip">96-slot light</span>
+          <span class="effect-chip">window shadow</span>
+          <span class="effect-chip">curtain motion</span>
+          <span class="effect-chip">night bounce</span>
+        </div>
+        <div class="preview-clock">
+          <strong class="preview-time" id="previewTime">12:00</strong>
+          <span class="preview-status" id="previewStatus">씬을 준비 중입니다</span>
+        </div>
+        <input class="time-range" id="timeRange" type="range" min="0" max="1439" step="1" value="720" aria-label="하루 시간 선택">
+        <div class="time-ticks"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
+        <div class="time-actions">
+          <button class="time-button" data-time="0">00:00</button>
+          <button class="time-button" data-time="360">06:00</button>
+          <button class="time-button" data-time="720">12:00</button>
+          <button class="time-button" data-time="1080">18:00</button>
+          <button class="time-button" id="nowTime">현재 시각</button>
+          <button class="time-button" id="playDay">▶ 하루 재생</button>
+        </div>
+        <p class="preview-note">원본 결과 이미지를 다시 합성하지 않고 하나의 기준 프레임으로 유지합니다. 시간 슬라이더는 형상을 바꾸지 않고 빛과 환경 효과만 바꿉니다.</p>
+      </div>
+    </div>
+  </dialog>
+
   <script>
     const pets = [
       {id:'CZ-CAT-006', species:'cat', trait:'검정·흰색 턱시도, 넓은 황록색 눈, 흰 턱·가슴·발', required:'추가 액세서리 없음'},
@@ -250,6 +317,15 @@
     const lightbox = document.querySelector('#lightbox');
     const modalImage = document.querySelector('#modalImage');
     const modalTitle = document.querySelector('#modalTitle');
+    const previewDialog = document.querySelector('#previewDialog');
+    const previewFrame = document.querySelector('#previewFrame');
+    const previewPetTitle = document.querySelector('#previewPetTitle');
+    const previewStatus = document.querySelector('#previewStatus');
+    const timeRange = document.querySelector('#timeRange');
+    const previewTime = document.querySelector('#previewTime');
+    const playDay = document.querySelector('#playDay');
+    let previewReady = false;
+    let dayTimer = null;
 
     function labelFor(species) { return species === 'cat' ? '고양이' : '강아지'; }
 
@@ -267,8 +343,8 @@
               <figcaption>INPUT</figcaption>
             </figure>
             <figure class="shot output">
-              <img loading="lazy" src="assets/output/${p.id}.jpg" alt="${p.id} 치비 생성 결과" data-title="${p.id} · 결과">
-              <figcaption>RESULT</figcaption>
+              <img loading="lazy" src="assets/output/${p.id}.jpg" alt="${p.id} 치비 생성 결과" data-title="${p.id} · 결과" data-pet-id="${p.id}">
+              <figcaption>RESULT · 모바일 프리뷰</figcaption>
             </figure>
           </div>
           <div class="card-copy">
@@ -291,6 +367,10 @@
     gallery.addEventListener('click', event => {
       const image = event.target.closest('img');
       if (!image) return;
+      if (image.dataset.petId) {
+        openPreview(image.dataset.petId);
+        return;
+      }
       modalImage.src = image.src;
       modalImage.alt = image.alt;
       modalTitle.textContent = image.dataset.title;
@@ -299,6 +379,67 @@
 
     document.querySelector('#closeModal').addEventListener('click', () => lightbox.close());
     lightbox.addEventListener('click', event => { if (event.target === lightbox) lightbox.close(); });
+
+    function sceneFor(petId) { return `pet_r004_${petId.toLowerCase().replaceAll('-', '_')}`; }
+    function formatTime(minutes) {
+      return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+    }
+    function stopDay() {
+      clearInterval(dayTimer);
+      dayTimer = null;
+      playDay.classList.remove('playing');
+      playDay.textContent = '▶ 하루 재생';
+    }
+    function pushTime() {
+      const minutes = Number(timeRange.value);
+      previewTime.textContent = formatTime(minutes);
+      if (previewReady) previewFrame.contentWindow.postMessage({type: 'tod', value: minutes / 1440}, '*');
+    }
+    function openPreview(petId) {
+      stopDay();
+      previewReady = false;
+      timeRange.value = '720';
+      pushTime();
+      previewPetTitle.textContent = `${petId} · 앱 프리뷰`;
+      document.querySelector('#previewModalTitle').textContent = `${petId} · 시간대별 모바일 프리뷰`;
+      previewStatus.textContent = '96단계 라이트와 커튼을 불러오는 중';
+      previewFrame.src = `preview/viewer.html?scene=${sceneFor(petId)}&wallpaper&tod=12:00&wakegust`;
+      previewDialog.showModal();
+    }
+    function closePreview() {
+      stopDay();
+      previewReady = false;
+      previewDialog.close();
+      previewFrame.src = 'about:blank';
+    }
+    previewFrame.addEventListener('load', () => {
+      if (previewFrame.src === 'about:blank') return;
+      previewReady = true;
+      previewStatus.textContent = '앱 렌더러 연결됨 · 슬라이더를 움직여보세요';
+      pushTime();
+    });
+    timeRange.addEventListener('input', () => { stopDay(); pushTime(); });
+    document.querySelectorAll('[data-time]').forEach(button => {
+      button.addEventListener('click', () => { stopDay(); timeRange.value = button.dataset.time; pushTime(); });
+    });
+    document.querySelector('#nowTime').addEventListener('click', () => {
+      stopDay();
+      const now = new Date();
+      timeRange.value = now.getHours() * 60 + now.getMinutes();
+      pushTime();
+    });
+    playDay.addEventListener('click', () => {
+      if (dayTimer) { stopDay(); return; }
+      playDay.classList.add('playing');
+      playDay.textContent = '■ 재생 중지';
+      dayTimer = setInterval(() => {
+        timeRange.value = (Number(timeRange.value) + 3) % 1440;
+        pushTime();
+      }, 50);
+    });
+    document.querySelector('#closePreview').addEventListener('click', closePreview);
+    previewDialog.addEventListener('click', event => { if (event.target === previewDialog) closePreview(); });
+    previewDialog.addEventListener('cancel', event => { event.preventDefault(); closePreview(); });
     render();
   </script>
 </body>
