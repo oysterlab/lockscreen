@@ -66,3 +66,12 @@ smear, duplicate limb, malformed paw, or floating object.
 Only `{identity}` and `{required}` vary by item. If a first output violates the
 green placement region or drops a required accessory, repeat the same prompt with
 one targeted correction and archive that regeneration in the manifest.
+
+## Review result
+
+- 30 native outputs are present at `941x1672`, with 30 distinct SHA-256 hashes.
+- `RC-CAT-039` accepted a targeted smaller/rightward regeneration for its wide
+  clownfish ring.
+- Move edits for `RC-CAT-090` and `RC-CAT-102` were rejected because the model
+  enlarged the subject; their smaller first-generation outputs were restored.
+- The contact sheet is an owner-review set, not an automatic aesthetic PASS.

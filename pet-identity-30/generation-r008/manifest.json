@@ -1,7 +1,7 @@
 {
   "experiment": "PET-R008-disjoint-input-30",
   "generator": "Codex built-in ImageGen",
-  "status": "selected-for-generation",
+  "status": "ready-for-promotion",
   "previousSetManifest": "../generation-r007/manifest.json",
   "selectionPolicy": {
     "catCount": 15,
@@ -16,6 +16,19 @@
     "xMax": 0.829,
     "yMin": 0.65,
     "yMax": 0.875
+  },
+  "review": {
+    "candidateCount": 30,
+    "nativeSize": "941x1672",
+    "distinctOutputHashes": 30,
+    "acceptedTargetedRegenerations": [
+      "RC-CAT-039"
+    ],
+    "discardedTargetedRegenerations": [
+      "RC-CAT-090",
+      "RC-CAT-102"
+    ],
+    "note": "Owner-review candidates; no automatic aesthetic PASS claim. The two discarded move edits enlarged the subjects, so their smaller first-generation outputs were restored."
   },
   "items": [
     {
