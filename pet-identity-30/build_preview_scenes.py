@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build PET-R005 previews with dense full-frame depth and normal lighting.
+"""Build PET-R007 previews with dense full-frame depth and normal lighting.
 
 The generated 9:16 image is immutable. Dense scene geometry may bend the light field
 and modulate surface shading, but never cuts out, warps, replaces, or composites pet
@@ -20,7 +20,7 @@ PREVIEW = PAGE / "preview"
 NATIVE_OUTPUT = PAGE / "assets/output-native"
 TEMPLATE = PREVIEW / "assets/photo3d_pet_r004_cz_cat_006/view.json"
 SHARED = PREVIEW / "assets/photo3d_pet_r004_shared"
-ASSET_VERSION = "pet-r006-curtain-motion-matte-1"
+ASSET_VERSION = "pet-r007-curtain-clear-pets-1"
 
 
 def slug(pet_id: str) -> str:
@@ -62,11 +62,12 @@ def write_scene(image_path: Path, template: dict) -> str:
     else:
         view.pop("surfaceLighting", None)
     view["_note"] = (
-        f"PET-R005 depth-safe preview for {pet_id}. The native generated PNG remains at "
+        f"PET-R007 curtain-clear preview for {pet_id}. The native generated PNG remains at "
         "its original UV. Dense full-frame depth bends only the sampled light field and "
         "dense normals apply bounded multiplicative shading. No subject mask, cutout, "
         "reference-pixel displacement, subject lift, or pet-local compositing is loaded. "
-        "Curtain replacement is restricted to the room-only left safe zone."
+        "The pet group was generated clear of the curtain corridor; current-vs-rest motion "
+        "matting and dense-depth occlusion remain as renderer safety layers."
     )
     (scene / "view.json").write_text(
         json.dumps(view, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#17130f">
-  <title>PET-R004 · 고양이 15 + 강아지 15</title>
+  <title>PET-R007 · 커튼 동선 비중첩 고양이 15 + 강아지 15</title>
   <style>
     :root {
       color-scheme: dark;
@@ -183,9 +183,9 @@
 </head>
 <body>
   <header class="wrap">
-    <p class="eyebrow">PET-R004 · 2026-08-24</p>
-    <h1>고양이 15 + 강아지 15<br>직접 장면 생성 검증</h1>
-    <p class="lede">사용자 입력 동물을 치비 캐릭터로 변환하고, 별도 누끼나 크로마키 없이 <code>base_9x16</code> 장면 안에서 한 번에 생성한 30개 비교 결과입니다.</p>
+    <p class="eyebrow">PET-R007 · 2026-08-25</p>
+    <h1>커튼 동선과 겹치지 않는<br>고양이 15 + 강아지 15</h1>
+    <p class="lede">사용자 입력 동물과 필수 액세서리를 오른쪽 안전 박스 안의 치비 캐릭터로 변환하고, 별도 누끼나 크로마키 없이 <code>base_9x16</code> 장면 안에서 한 번에 생성한 30개 결과입니다.</p>
     <div class="notice">자동 PASS 없음 · 전 항목 owner review required</div>
 
     <div class="stats" aria-label="실험 요약">
@@ -203,9 +203,10 @@
           <ol>
             <li>Image 1: 수정 대상인 빈 <code>base_9x16</code></li>
             <li>Image 2: 사용자 입력 동물 및 액세서리</li>
-            <li>Images 3–4: 치비 스타일·크기·배치만 안내</li>
+            <li>Images 3–4: 치비 스타일·최대 크기만 안내</li>
+            <li>Image 5: 빨강 금지 구역·초록 배치 박스 좌표 지도</li>
           </ol>
-          <p>동물과 필수 소품 전체가 골든 레퍼런스보다 커지지 않도록 제한했습니다. 결과 이미지는 네이티브 비율 그대로이며 가로·세로 독립 리사이즈를 하지 않았습니다.</p>
+          <p>동물·모자·옷·장난감·꼬리·그림자까지 오른쪽 배치 박스에 넣어 커튼 최대 동선과 분리했습니다. 결과 이미지는 941×1672 네이티브 비율 그대로이며 가로·세로 독립 리사이즈를 하지 않았습니다.</p>
         </div>
         <div class="refs">
           <figure class="ref"><img src="assets/reference/base.jpg" alt="빈 base 9x16 장면"><figcaption>Image 1 · edit target</figcaption></figure>
@@ -215,7 +216,7 @@
       </div>
     </details>
 
-    <a class="sheet-link" href="assets/contact-sheet.jpg" target="_blank" rel="noopener">30개 전체 결과 콘택트시트 ↗</a>
+    <a class="sheet-link" href="assets/contact-sheet.jpg?v=pet-r007-curtain-clear-pets-1" target="_blank" rel="noopener">30개 전체 결과 콘택트시트 ↗</a>
     <a class="sheet-link" href="preview/surface-contact-sheet.jpg" target="_blank" rel="noopener">30개 Depth · Normal QA 시트 ↗</a>
   </header>
 
@@ -232,7 +233,7 @@
   </main>
 
   <footer>
-    <div class="wrap">PET-R004 · Built-in ImageGen direct-base edit · 공개 결과는 품질 판정이 아니라 오너 검수용 후보입니다.</div>
+    <div class="wrap">PET-R007 · Built-in ImageGen direct-base edit · 공개 결과는 품질 판정이 아니라 오너 검수용 후보입니다.</div>
   </footer>
 
   <dialog id="lightbox">
@@ -284,25 +285,25 @@
     const pets = [
       {id:'CZ-CAT-006', species:'cat', trait:'검정·흰색 턱시도, 넓은 황록색 눈, 흰 턱·가슴·발', required:'추가 액세서리 없음'},
       {id:'RC-CAT-001', species:'cat', trait:'둥근 은갈색 태비 얼굴, 연녹색 눈, 이마 M 무늬', required:'회색 니트 상어 후드·이빨·지느러미'},
-      {id:'RC-CAT-003', species:'cat', trait:'은색 셰이디드, 둥근 얼굴, 연녹색 눈, 보라색 목줄', required:'얕은 베이지색 직조 바구니', flag:'털과 해부학적 질감이 골든보다 실사에 가깝게 남음'},
+      {id:'RC-CAT-003', species:'cat', trait:'은색 셰이디드, 둥근 얼굴, 연녹색 눈, 보라색 목줄', required:'얕은 베이지색 직조 바구니'},
       {id:'RC-CAT-005', species:'cat', trait:'순백색 털, 파란 회색 눈, 작은 분홍 코', required:'청록 목줄과 라벤더 꽃 모양 태그'},
       {id:'RC-CAT-018', species:'cat', trait:'좌측 검정·우측 주황 얼굴, 녹색·파란색 오드아이', required:'분홍 목줄과 하트 태그'},
       {id:'RC-CAT-028', species:'cat', trait:'접힌 귀, 회색·주황·크림색 얼굴 패치, 녹색 눈', required:'몸과 머리를 감싼 회색 저지 원단'},
       {id:'RC-CAT-036', species:'cat', trait:'순백색 털, 사파이어색 눈, 둥근 얼굴', required:'검정·흰색 깅엄 체크 셔츠'},
-      {id:'RC-CAT-049', species:'cat', trait:'긴 황금색 털, 청록색 눈, 크림색 가슴 갈기', required:'추가 액세서리 없음', flag:'긴 털 표현에 실사 디테일이 일부 남음'},
+      {id:'RC-CAT-049', species:'cat', trait:'긴 황금색 털, 청록색 눈, 크림색 가슴 갈기', required:'추가 액세서리 없음'},
       {id:'RC-CAT-065', species:'cat', trait:'납작하고 작은 칼리코 얼굴, 검정·주황·흰색 패치', required:'추가 액세서리 없음'},
       {id:'RC-CAT-066', species:'cat', trait:'회색·흰색 털과 코 아래의 고유한 흰 콧수염 무늬', required:'추가 액세서리 없음'},
       {id:'RC-CAT-081', species:'cat', trait:'무거운 크림·주황 태비 체형과 가늘게 뜬 눈', required:'추가 액세서리 없음'},
       {id:'RC-CAT-092', species:'cat', trait:'갈색·흰색 태비, 초록 눈, 송곳니가 보이는 웃음', required:'추가 액세서리 없음'},
       {id:'RC-CAT-105', species:'cat', trait:'갈색 벵갈 로제트, 큰 귀, 청록색 눈', required:'빨강·검정 버팔로 체크 하네스'},
-      {id:'RC-CAT-117', species:'cat', trait:'주황·흰색 태비, 가는 초록 눈, 흰 앞발', required:'교차한 긴 앞발 포즈', flag:'스케일 보정 후 교차 앞발 단서가 약해짐'},
+      {id:'RC-CAT-117', species:'cat', trait:'주황·흰색 태비, 가는 초록 눈, 흰 앞발', required:'교차한 긴 앞발 포즈'},
       {id:'RC-CAT-126', species:'cat', trait:'주황색 털, 큰 녹금색 눈, 넓은 주둥이와 젖은 털', required:'얼굴과 이마의 물방울 유지'},
 
       {id:'RC-DOG-136', species:'dog', trait:'검정·황갈색 장모 스피츠 믹스, 회색 가슴 갈기, 작은 혀', required:'머리 위의 큰 하늘색 선물 리본'},
       {id:'RC-DOG-144', species:'dog', trait:'황갈색 퍼그, 검은 주둥이, 둥근 눈, 말린 꼬리', required:'오른쪽으로 길게 나온 분홍색 혀'},
       {id:'RC-DOG-154', species:'dog', trait:'적갈색 시바견, 크림색 볼·가슴, 웃는 표정과 말린 꼬리', required:'검정 목줄과 짧은 리드줄'},
       {id:'RC-DOG-163', species:'dog', trait:'작은 황갈색·흰색 치와와 믹스, 매우 큰 옆 귀, 분홍 코', required:'파랑·빨강·흰색 니트 스웨터와 체크 패널'},
-      {id:'RC-DOG-176', species:'dog', trait:'흰색·황갈색 와이어 코트, 긴 주둥이, 매우 큰 귀와 감은 눈', required:'금색 패턴의 검정 목줄', flag:'큰 귀까지 포함한 축척 경계를 오너가 확인해야 함'},
+      {id:'RC-DOG-176', species:'dog', trait:'흰색·황갈색 와이어 코트, 긴 주둥이, 매우 큰 귀와 감은 눈', required:'금색 패턴의 검정 목줄'},
       {id:'RC-DOG-193', species:'dog', trait:'노령 크림색 시추 믹스, 큰 눈, 나온 혀', required:'기울어진 검정 톱햇과 검정 랩/케이프'},
       {id:'RC-DOG-194', species:'dog', trait:'크림색 스피츠 믹스, 곧은 귀, 차분한 표정', required:'버건디 터틀넥과 빨강·베이지·파랑 체크 코트'},
       {id:'RC-DOG-206', species:'dog', trait:'솔트앤페퍼 슈나우저, 회색 눈썹과 흰 수염', required:'흰 목욕가운과 머리 수건'},
@@ -312,7 +313,7 @@
       {id:'RC-DOG-224', species:'dog', trait:'테디베어 컷의 작은 주황 포메라니안', required:'파란 소매·노란 구름 쿠션·회색 별 인형'},
       {id:'RC-DOG-232', species:'dog', trait:'둥근 주황 포메라니안, 웃는 입과 분홍 혀', required:'산타모자와 빨강·흰색 줄무늬 선물상자'},
       {id:'RC-DOG-240', species:'dog', trait:'검정·황갈색 닥스훈트, 긴 주둥이·몸통과 처진 귀', required:'빨간 가죽 하네스와 입에 문 나뭇가지'},
-      {id:'RC-DOG-257', species:'dog', trait:'짙은 브린들 그레이트데인, 긴 직사각형 주둥이와 흰 가슴선', required:'추가 액세서리 없음', flag:'초대형 체형 단서는 치비 압축으로 약해질 수 있음'}
+      {id:'RC-DOG-257', species:'dog', trait:'짙은 브린들 그레이트데인, 긴 직사각형 주둥이와 흰 가슴선', required:'추가 액세서리 없음'}
     ];
 
     const gallery = document.querySelector('#gallery');
@@ -346,7 +347,7 @@
               <figcaption>INPUT</figcaption>
             </figure>
             <figure class="shot output">
-              <img loading="lazy" src="assets/output/${p.id}.jpg" alt="${p.id} 치비 생성 결과" data-title="${p.id} · 결과" data-pet-id="${p.id}">
+              <img loading="lazy" src="assets/output/${p.id}.jpg?v=pet-r007-curtain-clear-pets-1" alt="${p.id} 치비 생성 결과" data-title="${p.id} · 결과" data-pet-id="${p.id}">
               <figcaption>RESULT · 모바일 프리뷰</figcaption>
             </figure>
           </div>
@@ -406,7 +407,7 @@
       previewPetTitle.textContent = `${petId} · 앱 프리뷰`;
       document.querySelector('#previewModalTitle').textContent = `${petId} · 시간대별 모바일 프리뷰`;
       previewStatus.textContent = '96단계 라이트와 커튼을 불러오는 중';
-      previewFrame.src = `preview/viewer.html?scene=${sceneFor(petId)}&wallpaper&tod=12:00&wakegust&build=pet-r006-curtain-motion-matte-1`;
+      previewFrame.src = `preview/viewer.html?scene=${sceneFor(petId)}&wallpaper&tod=12:00&wakegust&build=pet-r007-curtain-clear-pets-1`;
       previewDialog.showModal();
     }
     function closePreview() {

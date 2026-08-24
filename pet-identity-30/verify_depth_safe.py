@@ -12,7 +12,7 @@ from pathlib import Path
 PAGE = Path(__file__).resolve().parent
 PREVIEW = PAGE / "preview"
 SURFACE_VERSION = "pet-r005-depth-normal-1"
-RUNTIME_VERSION = "pet-r006-curtain-motion-matte-1"
+RUNTIME_VERSION = "pet-r007-curtain-clear-pets-1"
 MAP_SIZE = (941, 1672)
 
 

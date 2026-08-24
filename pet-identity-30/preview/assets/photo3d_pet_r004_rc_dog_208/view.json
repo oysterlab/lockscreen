@@ -265,7 +265,7 @@
   "beamOrigin": -0.5,
   "beamScale": 0.15,
   "roomOnly": false,
-  "_note": "PET-R005 depth-safe preview for RC-DOG-208. The native generated PNG remains at its original UV. Dense full-frame depth bends only the sampled light field and dense normals apply bounded multiplicative shading. No subject mask, cutout, reference-pixel displacement, subject lift, or pet-local compositing is loaded. Curtain replacement is restricted to the room-only left safe zone.",
+  "_note": "PET-R007 curtain-clear preview for RC-DOG-208. The native generated PNG remains at its original UV. Dense full-frame depth bends only the sampled light field and dense normals apply bounded multiplicative shading. No subject mask, cutout, reference-pixel displacement, subject lift, or pet-local compositing is loaded. The pet group was generated clear of the curtain corridor; current-vs-rest motion matting and dense-depth occlusion remain as renderer safety layers.",
   "lightFrom": "pet_r004_shared",
   "indirectLight": {
     "off": "light/indirect_off.png",
