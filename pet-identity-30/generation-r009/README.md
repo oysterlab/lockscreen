@@ -8,8 +8,8 @@ placement. Dogs are intentionally unchanged.
 
 - The circular plinth's measured horizontal centre is native `x=544` on the
   `941x1672` frame (`57.81%`).
-- Centre the **cat body axis**—eyes, nose, chest, and front paws—on that line.
-- Do not centre an asymmetric tail, costume arm, hat, toy, or other accessory.
+- Centre the visual bounding box of the **complete pet silhouette**—cat, tail,
+  costume, hat, toy, and every attached accessory—on that line.
 - Preserve the exact accepted subject scale and keep both feet on the same
   contact plane.
 - Edit the complete flattened scene. Do not extract, mask, chroma-key, or paste
@@ -35,10 +35,9 @@ One built-in ImageGen edit is issued for each cat. Input roles are fixed:
 Use case: precise-object-edit
 Asset type: 9:16 mobile lock-screen wallpaper
 Primary request: In Image 1, translate the complete cat group horizontally to
-the left until the CAT BODY MIDLINE—the vertical line through the eyes, nose,
-chest, and front paws—is aligned with Image 5's green line at native x=544
-(57.81%), the exact centre of the circular plinth. Centre the cat body, not an
-asymmetric tail, costume arm, hat, toy, or accessory bounding box.
+the left until the horizontal centre of its COMPLETE VISIBLE SILHOUETTE—the cat,
+tail, costume, hat, toy, and every attached accessory—is aligned with Image 5's
+green line at native x=544 (57.81%), the exact centre of the circular plinth.
 
 Identity lock: {identity}
 Required pet-related item: {required}

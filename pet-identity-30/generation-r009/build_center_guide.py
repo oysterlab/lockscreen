@@ -32,13 +32,13 @@ def main() -> None:
     font = ImageFont.load_default(size=18)
     x = PLINTH_CENTER_X
 
-    # The green axis marks the cat BODY centre (eyes/nose/chest/front paws),
-    # never the centre of an asymmetric accessory or tail.
+    # The green axis marks the visual centre of the complete visible pet group,
+    # including its tail and any worn/held accessory.
     draw.line((x, 1040, x, 1465), fill=(20, 230, 90, 235), width=8)
     draw.ellipse((x - 18, 1320 - 18, x + 18, 1320 + 18), outline=(20, 230, 90, 255), width=7)
     draw.line((x - 80, 1320, x + 80, 1320), fill=(20, 230, 90, 220), width=5)
 
-    label = "CAT BODY AXIS = PLINTH CENTER (x=544 / 57.81%)"
+    label = "PET SILHOUETTE CENTER = PLINTH CENTER (x=544 / 57.81%)"
     box = draw.textbbox((0, 0), label, font=font)
     label_w = box[2] - box[0]
     draw.rounded_rectangle(

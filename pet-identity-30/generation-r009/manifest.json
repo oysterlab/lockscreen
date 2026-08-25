@@ -8,7 +8,7 @@
     "frameWidth": 941,
     "normalizedX": 0.5781084,
     "tolerancePixels": 24,
-    "semanticAxis": "eyes-nose-chest-front-paws"
+    "semanticAxis": "complete-visible-pet-silhouette-bounding-box-center"
   },
   "method": "built-in ImageGen full-frame precise-object-edit; no masks or cutouts",
   "pilotIds": ["RC-CAT-074", "RC-CAT-006", "RC-CAT-039"],
