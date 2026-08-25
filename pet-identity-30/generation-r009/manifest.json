@@ -1,0 +1,122 @@
+{
+  "round": "PET-R009",
+  "status": "pilot",
+  "scope": "cats-only",
+  "sourceRound": "PET-R008",
+  "plinthCenter": {
+    "nativeX": 544,
+    "frameWidth": 941,
+    "normalizedX": 0.5781084,
+    "tolerancePixels": 24,
+    "semanticAxis": "eyes-nose-chest-front-paws"
+  },
+  "method": "built-in ImageGen full-frame precise-object-edit; no masks or cutouts",
+  "pilotIds": ["RC-CAT-074", "RC-CAT-006", "RC-CAT-039"],
+  "items": [
+    {
+      "id": "CZ-CAT-012",
+      "source": "CZ-CAT-012__curiouszelda__CyCJMNaqnUt.jpg",
+      "identity": "slender black-and-white tuxedo cat, black facial mask, narrow white muzzle blaze, white chest and paws, very wide yellow-green eyes",
+      "required": "no accessory",
+      "review": "pending"
+    },
+    {
+      "id": "RC-CAT-002",
+      "source": "RC-CAT-002__nala_cat__CHyVcrApLE0.jpg",
+      "identity": "round silver-beige tabby, pale green eyes, distinct forehead M marking",
+      "required": "blue award ribbon and round gold medal worn at the neck; omit the certificate",
+      "review": "pending"
+    },
+    {
+      "id": "RC-CAT-006",
+      "source": "RC-CAT-006__white_coffee_cat__C1N_JowJwt4.jpg",
+      "identity": "pure white round-faced cat, dark blue-grey eyes, small pink nose",
+      "required": "red plush Santa body costume with white trim, black belt, gold buckle, and stuffed arms",
+      "review": "pilot-pending"
+    },
+    {
+      "id": "RC-CAT-016",
+      "source": "RC-CAT-016__venustwofacecat__DWreJu8CRcd.jpg",
+      "identity": "split black-left and orange-right tortoiseshell face, one green eye and one blue eye",
+      "required": "turquoise collar and pink heart-shaped tag without readable text",
+      "review": "pending"
+    },
+    {
+      "id": "RC-CAT-039",
+      "source": "RC-CAT-039__cobythecat__C_a0b3TRnwX.jpg",
+      "identity": "white silver-shaded round cat, pale blue eyes and small pink nose",
+      "required": "oversized orange clownfish plush ring wrapped closely around the body",
+      "review": "pilot-pending"
+    },
+    {
+      "id": "RC-CAT-045",
+      "source": "RC-CAT-045__cobythecat__C424sYoLUCr.jpg",
+      "identity": "pure white round cat, pale blue eyes and mildly serious expression",
+      "required": "red football jersey without readable lettering and a small brown football tucked against one paw",
+      "review": "pending"
+    },
+    {
+      "id": "RC-CAT-048",
+      "source": "RC-CAT-048__smoothiethecat__CY_qcsqKhzo.jpg",
+      "identity": "long golden shaded coat, huge emerald-green eyes, cream muzzle and darker front paws",
+      "required": "no accessory",
+      "review": "pending"
+    },
+    {
+      "id": "RC-CAT-064",
+      "source": "RC-CAT-064__pudgethecat__DNBjRG0SFw9.jpg",
+      "identity": "small flat-faced black-orange-white calico, amber-green eyes and dark nose",
+      "required": "tiny pale-blue cone party hat with pink pom-poms and a sheer pink neck ribbon",
+      "review": "pending"
+    },
+    {
+      "id": "RC-CAT-074",
+      "source": "RC-CAT-074__hamilton_the_hipster_cat__CJCEAxKFt6q.jpg",
+      "identity": "grey-and-white long-haired cat, bright green eyes, distinct white moustache marking and white paws",
+      "required": "no accessory",
+      "review": "pilot-pending"
+    },
+    {
+      "id": "RC-CAT-089",
+      "source": "RC-CAT-089__iambronsoncat__CVtkQCPJl0V.jpg",
+      "identity": "cream-orange tabby, green eyes and broad cheeks",
+      "required": "green turtle-shell costume fitted closely over the back",
+      "review": "pending"
+    },
+    {
+      "id": "RC-CAT-090",
+      "source": "RC-CAT-090__rexiecat__DBq4oHII3te.jpg",
+      "identity": "brown-and-white tabby, green eyes, smiling expression with visible fangs",
+      "required": "black hooded costume and a short miniature silver-bladed scythe held across the mouth",
+      "review": "pending"
+    },
+    {
+      "id": "RC-CAT-099",
+      "source": "RC-CAT-099__rexiecat__DGDKMxMqRtb.jpg",
+      "identity": "brown-and-white tabby, green eyes, joyful open mouth with visible fangs",
+      "required": "black tuxedo bib with white buttons, red bow tie, and one red rose held in the mouth",
+      "review": "pending"
+    },
+    {
+      "id": "RC-CAT-102",
+      "source": "RC-CAT-102__sukiicat__DUQ1y8GD8Pv.jpg",
+      "identity": "warm brown Bengal with dark rosettes, large ears and vivid teal-green eyes",
+      "required": "two large autumn maple leaves arranged like compact wings directly behind the shoulders",
+      "review": "pending"
+    },
+    {
+      "id": "RC-CAT-109",
+      "source": "RC-CAT-109__sukiicat__CmmSsA8J02H.jpg",
+      "identity": "warm brown Bengal with dark rosettes, large ears and vivid green eyes",
+      "required": "red-and-black diamond-pattern neck scarf",
+      "review": "pending"
+    },
+    {
+      "id": "RC-CAT-123",
+      "source": "RC-CAT-123__coleandmarmalade__DX9hp0EgznJ.jpg",
+      "identity": "orange-and-white tabby, green eyes, white muzzle and chest",
+      "required": "small straw sombrero with a multicolor woven band",
+      "review": "pending"
+    }
+  ]
+}
