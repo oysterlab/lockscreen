@@ -3,10 +3,11 @@
 # requires-python = ">=3.11"
 # dependencies = ["pillow==11.3.0"]
 # ///
-"""Build the fixed plinth-centre guide used by PET-R009 ImageGen edits."""
+"""Build fixed and per-scene plinth-centre guides for PET-R009 edits."""
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -15,19 +16,16 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parent
 REFERENCE = ROOT.parent / "assets" / "reference" / "target-latte.jpg"
 OUTPUT = ROOT / "center-guide.png"
+SCENE_SOURCE = ROOT.parent / "generation-r008" / "output-native"
+SCENE_GUIDES = ROOT / "center-guides"
 
 # Measured from the stable 941 px-wide plinth used by the approved outputs.
 # Visible plinth edges are about x=291 and x=797, yielding x=544.
 PLINTH_CENTER_X = 544
 
 
-def main() -> None:
-    image = Image.open(REFERENCE).convert("RGB")
-    # Repository reference JPEGs are web-sized; ImageGen's native edit canvas
-    # and the reviewed outputs are 941x1672.
-    if image.size != (941, 1672):
-        image = image.resize((941, 1672), Image.Resampling.LANCZOS)
-
+def mark(image: Image.Image) -> Image.Image:
+    image = image.convert("RGB")
     draw = ImageDraw.Draw(image, "RGBA")
     font = ImageFont.load_default(size=18)
     x = PLINTH_CENTER_X
@@ -48,9 +46,31 @@ def main() -> None:
     )
     draw.text((x - label_w / 2, 1008), label, font=font, fill=(225, 255, 232, 255))
 
+    return image
+
+
+def main() -> None:
+    image = Image.open(REFERENCE)
+    # Repository reference JPEGs are web-sized; ImageGen's native edit canvas
+    # and the reviewed outputs are 941x1672.
+    if image.size != (941, 1672):
+        image = image.resize((941, 1672), Image.Resampling.LANCZOS)
+
     ROOT.mkdir(parents=True, exist_ok=True)
-    image.save(OUTPUT)
+    mark(image).save(OUTPUT)
     print(OUTPUT)
+
+    manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
+    SCENE_GUIDES.mkdir(parents=True, exist_ok=True)
+    for item in manifest["items"]:
+        pet_id = item["id"]
+        source = SCENE_SOURCE / f"{pet_id}.png"
+        if not source.is_file():
+            raise RuntimeError(f"missing approved scene: {source}")
+        guide = mark(Image.open(source))
+        output = SCENE_GUIDES / f"{pet_id}.jpg"
+        guide.save(output, quality=94, optimize=True, progressive=True)
+    print(f"{SCENE_GUIDES}: {len(manifest['items'])} per-scene guides")
 
 
 if __name__ == "__main__":

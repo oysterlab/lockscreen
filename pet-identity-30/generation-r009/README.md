@@ -29,7 +29,9 @@ One built-in ImageGen edit is issued for each cat. Input roles are fixed:
 - Image 2: original identity and accessory reference;
 - Image 3: golden chibi style/scale reference `target-latte.jpg`;
 - Image 4: golden chibi style/scale reference `target-nila.jpg`;
-- Image 5: `center-guide.png`.
+- Image 5: the matching `center-guides/<PET-ID>.jpg`, which is Image 1 with
+  only the centre annotation added. This prevents guide-induced background or
+  plinth drift.
 
 ```text
 Use case: precise-object-edit
