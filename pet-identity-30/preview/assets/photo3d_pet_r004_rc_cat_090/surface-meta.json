@@ -6,8 +6,8 @@
   "normalSlope": 32.0,
   "normalGradientClip": 0.012,
   "modelPercentileRange": [
-    0.543660792708397,
-    5.1695579910278315
+    0.558776587843895,
+    5.163257455825804
   ],
   "invariants": [
     "full-frame dense maps only",
