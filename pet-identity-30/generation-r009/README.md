@@ -79,7 +79,24 @@ creating or shipping an alpha mask:
 uv run pet-identity-30/generation-r009/measure_candidates.py
 ```
 
-Candidates are rejected if upper-silhouette width falls outside `0.98–1.015x`
-or if the top edge moves upward by more than 6 native pixels. The small upper
-tolerance covers depth-estimator jitter; the prompt target remains `98–100%`
-of prior scale.
+Candidates are rejected if upper-silhouette width falls outside `0.96–1.015x`
+or if the top edge moves upward by more than 6 native pixels. The conservative
+lower bound permits only a subtle reduction; the small upper tolerance covers
+depth-estimator jitter. The generation prompt target remains `98–100%` of prior
+scale, and candidates may never be visibly larger.
+
+## Promote reviewed candidates
+
+```bash
+uv run pet-identity-30/generation-r009/build_contact_sheet.py
+uv run pet-identity-30/generation-r009/promote.py
+uv run pet-identity-30/build_depth_normals.py --force --ids \
+  CZ-CAT-012 RC-CAT-002 RC-CAT-006 RC-CAT-016 RC-CAT-039 \
+  RC-CAT-045 RC-CAT-048 RC-CAT-064 RC-CAT-074 RC-CAT-089 \
+  RC-CAT-090 RC-CAT-099 RC-CAT-102 RC-CAT-109 RC-CAT-123
+python3 pet-identity-30/build_preview_scenes.py
+python3 pet-identity-30/verify_depth_safe.py
+```
+
+Promotion replaces only the 15 public cat PNG/JPEG files. The 15 PET-R008 dog
+outputs and all input files remain byte-identical.

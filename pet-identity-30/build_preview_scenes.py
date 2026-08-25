@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build PET-R008 previews with dense full-frame depth and normal lighting.
+"""Build PET-R009 previews with dense full-frame depth and normal lighting.
 
 The generated 9:16 image is immutable. Dense scene geometry may bend the light field
 and modulate surface shading, but never cuts out, warps, replaces, or composites pet
@@ -20,7 +20,7 @@ PREVIEW = PAGE / "preview"
 NATIVE_OUTPUT = PAGE / "assets/output-native"
 TEMPLATE = PREVIEW / "assets/photo3d_pet_r004_shared/view-template.json"
 SHARED = PREVIEW / "assets/photo3d_pet_r004_shared"
-ASSET_VERSION = "pet-r008-disjoint-pets-1"
+ASSET_VERSION = "pet-r009-centered-cats-1"
 
 
 def slug(pet_id: str) -> str:
@@ -62,7 +62,7 @@ def write_scene(image_path: Path, template: dict) -> str:
     else:
         view.pop("surfaceLighting", None)
     view["_note"] = (
-        f"PET-R008 disjoint-source preview for {pet_id}. The native generated PNG remains at "
+        f"PET-R009 centred-cat preview for {pet_id}. The native generated PNG remains at "
         "its original UV. Dense full-frame depth bends only the sampled light field and "
         "dense normals apply bounded multiplicative shading. No subject mask, cutout, "
         "reference-pixel displacement, subject lift, or pet-local compositing is loaded. "

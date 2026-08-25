@@ -28,7 +28,7 @@ const P3D = scenePathParam
   : (sceneParam ? `./assets/photo3d_${sceneParam}/` : "./assets/photo3d_cherry2dio/");
 // asset cache-buster: bump on any rebuilt PNG so phones don't serve a stale image
 // (index.html's ?v= only refreshes the code, not these depth/colour PNGs).
-const AV = location.protocol === "file:" ? "" : "?a=pet-r008-disjoint-pets-1";
+const AV = location.protocol === "file:" ? "" : "?a=pet-r009-centered-cats-1";
 // scenes that carry an idle-flick animation (assets/photo3d_<scene>/anim/manifest.json):
 // the foreground plate is swapped through a short clip every ~10s, then held.
 const ANIM_SCENES = new Set(["cherry2dio", "nila2dio"]);

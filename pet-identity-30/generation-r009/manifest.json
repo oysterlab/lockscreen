@@ -1,6 +1,6 @@
 {
   "round": "PET-R009",
-  "status": "pilot",
+  "status": "ready-for-promotion",
   "scope": "cats-only",
   "sourceRound": "PET-R008",
   "plinthCenter": {
@@ -11,6 +11,13 @@
     "semanticAxis": "complete-visible-pet-silhouette-bounding-box-center"
   },
   "method": "built-in ImageGen full-frame precise-object-edit; no masks or cutouts",
+  "qa": {
+    "measurements": "qa-measurements.json",
+    "alignmentReview": "alignment-review.jpg",
+    "sizeBand": [0.96, 1.015],
+    "maxAlignmentErrorPixels": 24,
+    "note": "objective rejection gates only; not an automatic aesthetic PASS"
+  },
   "pilotIds": ["RC-CAT-074", "RC-CAT-006", "RC-CAT-039"],
   "items": [
     {

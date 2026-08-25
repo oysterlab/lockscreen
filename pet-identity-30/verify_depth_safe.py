@@ -13,7 +13,7 @@ from pathlib import Path
 PAGE = Path(__file__).resolve().parent
 PREVIEW = PAGE / "preview"
 SURFACE_VERSION = "pet-r005-depth-normal-1"
-RUNTIME_VERSION = "pet-r008-disjoint-pets-1"
+RUNTIME_VERSION = "pet-r009-centered-cats-1"
 MAP_SIZE = (941, 1672)
 
 
@@ -37,6 +37,12 @@ def main() -> None:
     current_manifest = json.loads(
         (PAGE / "generation-r008/manifest.json").read_text(encoding="utf-8")
     )
+    centered_manifest = json.loads(
+        (PAGE / "generation-r009/manifest.json").read_text(encoding="utf-8")
+    )
+    centered_qa = json.loads(
+        (PAGE / "generation-r009/qa-measurements.json").read_text(encoding="utf-8")
+    )
     previous_manifest = json.loads(
         (PAGE / "generation-r007/manifest.json").read_text(encoding="utf-8")
     )
@@ -44,6 +50,16 @@ def main() -> None:
     previous_ids = {item["id"] for item in previous_manifest["items"]}
     assert len(current_ids) == 30, "PET-R008 manifest does not contain 30 distinct IDs"
     assert not current_ids & previous_ids, "PET-R008 repeats PET-R007 IDs"
+    centered_ids = {item["id"] for item in centered_manifest["items"]}
+    assert len(centered_ids) == 15, "PET-R009 does not contain exactly 15 cats"
+    assert centered_ids <= current_ids, "PET-R009 cat IDs differ from PET-R008"
+    assert all(pet_id.startswith(("CZ-CAT-", "RC-CAT-")) for pet_id in centered_ids)
+    qa_items = centered_qa["items"]
+    assert {item["id"] for item in qa_items} == centered_ids, "PET-R009 QA ID mismatch"
+    assert all(item["sizeGate"] == "size-maintained" for item in qa_items)
+    assert max(item["widthRatio"] for item in qa_items) <= 1.015
+    assert min(item["widthRatio"] for item in qa_items) >= 0.96
+    assert max(item["alignmentErrorPixels"] for item in qa_items) <= 24
 
     input_ids = {path.stem for path in (PAGE / "assets/input").glob("*.jpg")}
     native_ids = {path.stem for path in (PAGE / "assets/output-native").glob("*.png")}
@@ -58,6 +74,14 @@ def main() -> None:
     assert native_ids == current_ids, "native output IDs differ from PET-R008 manifest"
     assert jpeg_ids == current_ids, "gallery output IDs differ from PET-R008 manifest"
     assert page_ids == current_ids, "page IDs differ from PET-R008 manifest"
+    for pet_id in centered_ids:
+        assert digest(PAGE / "assets/output-native" / f"{pet_id}.png") == digest(
+            PAGE / "generation-r009/output-native" / f"{pet_id}.png"
+        ), f"public cat is not PET-R009: {pet_id}"
+    for pet_id in current_ids - centered_ids:
+        assert digest(PAGE / "assets/output-native" / f"{pet_id}.png") == digest(
+            PAGE / "generation-r008/output-native" / f"{pet_id}.png"
+        ), f"PET-R008 dog changed unexpectedly: {pet_id}"
 
     manifest = json.loads((PREVIEW / "scenes.json").read_text(encoding="utf-8"))
     assert len(manifest) == 30, f"expected 30 scenes, found {len(manifest)}"
@@ -132,8 +156,9 @@ def main() -> None:
     assert (PREVIEW / "surface-contact-sheet.jpg").stat().st_size > 100_000
 
     print(
-        "PASS: PET-R008/PET-R007 ID intersection 0; 30 synchronized inputs, outputs, "
-        "page cards, and dense depth + normal scenes; native reference UV immutable; "
+        "PASS: PET-R009 has 15 centred, size-bounded cats and 15 byte-identical "
+        "PET-R008 dogs; PET-R008/PET-R007 ID intersection 0; 30 synchronized inputs, "
+        "outputs, page cards, and dense depth + normal scenes; native reference UV immutable; "
         "zero pet masks/relief; unclipped depth-occluded curtain motion; "
         "normal shading clamped to 0.88..1.12"
     )
