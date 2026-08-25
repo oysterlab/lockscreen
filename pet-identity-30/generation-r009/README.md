@@ -29,9 +29,10 @@ One built-in ImageGen edit is issued for each cat. Input roles are fixed:
 - Image 2: original identity and accessory reference;
 - Image 3: golden chibi style/scale reference `target-latte.jpg`;
 - Image 4: golden chibi style/scale reference `target-nila.jpg`;
-- Image 5: the matching `center-guides/<PET-ID>.jpg`, which is Image 1 with
-  only the centre annotation added. This prevents guide-induced background or
-  plinth drift.
+- Image 5: the matching `center-guides/<PET-ID>.jpg`, which is Image 1 with the
+  centre axis plus equal-size source/target boxes. The red box is the accepted
+  PET-R008 silhouette; the green box has identical dimensions and is translated
+  to the plinth centre. This prevents background drift and scale inflation.
 
 ```text
 Use case: precise-object-edit
@@ -67,3 +68,18 @@ appear in the output.
 The first three edits cover a plain cat, a full-body costume, and a wide prop.
 They are reviewed before the remaining cats are processed. Automatic checks
 must never label aesthetics as PASS; owner review remains authoritative.
+
+## Size rejection gate
+
+PET-R009 candidates may never be larger than their accepted PET-R008 source.
+Dense depth provides an upper-silhouette width and top-edge comparison without
+creating or shipping an alpha mask:
+
+```bash
+uv run pet-identity-30/generation-r009/measure_candidates.py
+```
+
+Candidates are rejected if upper-silhouette width falls outside `0.98–1.015x`
+or if the top edge moves upward by more than 6 native pixels. The small upper
+tolerance covers depth-estimator jitter; the prompt target remains `98–100%`
+of prior scale.

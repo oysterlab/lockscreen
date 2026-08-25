@@ -1,0 +1,138 @@
+{
+  "round": "PET-R009",
+  "purpose": "objective rejection gate only; not an aesthetic PASS",
+  "plinthCenterX": 544,
+  "sizeUpperBounds": {
+    "maxWidthRatio": 1.015,
+    "minWidthRatio": 0.98,
+    "maxUpwardTopDriftPixels": 6
+  },
+  "items": [
+    {
+      "id": "CZ-CAT-012",
+      "before": {
+        "upperSilhouetteLeft": 467,
+        "upperSilhouetteRight": 719,
+        "upperSilhouetteWidth": 253,
+        "upperSilhouetteCenterX": 593.0,
+        "topY": 1090
+      },
+      "candidate": {
+        "upperSilhouetteLeft": 410,
+        "upperSilhouetteRight": 654,
+        "upperSilhouetteWidth": 245,
+        "upperSilhouetteCenterX": 532.0,
+        "topY": 1095
+      },
+      "widthRatio": 0.9684,
+      "upwardTopDriftPixels": -5,
+      "alignmentErrorPixels": 12.0,
+      "sizeGate": "reject-size-drift"
+    },
+    {
+      "id": "RC-CAT-002",
+      "before": {
+        "upperSilhouetteLeft": 433,
+        "upperSilhouetteRight": 708,
+        "upperSilhouetteWidth": 276,
+        "upperSilhouetteCenterX": 570.5,
+        "topY": 1048
+      },
+      "candidate": {
+        "upperSilhouetteLeft": 384,
+        "upperSilhouetteRight": 638,
+        "upperSilhouetteWidth": 255,
+        "upperSilhouetteCenterX": 511.0,
+        "topY": 1046
+      },
+      "widthRatio": 0.9239,
+      "upwardTopDriftPixels": 2,
+      "alignmentErrorPixels": 33.0,
+      "sizeGate": "reject-size-drift"
+    },
+    {
+      "id": "RC-CAT-006",
+      "before": {
+        "upperSilhouetteLeft": 415,
+        "upperSilhouetteRight": 746,
+        "upperSilhouetteWidth": 332,
+        "upperSilhouetteCenterX": 580.5,
+        "topY": 987
+      },
+      "candidate": {
+        "upperSilhouetteLeft": 402,
+        "upperSilhouetteRight": 729,
+        "upperSilhouetteWidth": 328,
+        "upperSilhouetteCenterX": 565.5,
+        "topY": 989
+      },
+      "widthRatio": 0.988,
+      "upwardTopDriftPixels": -2,
+      "alignmentErrorPixels": 21.5,
+      "sizeGate": "size-maintained"
+    },
+    {
+      "id": "RC-CAT-016",
+      "before": {
+        "upperSilhouetteLeft": 462,
+        "upperSilhouetteRight": 723,
+        "upperSilhouetteWidth": 262,
+        "upperSilhouetteCenterX": 592.5,
+        "topY": 1084
+      },
+      "candidate": {
+        "upperSilhouetteLeft": 402,
+        "upperSilhouetteRight": 660,
+        "upperSilhouetteWidth": 259,
+        "upperSilhouetteCenterX": 531.0,
+        "topY": 1084
+      },
+      "widthRatio": 0.9885,
+      "upwardTopDriftPixels": 0,
+      "alignmentErrorPixels": 13.0,
+      "sizeGate": "size-maintained"
+    },
+    {
+      "id": "RC-CAT-039",
+      "before": {
+        "upperSilhouetteLeft": 427,
+        "upperSilhouetteRight": 816,
+        "upperSilhouetteWidth": 390,
+        "upperSilhouetteCenterX": 621.5,
+        "topY": 1138
+      },
+      "candidate": {
+        "upperSilhouetteLeft": 346,
+        "upperSilhouetteRight": 740,
+        "upperSilhouetteWidth": 395,
+        "upperSilhouetteCenterX": 543.0,
+        "topY": 1148
+      },
+      "widthRatio": 1.0128,
+      "upwardTopDriftPixels": -10,
+      "alignmentErrorPixels": 1.0,
+      "sizeGate": "size-maintained"
+    },
+    {
+      "id": "RC-CAT-074",
+      "before": {
+        "upperSilhouetteLeft": 428,
+        "upperSilhouetteRight": 770,
+        "upperSilhouetteWidth": 343,
+        "upperSilhouetteCenterX": 599.0,
+        "topY": 1090
+      },
+      "candidate": {
+        "upperSilhouetteLeft": 396,
+        "upperSilhouetteRight": 737,
+        "upperSilhouetteWidth": 342,
+        "upperSilhouetteCenterX": 566.5,
+        "topY": 1090
+      },
+      "widthRatio": 0.9971,
+      "upwardTopDriftPixels": 0,
+      "alignmentErrorPixels": 22.5,
+      "sizeGate": "size-maintained"
+    }
+  ]
+}
